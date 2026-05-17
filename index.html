@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>与她一同</title>
+<title>梦回 · AI 剧场</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -511,6 +511,9 @@
           <i class="ph ph-key text-lg"></i>
           <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#c98787] hidden" id="keyAlert"></span>
         </button>
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/40 transition text-[#a1a0ac]" id="openProfileBtn" title="玩家档案">
+          <i class="ph ph-user-circle text-lg"></i>
+        </button>
         <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/40 transition text-[#a1a0ac]" id="openSettingsBtn" title="设置">
           <i class="ph ph-sliders text-lg"></i>
         </button>
@@ -580,19 +583,32 @@
   <!-- INPUT -->
   <footer class="absolute bottom-0 left-0 right-0 p-4 pt-2 pointer-events-none">
     <div class="pointer-events-auto flex flex-col gap-2.5">
-      <!-- Quick-action pills -->
+      <!-- Input markers + scene control -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="quickActions">
-        <button class="flex-shrink-0 px-3.5 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="advance">
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="dialogue" title="对白「」">
+          <i class="ph ph-quotes text-[12px]"></i>
+          <span class="cn">对白</span>
+        </button>
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="action" title="动作 ( )">
+          <i class="ph ph-hand-pointing text-[12px]"></i>
+          <span class="cn">动作</span>
+        </button>
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="inner" title="心绪 * *">
+          <i class="ph ph-cloud text-[12px]"></i>
+          <span class="cn">心绪</span>
+        </button>
+        <div class="flex-shrink-0 w-px bg-[#d0ced8]/60 my-1"></div>
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="advance" title="请角色主动推进">
           <i class="ph ph-fast-forward text-[12px]"></i>
-          <span class="cn">推进剧情</span>
+          <span class="cn">推进</span>
         </button>
-        <button class="flex-shrink-0 px-3.5 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="continue">
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="continue" title="承接展开">
           <i class="ph ph-arrow-right text-[12px]"></i>
-          <span class="cn">承接展开</span>
+          <span class="cn">承接</span>
         </button>
-        <button class="flex-shrink-0 px-3.5 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="timeskip">
+        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="timeskip" title="时间流逝">
           <i class="ph ph-clock-clockwise text-[12px]"></i>
-          <span class="cn">时间流逝</span>
+          <span class="cn">时跳</span>
         </button>
       </div>
 
@@ -738,8 +754,42 @@
         </div>
       </div>
 
+      <div class="accordion" data-acc="patches">
+        <div class="acc-head">
+          <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
+          <div class="acc-title"><i class="ph ph-sparkle text-[14px] text-[#a89eb3]"></i>对话补完 <span class="acc-count" id="patchCount">0</span></div>
+        </div>
+        <div class="acc-body">
+          <div class="note" style="background:rgba(168,158,179,0.1);border-color:rgba(168,158,179,0.22);"><strong>由对话自动累积</strong>:角色在对话中发现的新信息(习惯、秘密、玩家身份等)。下次对话会注入到 prompt。</div>
+          <div class="chip-list" id="patchList" style="flex-direction:column;align-items:stretch;"></div>
+          <div id="patchEmpty" class="text-[11px] text-[#a89eb3] cn text-center py-3" style="display:none;">还没有补完内容</div>
+        </div>
+      </div>
+
       <button class="btn primary" id="saveCharBtn"><i class="ph ph-check"></i>保存角色卡</button>
       <button class="btn danger" id="clearCharBtn"><i class="ph ph-trash"></i>清除角色卡</button>
+    </div>
+  </div>
+
+  <!-- PROFILE DRAWER -->
+  <div class="drawer" id="profileDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-head">
+      <h2 class="font-medium text-[16px] text-[#5a5562]">玩家档案</h2>
+      <span class="ml-auto text-[10px] mono text-[#9b9aa5] uppercase tracking-widest">profile</span>
+    </div>
+    <div class="drawer-body">
+      <div class="note">这些信息会作为「玩家设定」注入到对话 prompt,让角色知道你是谁。<strong>故事 / 亲密两种模式共用一份。</strong></div>
+
+      <div class="field" style="margin-top:14px;"><div class="field-head"><span class="field-label">名字</span></div><input type="text" class="input" id="pName" placeholder="角色会称呼你的名字"></div>
+      <div class="field"><div class="field-head"><span class="field-label">年龄</span></div><input type="text" class="input" id="pAge" placeholder="例:28"></div>
+      <div class="field"><div class="field-head"><span class="field-label">外型</span></div><textarea class="ta" id="pAppearance" rows="2" placeholder="身高、发型、穿着、气质等..."></textarea></div>
+      <div class="field"><div class="field-head"><span class="field-label">身份 / 职业</span></div><textarea class="ta" id="pIdentity" rows="2" placeholder="工作、社会角色、与角色的关系起点..."></textarea></div>
+      <div class="field"><div class="field-head"><span class="field-label">性格 / 习惯</span></div><textarea class="ta" id="pPersonality" rows="3" placeholder="说话方式、习惯小动作、口头禅..."></textarea></div>
+      <div class="field"><div class="field-head"><span class="field-label">背景 / 其他</span></div><textarea class="ta" id="pBackground" rows="3" placeholder="家庭、过去、特殊设定..."></textarea></div>
+
+      <button class="btn primary" id="saveProfileBtn"><i class="ph ph-check"></i>保存档案</button>
+      <button class="btn danger" id="clearProfileBtn"><i class="ph ph-trash"></i>清除档案</button>
     </div>
   </div>
 
@@ -811,6 +861,10 @@ let token = localStorage.getItem("dzmm_token") || "";
 let card = null;
 try { const raw = localStorage.getItem("dzmm_card"); if (raw) card = JSON.parse(raw); } catch(e){}
 
+// Player profile — shared across modes
+let profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
+try { const raw = localStorage.getItem("dzmm_profile"); if (raw) profile = Object.assign(profile, JSON.parse(raw)); } catch(e){}
+
 let histories = { story: [], intimate: [] };
 try {
   const raw = localStorage.getItem("dzmm_histories");
@@ -844,6 +898,7 @@ const scrim = $("scrim");
 // Persistence
 // ═══════════════════════════════════════════════════════════
 function persistCard(){ if(card) localStorage.setItem("dzmm_card", JSON.stringify(card)); }
+function persistProfile(){ localStorage.setItem("dzmm_profile", JSON.stringify(profile)); }
 function persistHistories(){ localStorage.setItem("dzmm_histories", JSON.stringify(histories)); }
 function persistStats(){ localStorage.setItem("dzmm_stats", JSON.stringify(stats)); }
 
@@ -997,17 +1052,22 @@ function parseAssistantOutput(text){
 
 function applyCardPatches(patches){
   if (!patches.length || !card) return;
+  let added = 0;
   for (const p of patches){
     const target = p["目标"] || p["target"];
     const field = p["字段"] || p["field"];
     const content = p["内容"] || p["content"];
     if (!field || !content) continue;
-    // Store as appended notes — we don't override structured fields,
-    // we just stash into a `notes` array on the card.
     if (!card.notes) card.notes = [];
     card.notes.push({ target, field, content, ts: Date.now() });
+    added++;
   }
   persistCard();
+  if (added){
+    addSystemMessage(`✦ 角色卡补完 +${added}`);
+    // If the char drawer is currently open, refresh its accordion
+    if (charDrawer.classList.contains("open")) renderPatches();
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1255,6 +1315,20 @@ function buildSystemPrompt() {
     });
   }
 
+  // Player profile (shared across modes)
+  const profileLines = [];
+  if (profile.name) profileLines.push(`- 名字:${profile.name}`);
+  if (profile.age) profileLines.push(`- 年龄:${profile.age}`);
+  if (profile.appearance) profileLines.push(`- 外型:${profile.appearance}`);
+  if (profile.identity) profileLines.push(`- 身份/职业:${profile.identity}`);
+  if (profile.personality) profileLines.push(`- 性格/习惯:${profile.personality}`);
+  if (profile.background) profileLines.push(`- 背景:${profile.background}`);
+  if (profileLines.length){
+    lines.push(`\n## 玩家设定`);
+    lines.push(`(玩家在这次对话中扮演的角色,请在叙述时自然结合)`);
+    lines.push(...profileLines);
+  }
+
   // Mode framing
   if (mode === "intimate") {
     lines.push(`\n## 模式:亲密(18+)`);
@@ -1419,16 +1493,42 @@ input.addEventListener("keydown", (e) => {
 });
 sendBtn.addEventListener("click", () => send());
 
-// Quick action pills
+// Marker buttons — insert format wrappers at the caret position
+function insertAtCaret(left, right){
+  input.focus();
+  const start = input.selectionStart ?? input.value.length;
+  const end = input.selectionEnd ?? input.value.length;
+  const before = input.value.slice(0, start);
+  const selected = input.value.slice(start, end);
+  const after = input.value.slice(end);
+  input.value = before + left + selected + right + after;
+  const newPos = before.length + left.length + selected.length;
+  input.setSelectionRange(newPos, newPos);
+  input.dispatchEvent(new Event("input"));
+}
+
 document.querySelectorAll("#quickActions button").forEach(b => {
   b.addEventListener("click", () => {
-    const a = b.dataset.action;
-    const map = {
-      advance: "(请主动推进情节,可以制造突发事件或转折)",
-      continue: "(请承接你刚才的话题与场景,扩写下去)",
-      timeskip: "(时间悄悄流逝,此时:稍后。请根据时间变化重写场景与氛围)"
-    };
-    send(map[a]);
+    const marker = b.dataset.marker;
+    const action = b.dataset.action;
+    if (marker){
+      const wrappers = {
+        dialogue: ["「", "」"],
+        action: ["(", ")"],
+        inner: ["*", "*"]
+      };
+      const w = wrappers[marker];
+      if (w) insertAtCaret(w[0], w[1]);
+      return;
+    }
+    if (action){
+      const map = {
+        advance: "(请主动推进情节,可以制造突发事件或转折)",
+        continue: "(请承接你刚才的话题与场景,扩写下去)",
+        timeskip: "(时间悄悄流逝,此时:稍后。请根据时间变化重写场景与氛围)"
+      };
+      send(map[action]);
+    }
   });
 });
 
@@ -1438,6 +1538,7 @@ document.querySelectorAll("#quickActions button").forEach(b => {
 const charDrawer = $("charDrawer");
 const setDrawer = $("setDrawer");
 const keyDrawer = $("keyDrawer");
+const profileDrawer = $("profileDrawer");
 function openDrawer(d) {
   closeDrawers();
   if (d === charDrawer) populateCharForm();
@@ -1447,13 +1548,15 @@ function closeDrawers() {
   charDrawer.classList.remove("open");
   setDrawer.classList.remove("open");
   keyDrawer.classList.remove("open");
+  profileDrawer.classList.remove("open");
   scrim.classList.remove("open");
 }
 $("openCharBtn").addEventListener("click", () => openDrawer(charDrawer));
 $("openSettingsBtn").addEventListener("click", () => openDrawer(setDrawer));
 $("openKeyBtn").addEventListener("click", () => { $("tokenInput").value = token; openDrawer(keyDrawer); });
+$("openProfileBtn").addEventListener("click", () => { populateProfileForm(); openDrawer(profileDrawer); });
 scrim.addEventListener("click", closeDrawers);
-[charDrawer, setDrawer, keyDrawer].forEach(d => {
+[charDrawer, setDrawer, keyDrawer, profileDrawer].forEach(d => {
   let startY = null;
   d.addEventListener("touchstart", e => { startY = e.touches[0].clientY; });
   d.addEventListener("touchmove", e => {
@@ -1534,6 +1637,7 @@ document.addEventListener("click", (e) => {
     if (!card) return;
     if (kind === "sec") { card.secondary_characters.splice(i, 1); renderSecondary(); }
     else if (kind === "loc") { card.locations.splice(i, 1); renderLocations(); }
+    else if (kind === "patch") { (card.notes||[]).splice(i, 1); renderPatches(); }
     persistCard();
   }
 });
@@ -1570,7 +1674,7 @@ function populateCharForm() {
   $("cIntimate").value = c.intimate_preferences || "";
   $("cUserName").value = c.user_name || "";
   $("charSub").textContent = card ? "edit" : "new";
-  renderSecondary(); renderLocations();
+  renderSecondary(); renderLocations(); renderPatches();
 }
 
 $("saveCharBtn").addEventListener("click", () => {
@@ -1607,6 +1711,65 @@ $("clearCharBtn").addEventListener("click", () => {
   refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn();
   closeDrawers();
 });
+
+
+// Profile form handlers
+function populateProfileForm(){
+  $("pName").value = profile.name || "";
+  $("pAge").value = profile.age || "";
+  $("pAppearance").value = profile.appearance || "";
+  $("pIdentity").value = profile.identity || "";
+  $("pPersonality").value = profile.personality || "";
+  $("pBackground").value = profile.background || "";
+}
+$("saveProfileBtn").addEventListener("click", () => {
+  profile = {
+    name: $("pName").value.trim(),
+    age: $("pAge").value.trim(),
+    appearance: $("pAppearance").value.trim(),
+    identity: $("pIdentity").value.trim(),
+    personality: $("pPersonality").value.trim(),
+    background: $("pBackground").value.trim()
+  };
+  persistProfile();
+  closeDrawers();
+  addSystemMessage("玩家档案已保存");
+});
+$("clearProfileBtn").addEventListener("click", () => {
+  if (!confirm("清除玩家档案?")) return;
+  profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
+  localStorage.removeItem("dzmm_profile");
+  populateProfileForm();
+  closeDrawers();
+});
+
+// Card patches accordion render
+function renderPatches(){
+  const list = $("patchList");
+  const empty = $("patchEmpty");
+  const arr = (card && card.notes) ? card.notes : [];
+  $("patchCount").textContent = arr.length;
+  list.innerHTML = "";
+  if (arr.length === 0){
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  arr.forEach((n, i) => {
+    const row = document.createElement("div");
+    row.className = "chip";
+    row.style.cssText = "padding:8px 10px;align-items:flex-start;gap:8px;";
+    const target = n.target || "未指定";
+    row.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:10px;color:#a89eb3;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;margin-bottom:2px;">${escapeHTML(target)} · ${escapeHTML(n.field||"")}</div>
+        <div class="chip-name" style="white-space:normal;line-height:1.5;">${escapeHTML(n.content||"")}</div>
+      </div>
+      <button class="chip-x" data-i="${i}" data-kind="patch" style="margin-top:2px;">×</button>
+    `;
+    list.appendChild(row);
+  });
+}
 
 // ═══════════════════════════════════════════════════════════
 // Import / Export
