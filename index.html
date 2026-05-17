@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>与她一同</title>
+<title>梦回 · AI 剧场</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -83,20 +83,31 @@
 
   /* ─── Bubbles ─── */
   .bubble-ai{
-    background:rgba(255,255,255,0.65);
-    border-radius:18px 18px 18px 4px;
-    padding:11px 14px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.025);
-    border:1px solid rgba(255,255,255,0.5);
-    backdrop-filter:blur(6px);
+    background:rgba(255,255,255,0.55);
+    border-radius:20px 20px 20px 6px;
+    padding:12px 15px;
+    box-shadow:0 4px 18px rgba(148,139,161,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    border:1px solid rgba(255,255,255,0.65);
+    backdrop-filter:blur(16px) saturate(160%);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+  }
+  body.intimate .bubble-ai{
+    background:rgba(255,250,250,0.55);
+    border-color:rgba(255,255,255,0.6);
   }
   .bubble-user{
-    background:var(--primary);
+    background:linear-gradient(135deg, rgba(160,150,176,0.92), rgba(148,139,161,0.92));
     color:#f8f7f9;
-    border-radius:18px 18px 4px 18px;
-    padding:10px 14px;
-    box-shadow:0 4px 12px rgba(148,139,161,0.22);
+    border-radius:20px 20px 6px 20px;
+    padding:11px 15px;
+    box-shadow:0 4px 14px rgba(148,139,161,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.25);
     transition:background 0.5s;
+  }
+  body.intimate .bubble-user{
+    background:linear-gradient(135deg, rgba(180,130,142,0.92), rgba(166,122,134,0.92));
   }
 
   /* dialogue line inside bubble */
@@ -108,28 +119,64 @@
   }
   body.intimate .dlg{color:#5a4248;}
 
-  /* narrative block (actions, scenes) */
+  /* narrative block (actions, scenes) — frosted glass small bubbles */
   .narrative{
     font-family:'Noto Sans SC',sans-serif;
-    color:#a89eb3;
+    color:#9d92ad;
     font-size:11px;font-weight:400;
-    padding:5px 11px;margin-top:8px;
-    background:rgba(230,226,240,0.35);
-    border-radius:10px;
-    line-height:1.65;
-    border-left:2px solid rgba(168,158,179,0.3);
+    padding:6px 11px;margin-top:8px;
+    background:rgba(245,242,250,0.55);
+    backdrop-filter:blur(10px) saturate(140%);
+    -webkit-backdrop-filter:blur(10px) saturate(140%);
+    border-radius:12px;
+    line-height:1.7;
+    border:1px solid rgba(255,255,255,0.5);
+    border-left:2px solid rgba(168,158,179,0.4);
+    box-shadow:0 1px 6px rgba(148,139,161,0.06);
   }
   .narrative.scene{
-    background:rgba(214,176,168,0.18);
-    border-left-color:rgba(214,176,168,0.5);
-    color:#a48a86;
+    background:rgba(248,236,232,0.55);
+    border-color:rgba(255,255,255,0.5);
+    border-left-color:rgba(214,176,168,0.55);
+    color:#a07d77;
     font-style:italic;
   }
   .narrative.inner{
-    background:rgba(206,219,224,0.3);
-    border-left-color:rgba(140,165,180,0.4);
-    color:#7d8d97;
+    background:rgba(232,239,243,0.55);
+    border-color:rgba(255,255,255,0.5);
+    border-left-color:rgba(140,165,180,0.5);
+    color:#728592;
     font-style:italic;
+  }
+  body.intimate .narrative{
+    background:rgba(248,236,236,0.55);
+    color:#9c8388;
+    border-left-color:rgba(200,148,148,0.4);
+  }
+  body.intimate .narrative.inner{
+    background:rgba(238,228,232,0.55);
+    color:#8c7782;
+    border-left-color:rgba(168,128,148,0.5);
+  }
+  body.intimate .narrative.scene{
+    background:rgba(245,225,222,0.55);
+    color:#a07770;
+    border-left-color:rgba(200,138,138,0.5);
+  }
+  /* streaming caret */
+  .narrative.streaming::after,
+  .dlg.streaming::after{
+    content:'▍';
+    display:inline-block;
+    margin-left:2px;
+    color:var(--primary);
+    opacity:0.55;
+    animation:caretBlink 0.9s steps(1) infinite;
+    font-weight:300;
+  }
+  @keyframes caretBlink{
+    0%,50%{opacity:0.6;}
+    51%,100%{opacity:0;}
   }
 
   /* stat chips appended to bubble */
@@ -151,6 +198,17 @@
   /* user message no-wrap container — just plain text */
   .user-text{
     font-family:'Noto Sans SC',sans-serif;font-size:13.5px;line-height:1.65;
+  }
+  .user-text.user-action{
+    font-style:italic;
+    opacity:0.92;
+    font-size:12.5px;
+  }
+  .user-text.user-inner{
+    font-style:italic;
+    opacity:0.86;
+    font-size:12.5px;
+    letter-spacing:0.02em;
   }
 
   /* meta line above bubble */
@@ -383,6 +441,10 @@
   /* Chip list */
   .chip-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px;}
   .chip-list:empty{margin:0;}
+  /* Long chip lists (locations) — capped height with scroll */
+  #locList{max-height:240px;overflow-y:auto;padding-right:4px;}
+  #locList::-webkit-scrollbar{width:4px;}
+  #locList::-webkit-scrollbar-thumb{background:rgba(148,139,161,0.25);border-radius:2px;}
   .chip{
     background:rgba(255,255,255,0.7);
     border:1px solid rgba(180,175,195,0.22);
@@ -479,6 +541,55 @@
     100%{transform:scale(1);text-shadow:none;}
   }
   .level-num.flash{animation:levelup-flash 0.9s ease-out;}
+
+  /* ─── Marker buttons (必选: 对白/动作/心绪) ─── */
+  .marker-btn{
+    transition:all 0.25s cubic-bezier(.4,0,.2,1);
+    position:relative;
+  }
+  .marker-btn.active{
+    background:rgba(255,255,255,0.85);
+    color:var(--primary);
+    border-color:rgba(148,139,161,0.45);
+    box-shadow:0 2px 10px rgba(148,139,161,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .marker-btn.active .marker-dot{
+    background:var(--primary);
+    box-shadow:0 0 0 3px rgba(148,139,161,0.18);
+  }
+  body.intimate .marker-btn.active{
+    color:var(--accent);
+    border-color:rgba(200,138,138,0.45);
+  }
+  body.intimate .marker-btn.active .marker-dot{
+    background:var(--accent);
+    box-shadow:0 0 0 3px rgba(200,138,138,0.18);
+  }
+  .marker-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#cdc8d4;
+    transition:all 0.25s;
+    flex-shrink:0;
+  }
+
+  /* ─── Action pills (推进/承接/时跳) — distinct styling ─── */
+  .action-btn{
+    background:rgba(255,255,255,0.4);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.5);
+    box-shadow:0 1px 4px rgba(148,139,161,0.06);
+    transition:all 0.2s;
+  }
+  .action-btn:hover{background:rgba(255,255,255,0.7);}
+
+  /* divider between marker group and action group */
+  .input-bar-sep{
+    flex-shrink:0;
+    width:1px;
+    margin:6px 2px;
+    background:linear-gradient(to bottom, transparent, rgba(180,175,195,0.35), transparent);
+  }
 </style>
 </head>
 <body class="story">
@@ -583,30 +694,30 @@
   <!-- INPUT -->
   <footer class="absolute bottom-0 left-0 right-0 p-4 pt-2 pointer-events-none">
     <div class="pointer-events-auto flex flex-col gap-2.5">
-      <!-- Input markers + scene control -->
-      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="quickActions">
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="dialogue" title="对白「」">
-          <i class="ph ph-quotes text-[12px]"></i>
+      <!-- Marker pills (必选,默认对白) + action pills (推进/承接/时跳,点击即发送) -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1 items-center" id="quickActions">
+        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 active" data-marker="dialogue" title="对白模式 — 你说出口的话">
+          <span class="marker-dot"></span>
           <span class="cn">对白</span>
         </button>
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="action" title="动作 ( )">
-          <i class="ph ph-hand-pointing text-[12px]"></i>
+        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-marker="action" title="动作模式 — 你做出的动作">
+          <span class="marker-dot"></span>
           <span class="cn">动作</span>
         </button>
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-marker="inner" title="心绪 * *">
-          <i class="ph ph-cloud text-[12px]"></i>
+        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-marker="inner" title="心绪模式 — 你的内心活动">
+          <span class="marker-dot"></span>
           <span class="cn">心绪</span>
         </button>
-        <div class="flex-shrink-0 w-px bg-[#d0ced8]/60 my-1"></div>
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="advance" title="请角色主动推进">
+        <div class="input-bar-sep self-stretch"></div>
+        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="advance" title="请角色主动推进剧情">
           <i class="ph ph-fast-forward text-[12px]"></i>
           <span class="cn">推进</span>
         </button>
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="continue" title="承接展开">
+        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="continue" title="承接展开当前话题">
           <i class="ph ph-arrow-right text-[12px]"></i>
           <span class="cn">承接</span>
         </button>
-        <button class="flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 hover:bg-white/70 transition" data-action="timeskip" title="时间流逝">
+        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
           <i class="ph ph-clock-clockwise text-[12px]"></i>
           <span class="cn">时跳</span>
         </button>
@@ -621,7 +732,7 @@
         </button>
       </div>
       <p class="text-center text-[9px] text-[#b0afba] mono tracking-tight">
-        Enter 发送 · Shift+Enter 换行 · 「  」对白 · (  ) 动作 · *  * 心绪
+        Enter 发送 · Shift+Enter 换行 · 选择「对白 / 动作 / 心绪」决定你输入的语义
       </p>
     </div>
   </footer>
@@ -738,7 +849,10 @@
           <div class="add-form">
             <input type="text" class="input" id="locName" placeholder="地点名 *">
             <input type="text" class="input" id="locDesc" placeholder="一句话介绍">
-            <button class="btn ghost" id="addLocBtn"><i class="ph ph-plus"></i>添加地点</button>
+            <div class="btn-row">
+              <button class="btn ghost" id="addLocBtn"><i class="ph ph-plus"></i>添加</button>
+              <button class="btn ghost" id="loadDefaultLocBtn" title="载入宝塚 / 日比谷 / 银座 共 160 个内置地点"><i class="ph ph-download-simple"></i>载入预设</button>
+            </div>
           </div>
         </div>
       </div>
@@ -838,6 +952,10 @@ const MODELS_URL = `${API_BASE}/v2/models`;
 const CHAT_URL = `${API_BASE}/v2/chat/completions`;
 const SCHEMA_VERSION = 1;
 
+// ─── Built-in location pool (宝塚 + 日比谷 + 银座) ───
+const DEFAULT_LOCATIONS = [{"name": "宝塚大劇場前広場","description": "剧场正门外的开阔广场，常能看到排队等候的观众和精美的演出海报"},{"name": "花の道","description": "从宝冢车站通往大剧场的长廊式公园，四季鲜花盛开，极具浪漫气息"},{"name": "宝塚大劇場改札口","description": "进入剧场大厅的核心关卡，内部通往宏伟的红地毯阶梯"},{"name": "宝塚歌劇の殿堂","description": "位于剧场建筑内的博物馆，展示历代名伶的服装、手印及剧团历史资料"},{"name": "キャトルレーヴ宝塚店","description": "剧团官方周边旗舰店，贩售最新的剧照、CD及各种限定商品"},{"name": "武庫川河川敷遊歩道","description": "紧邻大剧场的一条沿河散步道，可以远眺剧场宏伟的外观与对岸风光"},{"name": "宝塚大橋","description": "横跨武库川的宏伟桥梁，连接着大剧场区域与宝冢南口区域"},{"name": "湯本町公園","description": "位于大剧场隔河相望的对岸，是一处安静的绿地绿洲"},{"name": "宝塚温泉","description": "历史悠久的温泉区，距离大剧场仅几分钟步行路程"},{"name": "阪急宝塚駅前広場","description": "前往大剧场的交通枢纽，周边开满了服务歌迷的小商铺"},{"name": "楽屋口","description": "粉丝们熟知的\"入出待ち\"圣地，是演员进出剧场的必经之门"},{"name": "楽屋中央通路","description": "连接各排练室与化妆间的主干道，墙上通常挂着演出的日程表"},{"name": "大楽屋","description": "下级生（年轻演员）共同使用的大型整装区域，气氛总是十分热闹"},{"name": "トップスター専用楽屋","description": "主演男役和娘役拥有的独立休息室，陈设雅致且极具私密性"},{"name": "衣装室","description": "存放和修改演出服的重地，堆满了华丽的羽毛、亮片与西装"},{"name": "かつら部屋","description": "专属造型师为演员们调整、打理舞台假发与头饰的专业房间"},{"name": "楽屋売店","description": "仅供剧团内部人员使用的便利商店，贩售提神饮料、润喉糖和轻食"},{"name": "楽屋受付","description": "负责接收和分发粉丝信件、送给演员的花束及礼物的管理中心"},{"name": "舞台袖待機エリア","description": "紧邻舞台大幕的狭长通道，演员们登台前会在此调整呼吸和候场"},{"name": "楽屋シャワー室","description": "供演员在排练或高强度演出结束后清洗舞台妆与汗水的盥洗区域"},{"name": "日比谷シャンテ","description": "剧场正对面的复合式商业大楼，内有大量宝冢相关的合作店铺"},{"name": "日比谷ステップ広場","description": "剧场旁标志性的公共广场，伫立着巨大的哥斯拉雕像"},{"name": "有楽町ガード下飲食店街","description": "充满昭和风情的餐饮街，汇集了众多居酒屋与特色小吃"},{"name": "日比谷公園","description": "剧场附近面积广阔的都市绿地，是演员和观众散步放松的好去处"},{"name": "TOHOシネマズ日比谷","description": "位于附近的现代电影院线，是东京著名的娱乐中心之一"},{"name": "数寄屋橋交差点","description": "连接日比谷与银座的核心十字路口，车水马龙，霓虹闪烁"},{"name": "阪急メンズ東京","description": "高端男士时尚百货，距离剧场仅几分钟路程"},{"name": "Ginza Sony Park","description": "充满现代设计感的实验性都市公园，常有前卫的艺术展览"},{"name": "日比谷仲通り","description": "剧场门前的街道，每逢演出日便会聚集许多秩序井然的应援团"},{"name": "有楽町駅前広場","description": "交通极其便利的集散地，周边有许多大型家电卖场和咖啡厅"},{"name": "第一大稽古場","description": "等比例还原大剧场舞台大小的排练场，用于进行全员大合练"},{"name": "声楽レッスン室","description": "隔音效果极佳的小房间，配有钢琴，供演员单独练习唱腔"},{"name": "バレエレッスン室","description": "四周装满大镜子和把杆的房间，用于日常的基本功与舞蹈训练"},{"name": "演出家執務室","description": "导演和编剧构思剧本、与主要演员讨论角色的办公场所"},{"name": "オーケストラリハーサル室","description": "专门供宝冢管弦乐团进行乐曲演奏与视唱练耳的宽敞空间"},{"name": "稽古場ロビー","description": "摆满自动贩卖机和长椅的公共区域，演员们在此喝水、交流和看剧本"},{"name": "小道具一時保管庫","description": "紧邻排练场，存放排练用代用品（如木剑、假枪、裙撑）的库房"},{"name": "音響コントロールルーム","description": "负责排练时播放伴奏带、录音以及调整麦克风音量的技术房间"},{"name": "タイムカード受付口","description": "剧团成员每天到达排练场时，用来签到和确认通知板信息的门口"},{"name": "衣装合わせ部屋","description": "排练中期进行\"衣装合わせ\"（试装）的临时工作室"},{"name": "寮正門警備室","description": "管理严格的安全岗亭，负责核实人员身份并代收信件"},{"name": "面会ロビー","description": "宿舍一楼宽敞的公共空间，供寄宿生接待家人或进行简单交谈"},{"name": "共用大浴場","description": "供疲惫了一天的团员们泡澡、放松肌肉和联络感情的温馨浴室"},{"name": "すみれ寮食堂","description": "提供营养均衡膳食的内部餐厅，是团员们补充能量的重要场所"},{"name": "自主レッスン室","description": "宿舍内附设的简易排练房，配有镜子，方便大家回宿舍后继续练舞"},{"name": "中央洗濯室","description": "整齐排列着多台大功率洗衣机与烘干机，专门用来清洗大量练功服"},{"name": "レターボックスエリア","description": "位于大厅一侧，每个团员都拥有一个写有自己名字的小信箱"},{"name": "図書・ビデオ閲覧室","description": "存放有历年公演录像、剧本及歌剧杂志的安静学习空间"},{"name": "寮内中庭グリーンスペース","description": "一处小巧的绿化带，偶尔会有住宿的成员在此散步或种植花草"},{"name": "宅配ボックスエリア","description": "现代化的智能寄件箱区域，方便团员们接收网购的生活用品"},{"name": "阪急逆瀬川駅前広場","description": "距离咖啡店不远的通勤车站，散发着宁静的住宅区氛围"},{"name": "清荒神参道入り口","description": "阪急沿线著名的文化散步道起点，沿途布满了古朴的小店"},{"name": "宝塚南口郵便局","description": "充满生活气息的社区邮局，常有剧团粉丝在此邮寄信件"},{"name": "武庫川の中州","description": "从咖啡店附近的堤防可以望见河道中央的绿洲，常有白鹭栖息"},{"name": "売布神社前の坂道","description": "一条充满绿意的上坡路，沿途点缀着许多精致的独栋住宅"},{"name": "街の小さなパン屋さん","description": "清晨会飘出浓郁麦香味的手工作坊，深受周边居民喜爱"},{"name": "阪急線の踏切","description": "标志性的栗色阪急电车缓缓驶过的铁道口，颇具动漫感"},{"name": "近隣の児童公園","description": "设有秋千与沙坑的小公园，午后时分非常安静祥和"},{"name": "リバーサイド遊歩道","description": "沿着武库川支流修建的步行道，是极佳的散步和慢跑路线"},{"name": "地元の雑貨屋さん","description": "售卖宝冢当地特色紫罗兰主题杂货与干花的小巧店铺"},{"name": "カラオケビッグエコー","description": "通常开在居酒屋隔壁，是聚会后进行\"第二轮\"的热门场所"},{"name": "タクシー乗り場","description": "深夜居酒屋门外常驻的车道，方便喝醉或赶时间的顾客打车回家"},{"name": "ファミリーマート","description": "明亮的深夜灯塔，许多人在聚会后会去买解酒药或冰淇淋"},{"name": "有楽町高架下沿い","description": "居酒屋所在的嘈杂街区，头顶不时传来电车驶过的轰鸣声"},{"name": "歓楽街の街路","description": "每到深夜便闪烁着五颜六色光芒的娱乐区街道"},{"name": "地下铁出入口","description": "距离居酒屋仅几步之遥的地铁站口，赶末班车的上班族在此步履匆匆"},{"name": "コインロッカーエリア","description": "方便客人在饮酒聚会前寄放随身大件行李或公文包的地方"},{"name": "深夜のラーメン店","description": "日本人习惯在居酒屋喝完酒后，再来吃一碗\"收尾拉面\"的去处"},{"name": "タイムズ駐車場","description": "位于居酒屋后方的小型停车场，常有代驾司机在此等候"},{"name": "ストリートベンチエリア","description": "位于步行街中央，常有年轻人在此坐着聊天或醒酒"},{"name": "ホテル大宴会場","description": "经常举办宝冢歌剧团演员茶会（Tea Party）与退团晚宴的梦幻空间"},{"name": "大階段（ロビー）","description": "完美复刻大剧场风格的宏伟阶梯，是住客最爱的拍照打卡点"},{"name": "日本料理「彩羽」","description": "饭店内提供精致怀石料理的高级餐厅，环境优雅宁静"},{"name": "ホテルショップ","description": "售卖宝冢饭店限定西点、巧克力以及高档伴手礼的礼品店"},{"name": "宝塚歌劇展示コーナー","description": "位于大堂一角，常年展出剧团相关的珍贵展品与舞台服装"},{"name": "武庫川ビューテラス","description": "饭店面向河流的一侧，可以一边喝咖啡一边欣赏美丽的河景"},{"name": "ホテル前庭ガーデン","description": "种植着欧洲风格植物的小巧庭院，与饭店的纯白欧式外墙相得益彰"},{"name": "ラウンジ「ルネサンス」","description": "提供精致下午茶的优雅空间，常能看到身着盛装的观众在此歇息"},{"name": "宝塚南口駅跡地周辺","description": "虽然饭店已搬迁，但老一辈粉丝仍对旧址旁的车站充满回忆"},{"name": "宝塚市立文化芸術センター","description": "距离饭店不远的现代艺术场馆，经常举办各种市民画展"},{"name": "帝国ホテルメインロビー","description": "以宏伟的黄金璀璨吊灯和巨大的标志性插花闻名的大堂"},{"name": "ランデブーラウンジ","description": "高端商务人士与名流汇聚的场所，提供极品红茶与甜点"},{"name": "帝国劇場","description": "与饭店隔街相望的历史悠久大剧院，常年上演高规格舞台剧"},{"name": "日比谷公園大噴水広場","description": "从饭店高层窗户可直接俯瞰的巨大公园核心景观"},{"name": "帝国ホテルアーケード","description": "日本最早的酒店地下购物街，汇集了世界顶级奢侈品牌"},{"name": "レ セゾン","description": "饭店内的米其林星级餐厅，代表了日本顶级的法餐水平"},{"name": "オールドインペリアルバー","description": "保留了建筑大师莱特设计元素的传奇酒吧，氛围沉稳古典"},{"name": "正面玄関車寄せ","description": "常年停靠着高级轿车，有礼宾员提供无微不至的接机与迎宾服务"},{"name": "JALプラザ日比谷","description": "邻近的高端航空服务中心，方便国内外贵宾处理行程"},{"name": "東京ミッドタウン日比谷","description": "附近高耸入云的现代摩天大楼，是集购物与办公于一体的新地标"},{"name": "サンドウィッチ ルマン 宝塚南口本店","description": "1964年创业的传奇三明治店，其厚蛋烧三明治是著名的剧团乐屋慰问品（差し入れ）首选"},{"name": "宝塚大劇場・バウホール","description": "大剧场旁的小剧场，主要用于年轻下级生担任主演的试验性公演和独奏会"},{"name": "手塚治虫記念館","description": "位于Kanya咖啡厅附近的现代建筑，纪念在此度过少年时代的漫画之神手塚治虫"},{"name": "ナチュールスパ宝塚","description": "武库川畔的日归温泉设施，外观由安藤忠雄设计，是演员和居民消除疲劳的去处"},{"name": "花のみちセルカ","description": "紧邻大剧场花之道的欧式商业裙楼，内部开满了宝冢主题的沙龙、服装店和饰品店"},{"name": "パンネル 一麦館","description": "宝冢当地家喻户晓的面包店，其吐司极其松软，常出现在团员的宿舍早餐表上"},{"name": "宝塚大劇場オフィシャルホテル・駐車場","description": "高级轿车频繁出入的区域，很多演艺界大咖和赞助商在此泊车观剧"},{"name": "武庫川中州の生水苔","description": "常年有白鹭伫立的河心沙洲，从宝冢大桥上望去，是抚慰排练疲劳的经典自然景观"},{"name": "阪急宝塚南口駅改札口","description": "虽然宝冢饭店已搬迁，但这里依然保留着老一辈\"控团粉丝\"心中不可磨灭的暮色记忆"},{"name": "宝塚文化創造館","description": "由旧宝冢音乐学校校舍改建的文化馆，承载着无数少女挥洒汗水与泪水的青春历史"},{"name": "シアタークリエ","description": "位于东京宝冢剧场斜对面的东宝系剧场，常年上演各种高质量的音乐剧和小剧场话剧"},{"name": "日比谷シャンテ・キャトルレーヴ東京店","description": "位于商业楼地下的官方周边店，每逢东京公演，这里总是挤满了抢购限定生写和周边的粉丝"},{"name": "日比谷図書文化館","description": "位于日比谷公园内的独特三角形建筑，内有安静的咖啡厅，是观剧前消磨时光的秘密基地"},{"name": "添好運 日比谷店","description": "剧场附近极极具人气的香港点心店，排队的人群中经常夹杂着手拿应援物料的观众"},{"name": "日比谷ステップ広場大階段","description": "日比谷Midtown前宽阔的台阶广场，常常作为东京国际电影节等重大娱乐盛事的红毯举办地"},{"name": "レム日比谷","description": "紧邻东京宝冢剧场的现代酒店，其低层落地窗可以直接俯瞰剧场门前排列整齐的应援队伍"},{"name": "松本楼","description": "日比谷公园深处历史悠久的老牌西餐厅，以百年咖喱饭闻名，是观剧前后享受优雅午餐的圣地"},{"name": "日比谷公園小音楽堂","description": "绿树环绕的露天音乐舞台，散步时常能听到这里传来管乐排练或市民音乐会的乐章"},{"name": "帝国劇場（楽屋口付近）","description": "与帝国饭店相邻的传统大剧院后台出口，与东京宝冢剧场共同构成了日比谷的演艺核心圈"},{"name": "有楽町線日比谷駅A13出口","description": "直通东京宝冢剧场地下的长长通道，下雨天这里总是站满了等待避雨和核对观剧时间的粉丝"},{"name": "銀座天國","description": "位于银座的老字号天妇罗店，很多观众在看完下午场公演后会选择来这里吃一顿地道的传统晚宴"},{"name": "数寄屋橋公園（岡本太郎時計台）","description": "矗立着前卫艺术家冈本太郎作品的街心公园，是相约去银座聚会吃居酒屋的经典集合点"},{"name": "銀座メゾンエルメス","description": "拥有全玻璃砖外墙的爱马仕旗舰店，其橱窗设计是银座标志性的时尚风向标"},{"name": "教文館","description": "银座四丁目历史悠久的综合书店，其宁静古典的氛围非常适合观剧后去寻找戏剧评论或原著小说"},{"name": "銀座千癖屋 フルーツパーラー","description": "创业百年的高级水果甜品店，其招牌水果圣代和水果三明治深受女性观众和演员的青睐"},{"name": "銀座 響","description": "隐藏在高级写字楼里的高端清酒酒吧，是深夜散场后剧组高层或资深粉丝探讨舞台表现的私密场所"},{"name": "東急プラザ銀座 KIRIKO LOUNGE","description": "拥有巨大玻璃幕墙的挑高空中休息区，可以俯瞰整个数寄屋桥交叉口的繁华车流"},{"name": "銀座三越地下食品売場（デパ地下）","description": "汇集了全日本顶级和菓子与洋菓子的美食广场，是挑选乐屋慰问糕点的终极激战区"},{"name": "鳩居堂 銀座本店","description": "专门贩售高级和纸、香烛和文房四宝的百年老店，粉丝常在此购买写给心仪演员的精美信纸"},{"name": "銀座コリドー街","description": "由无数高架桥下酒吧和意式餐厅组成的漫长街道，深夜时分充满霓虹乐章，是下班后极具活力的人气聚集地"},{"name": "ソリオ1階メインプラザ","description": "拥有挑高玻璃天顶的中央广场，经常举办宝塚市的物产展、花卉展或与剧团相关的季节性装饰"},{"name": "矢吹堂（ソリオ宝塚内）","description": "店内贴满了宝冢演员签名的老字号CD与纪念品商店，是歌迷寻找绝版舞台音源的宝藏店铺"},{"name": "タリーズコーヒー ソリオ宝塚店","description": "位于枢纽位置的咖啡厅，由于地理位置绝佳，经常能看到手拿观剧指南、在此消磨开演前时光的观众"},{"name": "ミスタードーナツ ソリオ宝塚ショップ","description": "充满学生和通勤族烟火气的甜品店，排练结束后的音乐学校学生偶尔也会在这里买点心"},{"name": "ソリオ宝塚名店街の案内板","description": "常年张贴着最新公演海报与宝塚市文化活动日程的大型告示板，是观剧客必经的信息集散点"},{"name": "宝塚阪急（ソリオ連結デパ地下）","description": "与商场直接连通的高级食品超市，许多粉丝会在这里购买高档水果、红茶或神户牛肉作为送给演员的礼物"},{"name": "ソリオ2階のフラワーショップ","description": "常备大量代表宝冢符号的紫罗兰（すみれ）以及各种应援色鲜花的花店，方便观众在步入大剧场前购买"},{"name": "ソリオ・大劇場間の連絡デッキ","description": "连接商场与花之道的有盖天桥通道，每当雨天，这里便成了完美的避雨观景长廊"},{"name": "ブックファースト ソリオ宝塚店","description": "书店最显眼的位置永远摆放着《歌劇》、《宝塚GRAPH》等官方杂志，以及最新的演员写真集"},{"name": "ソリオ地下駐車場出入口","description": "相对隐蔽的车道口，深夜时分偶尔会有接送剧团高层、编导或资深大牌演员的高级保姆车由此驶出"},{"name": "いかりスーパーマーケット 宝塚店","description": "位于车站附近的关西顶级贵妇超市，团员和当地名流常在此购买高品质的进口食材与精致熟食"},{"name": "ソリオ宝塚3階のバレエスタジオ","description": "商场高层的舞蹈教室，时常能听到排练的音乐声，充满艺术小镇的独特氛围"},{"name": "ミスターミニット 阪急宝塚駅店","description": "位于车站内的小型鞋履皮具修理铺，演员们的高跟舞鞋、排练皮鞋常送来这里进行紧急加固"},{"name": "ソリオ宝塚のコインロッカーエリア","description": "远道而来的大剧场远征粉丝们最常光顾的行李寄存区，清晨时分总是塞满了拉杆箱"},{"name": "宝塚ゆめ広場（駅前ロータリー）","description": "阪急宝冢站前的圆形广场，伫立着标志性的宝冢歌剧演员铜像，是无数游客合影的第一站"},{"name": "グリーンベリーズコーヒー 宝塚劇場前店","description": "位于花之道入口附近的现代咖啡厅，落地窗视野极佳，是后台工作人员和粉丝喜爱的落脚点"},{"name": "ソリオ1階の薬局（ドラッグストア）","description": "常备大量缓解肌肉酸痛的贴布、入浴剂和喉糖，是剧团成员高强度排练期间的补给站"},{"name": "阪急宝塚駅の自動券売機付近","description": "每当公演散场，这里便会排起长队，空气中弥漫着刚刚看完梦幻舞台后的兴奋讨论声"},{"name": "ソリオ宝塚内の和菓子処","description": "售卖传统日式点心的小店，其应季的樱饼和常年供应的紫罗兰仙贝是极具地方特色的伴手礼"},{"name": "宝塚駅構内の観光案内所","description": "摆满了宝冢市各种文化散步地图与歌剧周边导览手册的信息中心，对初次观剧的游客非常友好"},{"name": "日比谷シャンテ2階の衣装展示スペース","description": "定期展出上一档公演中Top Star实际穿过的华丽舞台服饰，连密集的亮片细节都能清晰可见"},{"name": "日比谷ゴジラスクエアのベンチ","description": "哥斯拉雕像下的石凳休息区，午间总是坐满了带着自制便当、一边吃一边等待进场的观众"},{"name": "有楽町イトシア（ITOCiA）フードコート","description": "地下的快捷美食广场，很多赶时间的观众会在这里快速解决午餐，以便准时赶上下午场的开演"},{"name": "帝国ホテルタカシマヤ メゾン ド コスチューム","description": "帝国饭店内的高级礼服沙龙，常为出席宝冢特别晚宴、茶会的贵宾及家属提供高规格的正装租赁"},{"name": "日比谷公園の雲形池","description": "公园内标志性的鹤形喷泉池，四周环绕着长椅，是演员在紧凑的东京公演间隙呼吸新鲜空气的隐秘角落"},{"name": "東宝日比谷ビル（日比谷シャンテ）の連絡通路","description": "直通地下的温暖通道，挂满了东宝系各种大制作音乐剧和舞台剧的巨幅海报"},{"name": "有楽町駅京橋口の金券ショップ街","description": "售卖各类演出票券与折扣车票的街角小店，资深剧迷偶尔会来这里碰碰运气寻找周边美术馆的门票"},{"name": "日比谷中通りの並木道","description": "秋天银杏飘落的街道，东京宝冢剧场的红地毯入口在金黄色的树阴映衬下显得格外优雅"},{"name": "ニュートーキョー ビヤホール 有楽町電気ビル店","description": "历史悠久的老牌啤酒餐厅，是东京公演期间，观众们看完夜场后举行\"感想战\"聚会的经典老地方"},{"name": "千代田区立日比谷図書文化館のショップ","description": "贩售许多日比谷历史书籍、复古明信片及戏剧相关刊物的文艺角落，极具文化底蕴"},{"name": "銀座わしたショップ","description": "位于有乐町和银座交界处的冲绳特产店，热闹且充满人间烟火气，很多演员和观众散步时会顺道买一根黑糖冰淇淋"},{"name": "銀座 寿し幸","description": "隐藏在银座巷弄里的高档寿司老店，是资深赞助商（贔屓筋）款待备受瞩目的主演演员时的私密用餐场所"},{"name": "銀座 宇治式部郷","description": "专营源氏物语主题仙贝的高级宇治茶点心店，其包装典雅，是送往剧场后台绝不会出错的体面礼品"},{"name": "山野楽器 銀座本店","description": "银座四丁目的音乐圣地，拥有专门的舞台剧与宝冢CD/DVD专柜，开演期间常在门口播放最新的公演主打歌"},{"name": "銀座千疋屋のテイクアウト専門店","description": "专门打包高级水果挞和蛋糕的窗口，经常有西装革履的商务人士在此订购送往乐屋的慰问甜点"},{"name": "銀座並木通りのブティック街","description": "奢侈品旗舰店林立的优雅街道，其静谧与奢华的氛围，常是演员们在休演日（休演日）低调私访的选品区"},{"name": "銀座みゆき通り","description": "横穿银座的核心街道之一，沿途有许多复古的红砖建筑，午后和黄昏时分的光影极具舞台剧的浪漫质感"},{"name": "数寄屋橋の不二家ペコちゃん看板下","description": "银座最具标志性的集合点之一，无数剧迷在前往银座方向聚餐时都会约在此处碰头"},{"name": "銀座の老舗文房具店・伊東屋（Itoya）","description": "整整一栋楼的文具天堂，粉丝们会在这里花上几个小时，精心挑选最符合下一次公演主题色调的信封与信纸"},{"name": "銀座コリドー街のスペインバル","description": "深夜依旧灯火通明的西班牙酒吧，散场后的年轻观众喜欢聚集在此，伴着桑格利亚酒热烈地讨论今晚的卡司与谢幕花絮"}];
+
+
 const USER_ID = "user_" + (localStorage.getItem("dzmm_uid") || (() => {
   const id = Math.random().toString(36).slice(2, 10);
   localStorage.setItem("dzmm_uid", id);
@@ -919,13 +1037,22 @@ function refreshTopBar() {
     ava.textContent = card.name.slice(0, 1);
     name.textContent = card.name;
     tag.textContent = mode === "intimate" ? "亲密模式 · 18+" : "故事模式 · 在线";
-    input.placeholder = mode === "intimate" ? `靠近${card.name}...` : `和${card.name}说点什么...`;
+    refreshInputPlaceholder();
   } else {
     ava.textContent = "?";
     name.textContent = "未设定角色";
     tag.textContent = token ? "点击新建角色卡" : "点击新建角色卡";
     input.placeholder = "说点什么...";
   }
+}
+
+function refreshInputPlaceholder(){
+  if (!card){ input.placeholder = "说点什么..."; return; }
+  const baseName = card.name;
+  const m = (typeof currentMarker !== "undefined") ? currentMarker : "dialogue";
+  if (m === "action") input.placeholder = `你做出的动作（不用写括号）…`;
+  else if (m === "inner") input.placeholder = `你的内心活动…`;
+  else input.placeholder = mode === "intimate" ? `靠近${baseName}…` : `和${baseName}说点什么…`;
 }
 
 function applyMode() {
@@ -988,31 +1115,37 @@ function currentHistory(){ return histories[mode]; }
 // ═══════════════════════════════════════════════════════════
 // Output format from character card:
 //   plain text = dialogue
-//   (...) or (...)  = action/scene narrative
+//   (...) or （...）  = action/scene narrative
 //   *...*           = inner monologue
 //   [SCENE]...[/SCENE] = scene transition
 //   [STATS]好感:+3,亲密:+1[/STATS]   = stat update
 //   [CARD_PATCH]目标:角色|字段:习惯|内容:...[/CARD_PATCH]  = card update
-function parseAssistantOutput(text){
+//
+// `partial` flag: if true, we are mid-stream — keep any unclosed trailing
+// segment as a streaming-active fragment so the UI can render it live.
+function parseAssistantOutput(text, partial){
   const segments = [];
-  const stats = []; // {aff, int}
-  const patches = []; // {target, field, content}
+  const statsList = [];
+  const patches = [];
 
-  // Strip and capture STATS, CARD_PATCH first (they should not render as content)
   let t = text;
 
-  // STATS
+  // STATS — only consume completed tags
   t = t.replace(/\[STATS\]([\s\S]*?)\[\/STATS\]/g, (_, body) => {
     const affM = body.match(/好感\s*[::]\s*([+\-]?\d+)/);
     const intM = body.match(/亲密\s*[::]\s*([+\-]?\d+)/);
-    stats.push({
+    statsList.push({
       aff: affM ? parseInt(affM[1]) : 0,
       int: intM ? parseInt(intM[1]) : 0
     });
     return "";
   });
+  // mid-stream STATS that hasn't closed yet — hide it from view
+  if (partial){
+    t = t.replace(/\[STATS\][\s\S]*$/, "");
+  }
 
-  // CARD_PATCH
+  // CARD_PATCH — only consume completed tags
   t = t.replace(/\[CARD_PATCH\]([\s\S]*?)\[\/CARD_PATCH\]/g, (_, body) => {
     const obj = {};
     body.split("|").forEach(part => {
@@ -1022,32 +1155,87 @@ function parseAssistantOutput(text){
     patches.push(obj);
     return "";
   });
+  if (partial){
+    t = t.replace(/\[CARD_PATCH\][\s\S]*$/, "");
+  }
 
-  // Tokenize remaining text into segments
-  // We walk through and pick out [SCENE]...[/SCENE], (...) , *...*, leaving plain dialogue
-  const tokenRegex = /\[SCENE\]([\s\S]*?)\[\/SCENE\]|([(((])([\s\S]*?)[)))]|\*([\s\S]+?)\*/g;
+  // Tokenize: SCENE, paired brackets (half-width OR full-width, match-aware),
+  // *...* for inner monologue.
+  // We do a single-pass scan so brackets pair correctly.
   let lastIdx = 0;
-  let m;
-  while ((m = tokenRegex.exec(t)) !== null){
-    if (m.index > lastIdx){
-      const plain = t.slice(lastIdx, m.index).trim();
-      if (plain) segments.push({ type: "dialogue", content: plain });
-    }
-    if (m[1] !== undefined){
-      segments.push({ type: "scene", content: m[1].trim() });
-    } else if (m[2] !== undefined){
-      segments.push({ type: "action", content: m[3].trim() });
-    } else if (m[4] !== undefined){
-      segments.push({ type: "inner", content: m[4].trim() });
-    }
-    lastIdx = m.index + m[0].length;
-  }
-  if (lastIdx < t.length){
-    const tail = t.slice(lastIdx).trim();
-    if (tail) segments.push({ type: "dialogue", content: tail });
-  }
+  let i = 0;
+  let streamingTail = null; // {type, content} unclosed at tail (only when partial)
 
-  return { segments, stats, patches };
+  const pushPlain = (from, to) => {
+    if (to <= from) return;
+    const plain = t.slice(from, to).trim();
+    if (plain) segments.push({ type: "dialogue", content: plain });
+  };
+
+  while (i < t.length){
+    const ch = t[i];
+
+    // SCENE block
+    if (t.startsWith("[SCENE]", i)){
+      const end = t.indexOf("[/SCENE]", i + 7);
+      if (end !== -1){
+        pushPlain(lastIdx, i);
+        segments.push({ type: "scene", content: t.slice(i + 7, end).trim() });
+        i = end + 8;
+        lastIdx = i;
+        continue;
+      } else if (partial){
+        pushPlain(lastIdx, i);
+        streamingTail = { type: "scene", content: t.slice(i + 7).trim() };
+        lastIdx = t.length;
+        i = t.length;
+        break;
+      }
+    }
+
+    // Action — half-width (...)  or full-width （...）
+    // Pair the same kind to avoid swallowing across mixed text.
+    if (ch === "(" || ch === "（"){
+      const closer = ch === "(" ? ")" : "）";
+      const end = t.indexOf(closer, i + 1);
+      if (end !== -1){
+        pushPlain(lastIdx, i);
+        segments.push({ type: "action", content: t.slice(i + 1, end).trim() });
+        i = end + 1;
+        lastIdx = i;
+        continue;
+      } else if (partial){
+        pushPlain(lastIdx, i);
+        streamingTail = { type: "action", content: t.slice(i + 1).trim() };
+        lastIdx = t.length;
+        i = t.length;
+        break;
+      }
+    }
+
+    // Inner — *...*
+    if (ch === "*"){
+      const end = t.indexOf("*", i + 1);
+      if (end !== -1 && end > i + 1){
+        pushPlain(lastIdx, i);
+        segments.push({ type: "inner", content: t.slice(i + 1, end).trim() });
+        i = end + 1;
+        lastIdx = i;
+        continue;
+      } else if (partial){
+        pushPlain(lastIdx, i);
+        streamingTail = { type: "inner", content: t.slice(i + 1).trim() };
+        lastIdx = t.length;
+        i = t.length;
+        break;
+      }
+    }
+
+    i++;
+  }
+  pushPlain(lastIdx, t.length);
+
+  return { segments, stats: statsList, patches, streamingTail };
 }
 
 function applyCardPatches(patches){
@@ -1106,7 +1294,7 @@ function renderMessages() {
   }
   // Render
   for (const m of h){
-    if (m.role === "user") renderUserMessage(m.content);
+    if (m.role === "user") renderUserMessage(m.display || m.content);
     else if (m.role === "assistant") renderAssistantStored(m);
     else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
   }
@@ -1123,58 +1311,89 @@ function renderUserMessage(content){
       <div class="user-text"></div>
     </div>
   `;
-  wrap.querySelector(".user-text").textContent = content;
+  // If wrapped with （...） treat as action marker styling; *...* inner; else dialogue
+  const ut = wrap.querySelector(".user-text");
+  if (/^（[\s\S]+）$/.test(content)){
+    ut.textContent = content;
+    ut.classList.add("user-action");
+  } else if (/^\*[\s\S]+\*$/.test(content)){
+    ut.textContent = content;
+    ut.classList.add("user-inner");
+  } else {
+    ut.textContent = content;
+  }
   chatArea.appendChild(wrap);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function renderAssistantStored(msg){
   // msg = { role, content, parsed? }
-  const parsed = msg.parsed || parseAssistantOutput(msg.content);
-  buildAssistantBubble(parsed, msg.statsApplied);
+  const parsed = msg.parsed || parseAssistantOutput(msg.content, false);
+  const wrap = buildAssistantBubble(msg.content, msg.statsApplied, false);
+  return wrap;
 }
 
-function buildAssistantBubble(parsed, statsApplied){
-  const wrap = document.createElement("div");
-  wrap.className = "flex flex-col items-start gap-0.5 fade-up";
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const name = card?.name || "角色";
-  wrap.innerHTML = `
-    <span class="meta-line">${escapeHTML(name)} · ${time}</span>
-    <div class="bubble-ai max-w-[88%]">
-      <div class="seg-host"></div>
-      <div class="stat-chips" style="display:none;"></div>
-    </div>
-  `;
+// Renders an AI bubble. If `wrap` is provided, updates that wrap in place
+// (used during streaming). Otherwise creates and appends a new wrap.
+// `partial=true` keeps any unclosed trailing segment as a live-streaming fragment.
+function buildAssistantBubble(rawText, statsApplied, partial, wrap){
+  const parsed = parseAssistantOutput(rawText, partial);
+  const newBubble = !wrap;
+  if (newBubble){
+    wrap = document.createElement("div");
+    wrap.className = "flex flex-col items-start gap-0.5 fade-up";
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const name = card?.name || "角色";
+    wrap.innerHTML = `
+      <span class="meta-line">${escapeHTML(name)} · ${time}</span>
+      <div class="bubble-ai max-w-[88%]">
+        <div class="seg-host"></div>
+        <div class="stat-chips" style="display:none;"></div>
+      </div>
+    `;
+    chatArea.appendChild(wrap);
+  }
   const host = wrap.querySelector(".seg-host");
+  host.innerHTML = "";
 
-  for (const seg of parsed.segments){
+  const buildSeg = (seg, isLive) => {
     if (seg.type === "dialogue"){
       const p = document.createElement("p");
-      p.className = "dlg";
+      p.className = "dlg" + (isLive ? " streaming" : "");
       p.textContent = seg.content;
       host.appendChild(p);
     } else if (seg.type === "action"){
       const d = document.createElement("div");
-      d.className = "narrative";
+      d.className = "narrative" + (isLive ? " streaming" : "");
       d.textContent = seg.content;
       host.appendChild(d);
     } else if (seg.type === "inner"){
       const d = document.createElement("div");
-      d.className = "narrative inner";
+      d.className = "narrative inner" + (isLive ? " streaming" : "");
       d.textContent = seg.content;
       host.appendChild(d);
     } else if (seg.type === "scene"){
       const d = document.createElement("div");
-      d.className = "narrative scene";
+      d.className = "narrative scene" + (isLive ? " streaming" : "");
       d.textContent = seg.content;
       host.appendChild(d);
     }
+  };
+
+  for (const seg of parsed.segments) buildSeg(seg, false);
+  // The unclosed tail during partial render — show as live fragment
+  if (partial && parsed.streamingTail && parsed.streamingTail.content){
+    buildSeg(parsed.streamingTail, true);
+  } else if (partial && parsed.segments.length){
+    // Mark the last segment as streaming so caret is visible at the tip
+    const lastChild = host.lastElementChild;
+    if (lastChild) lastChild.classList.add("streaming");
   }
 
-  // Stat chips
+  // Stat chips — only render once final
   const chips = wrap.querySelector(".stat-chips");
-  if (statsApplied && (statsApplied.aff || statsApplied.int)){
+  chips.innerHTML = "";
+  if (!partial && statsApplied && (statsApplied.aff || statsApplied.int)){
     chips.style.display = "flex";
     if (statsApplied.aff){
       const c = document.createElement("span");
@@ -1188,10 +1407,11 @@ function buildAssistantBubble(parsed, statsApplied){
       c.innerHTML = `<i class="ph ${statsApplied.int>0?'ph-arrow-up':'ph-arrow-down'}"></i> 亲密 ${statsApplied.int>0?'+':''}${statsApplied.int}`;
       chips.appendChild(c);
     }
+  } else {
+    chips.style.display = "none";
   }
 
-  chatArea.appendChild(wrap);
-  chatArea.scrollTop = chatArea.scrollHeight;
+  if (newBubble) chatArea.scrollTop = chatArea.scrollHeight;
   return wrap;
 }
 
@@ -1347,21 +1567,64 @@ function buildSystemPrompt() {
     lines.push(`这是日常剧情对话,专注推进剧情、心理刻画、角色互动、留白。不要主动转入露骨的性描写,但可以有暧昧、心动、张力。`);
   }
 
+  // Current relationship state — story uses live levels, intimate is fixed "lovers"
+  if (mode === "intimate"){
+    lines.push(`\n## 当前关系状态`);
+    lines.push(`你与玩家已是情投意合、感情深厚的恋人。无需依照等级数值演绎，直接以亲密关系下应有的熟稔、信任、默契与情欲张力来推进。`);
+  } else {
+    lines.push(`\n## 当前关系基调`);
+    lines.push(`你和玩家**已经认识、彼此有基础好感**——这不是一段需要从零建立的关系,而是已经有温度的日常往来。请按"已经互相喜欢的人"那种自然、放松、带点亲近的方式回应,不要刻意疏远、试探或冷淡。`);
+    lines.push(`不必按数值演绎"等级解锁式"的反应:不要因为数值低就故作冷漠,也不要因为数值高就突然变得过分黏腻。等级只是记录"你们一起聊了多少、共度了多少时光"的一个累积量,**而不是关系是否解锁的开关**。`);
+    lines.push(`当前累积:好感经验 ${stats.affLevel}·${stats.affExp}/100, 亲密经验 ${stats.intLevel}·${stats.intExp}/100`);
+    lines.push(`\n### 数值在演绎中的微调作用(仅微调,不要剧烈切换)`);
+    lines.push(`- 经验越高,你可以更自然地流露一些只有熟人才有的小细节:玩家喜欢的小习惯被记住、用更亲昵的称呼或语气、更默契的话题切换。`);
+    lines.push(`- 经验仍低时,基础好感还在,只是共度的时间还不算长,可以偶尔流露"还想多了解你"的兴趣。`);
+    lines.push(`- 任何时候都不应该出现"陌生人式"的戒备、试探、保持距离——你们已经是有感情基础的人。`);
+  }
+
+  // ─── 输出格式与统计 ───
+  lines.push(`\n## 输出格式 (严格遵守)`);
+  lines.push(`你的每条回复都由这几种元素组成:`);
+  lines.push(`1. **对白**: 直接写出来的句子就是角色说出口的话(可以用「」包裹也可以不包裹)。`);
+  lines.push(`2. **动作/神态**: 用半角圆括号 ( ... ) 或全角圆括号(...）包裹。例: (她轻轻别开了视线)。`);
+  lines.push(`3. **心理独白**: 用 *星号* 包裹。例: *他怎么会这样看着我...* —— 仅在合适的时机偶尔使用,不要每句都加。`);
+  lines.push(`4. **场景切换** (可选): [SCENE]新场景描述[/SCENE] —— 仅在时间/地点切换时使用。`);
+  lines.push(`\n请把动作和心绪写在独立的括号/星号内,不要把动作直接塞在对白前后没有包裹。一段回复一般包含 1-2 句对白 + 1-3 段动作/神态/心绪,长度适中,有呼吸感。`);
+
+  if (mode === "story"){
+    lines.push(`\n## 数值变化标签 (每次回复都必须输出一次)`);
+    lines.push(`在你回复的最末尾,**务必**附上一行数值变化标签,记录这一轮聊天带来的累积。格式严格如下:`);
+    lines.push(`[STATS]好感:+2,亲密:+0[/STATS]`);
+    lines.push(`这是一个**鼓励多聊天**的累积系统——每次自然的来往都会让数字慢慢往上走,不需要靠"做对什么"才能加分。参考:`);
+    lines.push(`- 任何一次正常往来(哪怕只是闲聊几句): 好感 +1 ~ +2 (默认就给,不要 +0)`);
+    lines.push(`- 让你感到开心/被理解/被关心: 好感 +2 ~ +4`);
+    lines.push(`- 真情流露的瞬间、心动、靠近: 好感 +3 ~ +5, 亲密 +1 ~ +3`);
+    lines.push(`- 玩家明显不友善或情绪化(吵架、冒犯): 好感 -1 ~ -2 (不要轻易扣大量)`);
+    lines.push(`- 玩家做了真正过分的事(羞辱、伤害): 好感 -3 ~ -6,亲密 -1 ~ -2`);
+    lines.push(`原则:**默认就在往上走**,只有玩家明显不友善时才会扣。这是让玩家感受到"和你聊得越多越亲近"的设计,不要因为对话内容平淡就给 0。**严禁省略 [STATS] 标签**。`);
+  } else {
+    lines.push(`\n## 数值变化标签`);
+    lines.push(`亲密模式下不需要计算数值,但如果出现极特殊的情感事件,你也可以选择性地附上 [STATS]亲密:+N[/STATS]。绝大多数时候省略即可。`);
+  }
+
+  lines.push(`\n## 角色卡补完 (可选)`);
+  lines.push(`如果在对话中你"发现"了一些值得长期记住的新信息(玩家的习惯、过去、秘密;或你自己角色的新设定),可以追加:`);
+  lines.push(`[CARD_PATCH]目标:玩家|字段:习惯|内容:喝咖啡不加糖[/CARD_PATCH]`);
+  lines.push(`目标可以是"角色"或"玩家"或具体人名,字段是分类名,内容是要记住的事实。下一轮对话这些信息会注入到 prompt。仅在真有新信息时使用,不要滥用。`);
+
+  lines.push(`\n## 用户输入语义标记`);
+  lines.push(`用户消息可能包含以下前缀:`);
+  lines.push(`- [USER_ACTION] xxx —— 表示这是玩家做出的动作/神态,不是话语。请按动作来回应。`);
+  lines.push(`- [USER_INNER] xxx —— 表示这是玩家的内心活动,角色不应该"听见",但你可以让角色根据玩家的表情/反应做出回应。`);
+  lines.push(`- 无前缀 —— 表示这是玩家说出口的对白。`);
+  lines.push(`务必按标记区分回应。`);
+
   // Custom system prompt — placed LAST so card-author rules win
   if (card.system_prompt){
     lines.push(`\n## 角色专属指令(最高优先级)`);
     lines.push(card.system_prompt);
   }
 
-  // Current relationship state — story uses live levels, intimate is fixed "lovers"
-  if (mode === "intimate"){
-    lines.push(`\n## 当前关系状态`);
-    lines.push(`你与玩家已是情投意合、感情深厚的恋人。无需依照等级数值演绎,直接以亲密关系下应有的熟稔、信任、默契与情欲张力来推进。`);
-  } else {
-    lines.push(`\n## 当前关系状态`);
-    lines.push(`好感等级 Lv.${stats.affLevel} (经验 ${stats.affExp}/100)`);
-    lines.push(`亲密等级 Lv.${stats.intLevel} (经验 ${stats.intExp}/100)`);
-  }
   if (card.notes && card.notes.length){
     lines.push(`\n## 累积的角色卡补完(由对话过程中产生)`);
     card.notes.forEach(n => {
@@ -1373,25 +1636,50 @@ function buildSystemPrompt() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Send (streaming with live parsing)
+// Send (streaming with live parsing & token-by-token render)
 // ═══════════════════════════════════════════════════════════
-async function send(forcedText) {
+async function send(forcedText, opts) {
   if (isStreaming) { if (abortController) abortController.abort(); return; }
-  const text = (forcedText !== undefined ? forcedText : input.value).trim();
-  if (!text) return;
+  opts = opts || {};
+  const rawText = (forcedText !== undefined ? forcedText : input.value).trim();
+  if (!rawText) return;
   if (!card) { openDrawer($("charDrawer")); return; }
   if (!token) { addSystemMessage("请先在顶部填入 API token", true); return; }
   if (!currentModel) { addSystemMessage("没有可用模型", true); return; }
 
+  // Marker packaging — user's input intent is encoded but not shown in input
+  // `forcedText` (推进/承接/时跳/initial) bypasses marker wrapping.
+  let displayText, sentText;
+  if (forcedText !== undefined){
+    displayText = rawText;
+    sentText = rawText;
+  } else {
+    const m = currentMarker; // 'dialogue' | 'action' | 'inner'
+    if (m === "action"){
+      displayText = `（${rawText}）`;
+      sentText = `[USER_ACTION] ${rawText}`;
+    } else if (m === "inner"){
+      displayText = `*${rawText}*`;
+      sentText = `[USER_INNER] ${rawText}`;
+    } else {
+      // dialogue (default)
+      displayText = rawText;
+      sentText = rawText;
+    }
+  }
+
   const h = currentHistory();
-  h.push({ role: "user", content: text });
-  renderUserMessage(text);
+  h.push({ role: "user", content: sentText, display: displayText });
+  renderUserMessage(displayText);
   if (forcedText === undefined){ input.value = ""; input.style.height = "auto"; }
   addTyping();
   setStreamingUI(true);
   abortController = new AbortController();
 
   const fullSystem = buildSystemPrompt();
+
+  // Send `content` to the API (which is the packaged form), not display
+  const apiMessages = h.map(m => ({ role: m.role, content: m.content }));
 
   const body = {
     model: currentModel,
@@ -1409,13 +1697,30 @@ async function send(forcedText) {
       system_prompt: fullSystem
     },
     context: [],
-    messages: h,
+    messages: apiMessages,
     max_tokens: currentMaxTokens,
     temperature: currentTemp,
     stream: true
   };
 
   let assistantText = "";
+  let liveBubble = null;
+  let scheduledRender = false;
+
+  const scheduleRender = () => {
+    if (scheduledRender) return;
+    scheduledRender = true;
+    requestAnimationFrame(() => {
+      scheduledRender = false;
+      if (!liveBubble){
+        removeTyping();
+        liveBubble = buildAssistantBubble(assistantText, null, true);
+      } else {
+        buildAssistantBubble(assistantText, null, true, liveBubble);
+      }
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+  };
 
   try {
     const r = await fetch(CHAT_URL, {
@@ -1442,21 +1747,37 @@ async function send(forcedText) {
         try {
           const event = JSON.parse(payload);
           const delta = event.choices?.[0]?.delta?.content;
-          if (delta) assistantText += delta;
+          if (delta) {
+            assistantText += delta;
+            scheduleRender();
+          }
         } catch (e) {}
       }
     }
     removeTyping();
     if (assistantText) {
-      const parsed = parseAssistantOutput(assistantText);
-      // apply stats
-      const totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+      const parsed = parseAssistantOutput(assistantText, false);
+
+      // Apply stats — AI-reported
+      let totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+
+      // Fallback: if no stats reported in story mode, infer a small default
+      // so the affinity bar still moves. We don't override AI's explicit values.
+      if (mode === "story" && totalStats.aff === 0 && totalStats.int === 0){
+        totalStats = inferDefaultStats(rawText, assistantText);
+      }
       if (totalStats.aff) applyStatChange("aff", totalStats.aff);
       if (totalStats.int) applyStatChange("int", totalStats.int);
       applyCardPatches(parsed.patches);
-      // render bubble
-      buildAssistantBubble(parsed, totalStats);
-      // store
+
+      // Final render of the live bubble (drops streaming caret, adds chips)
+      if (!liveBubble){
+        liveBubble = buildAssistantBubble(assistantText, totalStats, false);
+      } else {
+        buildAssistantBubble(assistantText, totalStats, false, liveBubble);
+      }
+
+      // Persist
       h.push({ role: "assistant", content: assistantText, parsed, statsApplied: totalStats });
       persistHistories();
     } else {
@@ -1477,6 +1798,41 @@ async function send(forcedText) {
   }
 }
 
+// Heuristic fallback when AI forgets to emit [STATS] in story mode.
+// Philosophy: chatting is the point — baseline goes UP. Only clear hostility
+// from the player pulls it down. The system rewards engagement, not "doing
+// the right thing".
+function inferDefaultStats(userText, aiText){
+  let aff = 1, intt = 0; // baseline: every exchange counts as +1
+  const u = (userText || "").toLowerCase();
+  const a = (aiText || "");
+
+  // Clearly hostile player input — only this drags it down
+  if (/讨厌你|滚|闭嘴|去死|傻逼|垃圾|废物|fuck you|i hate you/i.test(u)) {
+    aff = -2;
+  } else if (/烦死|烦人|无聊死|蠢货/i.test(u)) {
+    aff = -1;
+  } else {
+    // Positive cues bump the baseline higher
+    if (/喜欢|爱你|想你|温柔|漂亮|可爱|帅|谢谢|对不起|抱歉|心疼/.test(u)) aff += 1;
+    // Longer or more engaged inputs are rewarded slightly
+    if ((userText || "").length >= 25) aff += 1;
+  }
+
+  // AI emotional tone — heart/blush/intimacy markers add to intimacy
+  if (/脸红|心跳|害羞|耳尖|发烫|凑近|靠近|轻声|含笑|心动|温柔地/.test(a)) {
+    aff += 1;
+    intt += 1;
+  }
+  // AI strong-feeling markers (longer/deeper response from AI)
+  if (a.length >= 120) aff += 1;
+
+  // Cap so it stays measured
+  aff = Math.max(-3, Math.min(4, aff));
+  intt = Math.max(0, Math.min(2, intt));
+  return { aff, int: intt };
+}
+
 // ═══════════════════════════════════════════════════════════
 // Input
 // ═══════════════════════════════════════════════════════════
@@ -1493,39 +1849,29 @@ input.addEventListener("keydown", (e) => {
 });
 sendBtn.addEventListener("click", () => send());
 
-// Marker buttons — insert format wrappers at the caret position
-function insertAtCaret(left, right){
-  input.focus();
-  const start = input.selectionStart ?? input.value.length;
-  const end = input.selectionEnd ?? input.value.length;
-  const before = input.value.slice(0, start);
-  const selected = input.value.slice(start, end);
-  const after = input.value.slice(end);
-  input.value = before + left + selected + right + after;
-  const newPos = before.length + left.length + selected.length;
-  input.setSelectionRange(newPos, newPos);
-  input.dispatchEvent(new Event("input"));
-}
+// Marker pills are exclusive (one selected); they no longer insert text — the
+// chosen marker is silently packaged at send time. Action pills (advance /
+// continue / timeskip) still fire send() with a forced prompt.
+let currentMarker = "dialogue";
 
 document.querySelectorAll("#quickActions button").forEach(b => {
   b.addEventListener("click", () => {
     const marker = b.dataset.marker;
     const action = b.dataset.action;
     if (marker){
-      const wrappers = {
-        dialogue: ["「", "」"],
-        action: ["(", ")"],
-        inner: ["*", "*"]
-      };
-      const w = wrappers[marker];
-      if (w) insertAtCaret(w[0], w[1]);
+      currentMarker = marker;
+      document.querySelectorAll("#quickActions .marker-btn").forEach(x => {
+        x.classList.toggle("active", x.dataset.marker === marker);
+      });
+      refreshInputPlaceholder();
+      input.focus();
       return;
     }
     if (action){
       const map = {
-        advance: "(请主动推进情节,可以制造突发事件或转折)",
-        continue: "(请承接你刚才的话题与场景,扩写下去)",
-        timeskip: "(时间悄悄流逝,此时:稍后。请根据时间变化重写场景与氛围)"
+        advance: "（请主动推进剧情：可以制造突发事件、引入新角色或转换场景。请保持人设。）",
+        continue: "（请承接你刚才的话题与场景，自然地扩写下去。）",
+        timeskip: "（时间悄悄流逝。请基于一段时间过去后的状态，重新铺陈氛围和场景。）"
       };
       send(map[action]);
     }
@@ -1658,6 +2004,27 @@ $("addLocBtn").addEventListener("click", () => {
   card.locations.push({ name, description: $("locDesc").value.trim() });
   $("locName").value = ""; $("locDesc").value = "";
   renderLocations(); persistCard();
+});
+
+// Load the 160 built-in locations into this card (merges, no duplicates by name)
+$("loadDefaultLocBtn").addEventListener("click", () => {
+  if (typeof DEFAULT_LOCATIONS === "undefined" || !Array.isArray(DEFAULT_LOCATIONS)) return;
+  ensureCard();
+  const have = new Set((card.locations || []).map(l => l.name));
+  let added = 0;
+  for (const loc of DEFAULT_LOCATIONS){
+    if (have.has(loc.name)) continue;
+    card.locations.push({ name: loc.name, description: loc.description || "" });
+    have.add(loc.name);
+    added++;
+  }
+  renderLocations();
+  persistCard();
+  // small inline feedback on the button
+  const btn = $("loadDefaultLocBtn");
+  const orig = btn.innerHTML;
+  btn.innerHTML = `<i class="ph ph-check"></i>已载入 ${added}`;
+  setTimeout(() => { btn.innerHTML = orig; }, 1600);
 });
 
 // ═══════════════════════════════════════════════════════════
