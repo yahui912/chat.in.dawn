@@ -1,0 +1,2351 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Daydream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Ivory / very pale palette */
+    --bg:#fbf7f0;
+    --bg-2:#f6efe5;
+    --ink:#4a3d33;
+    --ink-soft:#867463;
+    --ink-mute:#b8a896;
+    --ink-faint:#ddd0bc;
+
+    --glass:rgba(255,253,248,0.72);
+    --glass-strong:rgba(255,253,248,0.88);
+    --glass-border:rgba(255,255,253,0.95);
+    --glass-border-soft:rgba(180,160,135,0.14);
+    --glass-shadow:0 8px 28px -10px rgba(150,120,90,0.12);
+
+    /* Soft pale accents */
+    --rose:#e0a8a8;       /* pale rose */
+    --tea:#c9a587;        /* pale milk tea */
+    --apricot:#e6c298;    /* pale apricot */
+    --sage:#bccfad;       /* pale sage */
+    --mauve:#c4b3c0;      /* pale mauve */
+
+    --bubble-user-a:#d8b8a0;
+    --bubble-user-b:#e4c2a8;
+    --heart:#d89898;
+    --err:#c97070;
+
+    /* Mode-driven */
+    --mood:#e0a8a8;
+  }
+  body.intimate{
+    --bg:#f5ebdc;
+    --bg-2:#ead8be;
+    --ink:#4f3a30;
+    --rose:#c08580;
+    --apricot:#caa078;
+    --mood:#c08580;
+    --glass-shadow:0 8px 28px -10px rgba(120,80,65,0.16);
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+  body{
+    font-family:'Outfit', system-ui, sans-serif;
+    color:var(--ink);
+    background:var(--bg-2);
+    overscroll-behavior:none;
+    transition:background 0.8s ease;
+  }
+  .cn{font-family:'Noto Serif SC', serif;}
+
+  .stage{
+    position:fixed;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at center, var(--bg) 0%, var(--bg-2) 80%);
+    transition:background 0.8s ease;
+  }
+  .phone{
+    position:relative;
+    width:min(100vw, 420px);
+    height:min(100vh, 900px);
+    border-radius:36px;
+    overflow:hidden;
+    background:var(--bg);
+    box-shadow:
+      0 40px 70px -22px rgba(150,120,90,0.22),
+      0 0 0 1px rgba(255,255,253,0.7);
+    transition:background 0.8s ease;
+  }
+  @media (max-width:430px){
+    .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none;}
+  }
+
+  /* ─── Backdrop orbs ─── */
+  .backdrop{position:absolute;inset:0;overflow:hidden;z-index:0;}
+  .orb{
+    position:absolute;border-radius:50%;
+    filter:blur(75px);
+    opacity:0.38;
+    animation:drift 22s ease-in-out infinite alternate;
+    transition:background 1s ease, opacity 1s ease;
+  }
+  /* Story orbs — pale ivory/peach */
+  .orb.a{width:380px;height:380px;background:#f4d8ce;top:-100px;left:-100px;}
+  .orb.b{width:340px;height:340px;background:#e8d5b8;top:25%;right:-120px;animation-delay:-7s;}
+  .orb.c{width:300px;height:300px;background:#efe0c4;bottom:-80px;left:-40px;animation-delay:-12s;}
+  .orb.d{width:220px;height:220px;background:#dcd0b8;bottom:25%;right:25%;opacity:0.32;animation-delay:-3s;}
+  /* Intimate orbs — slightly warmer but still pale */
+  body.intimate .orb.a{background:#e0b8ad;opacity:0.45;}
+  body.intimate .orb.b{background:#d0a888;opacity:0.4;}
+  body.intimate .orb.c{background:#c89a92;opacity:0.4;}
+  body.intimate .orb.d{background:#b89888;opacity:0.32;}
+
+  @keyframes drift{
+    0%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(30px,-25px) scale(1.08);}
+    100%{transform:translate(-25px,35px) scale(0.95);}
+  }
+  .grain{
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    background-image:radial-gradient(rgba(120,90,60,0.03) 1px, transparent 1px);
+    background-size:3px 3px;
+  }
+
+  .ui{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
+
+  /* ─── Top bar ─── */
+  .topbar{
+    flex-shrink:0;
+    padding:14px 16px 10px;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid var(--glass-border-soft);
+    display:flex;align-items:center;gap:8px;
+  }
+  .ava-mini{
+    width:38px;height:38px;border-radius:50%;
+    background:linear-gradient(135deg, #e8c8a8, #d4b094);
+    background-size:cover;background-position:center;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Noto Serif SC',serif;font-size:18px;font-weight:500;color:#fff;
+    box-shadow:0 0 0 2px rgba(255,255,253,0.95), 0 4px 12px -3px rgba(150,120,90,0.3);
+    position:relative;cursor:pointer;
+    overflow:hidden;
+  }
+  .ava-mini.has-img{color:transparent;}
+  .ava-mini.empty{
+    background:linear-gradient(135deg, #ddd0bc, #b8a896);
+    font-family:'Outfit',sans-serif;font-weight:300;
+  }
+  .ava-mini::after{
+    content:'';position:absolute;right:-1px;bottom:-1px;
+    width:10px;height:10px;border-radius:50%;
+    background:#bccfad;border:2px solid var(--bg);
+    transition:background 0.3s;
+    z-index:1;
+  }
+  .ava-mini.offline::after, .ava-mini.empty::after{background:var(--ink-faint);}
+  .top-info{flex:1;min-width:0;}
+  .top-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:500;line-height:1.1;color:var(--ink);}
+  .top-name.empty{color:var(--ink-mute);font-family:'Outfit',sans-serif;font-style:italic;}
+  .top-status{font-size:10px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;}
+  .top-status .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#9caf88;margin-right:4px;vertical-align:middle;animation:blink 2s infinite;}
+  .top-status.offline .dot{background:var(--ink-faint);animation:none;}
+  @keyframes blink{50%{opacity:0.4;}}
+
+  .icon-btn{
+    width:36px;height:36px;border-radius:12px;
+    background:rgba(255,253,247,0.5);
+    border:1px solid var(--glass-border);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);cursor:pointer;
+    transition:all 0.2s;position:relative;
+  }
+  .icon-btn:hover{background:rgba(255,253,247,0.85);color:var(--ink);}
+  .icon-btn:active{transform:scale(0.94);}
+  .icon-btn.alert::before{
+    content:'';position:absolute;top:6px;right:6px;
+    width:7px;height:7px;border-radius:50%;background:var(--err);
+    box-shadow:0 0 0 2px rgba(255,253,247,0.9);
+  }
+
+  /* ─── Mode segmented control ─── */
+  .mode-bar{
+    flex-shrink:0;
+    padding:8px 16px 4px;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    display:flex;justify-content:center;
+  }
+  .mode-seg{
+    display:inline-flex;
+    background:rgba(255,253,247,0.55);
+    border:1px solid var(--glass-border-soft);
+    border-radius:99px;
+    padding:3px;
+    box-shadow:inset 0 1px 2px rgba(80,55,30,0.04);
+  }
+  .mode-btn{
+    background:transparent;border:none;cursor:pointer;
+    padding:6px 16px;border-radius:99px;
+    font-family:'Outfit',sans-serif;font-size:11px;font-weight:500;
+    letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--ink-mute);
+    transition:all 0.3s ease;
+    display:flex;align-items:center;gap:6px;
+  }
+  .mode-btn.active{
+    background:linear-gradient(135deg, #e8c4a4, #d4b094);
+    color:#5a4634;
+    box-shadow:0 2px 6px -2px rgba(150,120,90,0.22);
+  }
+  body.intimate .mode-btn.active{
+    background:linear-gradient(135deg, #d8a098, #c08580);
+    color:#fff;
+  }
+
+  /* ─── Status panels (Story / Intimate) ─── */
+  .status-wrap{
+    flex-shrink:0;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-bottom:1px solid var(--glass-border-soft);
+    overflow:hidden;
+    transition:max-height 0.5s ease;
+  }
+  .status-panel{
+    padding:10px 16px 12px;
+    animation:fadeIn 0.4s ease both;
+  }
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .status-panel.hidden{display:none;}
+
+  /* Story panel: 3-up small stats */
+  .story-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+  }
+  .stat{
+    background:rgba(255,253,247,0.4);
+    border:1px solid var(--glass-border-soft);
+    border-radius:12px;
+    padding:8px 10px;
+  }
+  .stat-head{
+    display:flex;align-items:center;gap:5px;
+    font-size:8.5px;color:var(--ink-mute);
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.14em;text-transform:uppercase;
+    margin-bottom:5px;
+  }
+  .stat-val{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;font-weight:500;color:var(--ink);
+    display:flex;align-items:baseline;gap:3px;
+  }
+  .stat-val .max{font-size:9px;color:var(--ink-faint);font-weight:400;}
+  .stat-bar{
+    height:3px;background:rgba(160,135,105,0.18);border-radius:99px;
+    margin-top:5px;overflow:hidden;
+  }
+  .stat-fill{
+    height:100%;border-radius:99px;
+    transition:width 0.6s cubic-bezier(.4,1.4,.4,1);
+  }
+  .stat-fill.affinity{background:linear-gradient(90deg, #c98a8a, #e8b8a8);}
+  .stat-fill.intimacy{background:linear-gradient(90deg, #b08968, #d4a574);}
+  .stat-mood{
+    display:flex;align-items:center;gap:6px;
+    font-family:'Noto Serif SC',serif;font-size:13px;color:var(--ink);
+  }
+  .stat-mood .emoji{font-size:18px;line-height:1;}
+
+  /* Intimate panel */
+  .intimate-row{
+    display:flex;align-items:center;gap:10px;
+  }
+  .ambiance{
+    background:rgba(168,98,94,0.1);
+    border:1px solid rgba(168,98,94,0.25);
+    color:#8b4a45;
+    padding:5px 11px;border-radius:99px;
+    font-family:'Noto Serif SC',serif;font-size:11px;font-weight:500;
+    display:flex;align-items:center;gap:5px;
+  }
+  .ambiance .pulse{
+    width:6px;height:6px;border-radius:50%;background:#a8625e;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{transform:scale(1);opacity:1;}
+    50%{transform:scale(1.4);opacity:0.5;}
+  }
+  .lead-seg{
+    margin-left:auto;
+    display:inline-flex;
+    background:rgba(255,253,247,0.5);
+    border:1px solid var(--glass-border-soft);
+    border-radius:99px;padding:2px;
+  }
+  .lead-btn{
+    background:transparent;border:none;cursor:pointer;
+    padding:5px 11px;border-radius:99px;
+    font-family:'Outfit',sans-serif;font-size:10.5px;
+    color:var(--ink-mute);
+    transition:all 0.25s;
+    display:flex;align-items:center;gap:4px;
+  }
+  .lead-btn.active{
+    background:linear-gradient(135deg, #d8a098, #c08580);
+    color:#fff;
+  }
+  .lead-btn svg{width:11px;height:11px;}
+
+  /* ─── Messages ─── */
+  .messages{
+    flex:1;min-height:0;overflow-y:auto;
+    padding:18px 14px 8px;
+    display:flex;flex-direction:column;gap:12px;
+    scroll-behavior:smooth;
+  }
+  .messages::-webkit-scrollbar{width:0;}
+
+  .empty-state{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;text-align:center;gap:14px;
+  }
+  .empty-orb{
+    width:84px;height:84px;border-radius:50%;
+    background:rgba(255,253,247,0.55);
+    border:1px solid var(--glass-border);
+    -webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(20px);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-mute);
+    box-shadow:0 8px 28px -8px rgba(100,75,50,0.2);
+    position:relative;
+  }
+  .empty-orb::before{
+    content:'';position:absolute;inset:-12px;border-radius:50%;
+    background:conic-gradient(from 0deg, #e8c8b0, #c8b08a, #d4a574, #b8a890, #e8c8b0);
+    filter:blur(14px);opacity:0.45;z-index:-1;
+  }
+  .empty-title{font-family:'Noto Serif SC',serif;font-size:18px;color:var(--ink);font-weight:500;}
+  .empty-sub{font-size:12px;color:var(--ink-mute);font-family:'Outfit',sans-serif;line-height:1.7;max-width:240px;}
+  .empty-btn{
+    margin-top:6px;padding:10px 22px;border-radius:99px;border:none;cursor:pointer;
+    background:linear-gradient(135deg, #e8c4a4, #d4b094);
+    color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;
+    box-shadow:0 6px 18px -4px rgba(140,100,75,0.4);
+    transition:all 0.2s;
+  }
+  .empty-btn:hover{filter:brightness(1.06);}
+  .empty-btn:active{transform:scale(0.97);}
+
+  .msg{display:flex;gap:8px;align-items:flex-end;animation:fadeUp 0.3s ease-out both;}
+  .msg.user{flex-direction:row-reverse;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  .msg-avatar{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:#fff;
+    box-shadow:0 2px 6px -2px rgba(150,120,90,0.22);
+    background-size:cover;background-position:center;
+    overflow:hidden;
+  }
+  .msg-avatar.has-img{color:transparent;}
+  .msg.assistant .msg-avatar{
+    background:linear-gradient(135deg, #e8c8a8, #d4b094);
+    font-family:'Noto Serif SC',serif;
+  }
+  .msg.user .msg-avatar{
+    background:linear-gradient(135deg, #d4b094, #e0a8a8);
+    font-family:'Noto Serif SC',serif;
+  }
+
+  .bubble-wrap{max-width:75%;display:flex;flex-direction:column;}
+  .msg.user .bubble-wrap{align-items:flex-end;}
+  .msg-name{font-size:9px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;text-transform:lowercase;letter-spacing:0.06em;margin:0 6px 3px;}
+
+  .bubble{
+    padding:10px 14px;
+    border-radius:18px;
+    font-family:'Noto Serif SC',serif;
+    font-size:14px;line-height:1.55;
+    word-wrap:break-word;
+    white-space:pre-wrap;
+  }
+  .msg.assistant .bubble{
+    background:var(--glass-strong);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--glass-border);
+    border-bottom-left-radius:6px;
+    color:var(--ink);
+    box-shadow:var(--glass-shadow);
+  }
+  .msg.user .bubble{
+    background:linear-gradient(135deg, var(--bubble-user-a), var(--bubble-user-b));
+    border-bottom-right-radius:6px;
+    color:#fff;
+    box-shadow:0 6px 16px -8px rgba(150,120,90,0.28);
+  }
+  .bubble.streaming::after{
+    content:'▋';display:inline-block;margin-left:2px;
+    color:var(--rose);animation:caret 0.9s infinite;
+    font-family:monospace;font-size:13px;
+  }
+  @keyframes caret{50%{opacity:0;}}
+
+  /* ─── Narrative blocks (out-of-bubble) ─── */
+  .narr-stack{
+    display:flex;flex-direction:column;gap:6px;
+    margin:2px 0 2px;
+    align-self:stretch;
+    width:100%;
+    max-width:none;
+    animation:fadeUp 0.3s ease-out both;
+  }
+  .narr{
+    font-family:'Noto Serif SC',serif;
+    font-size:12.5px;line-height:1.6;
+    padding:9px 13px;
+    border-radius:10px;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(255,253,247,0.35);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    color:var(--ink-soft);
+    position:relative;
+    word-wrap:break-word;
+    white-space:pre-wrap;
+  }
+  .narr-label{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--ink-mute);
+    margin-right:7px;
+    opacity:0.7;
+  }
+  /* Action / scene (parentheses) */
+  .narr.action{
+    border-left:2px solid var(--apricot);
+    background:rgba(212,165,116,0.07);
+  }
+  .narr.action .narr-label{color:var(--tea);}
+  /* Inner monologue (asterisks) — only when user-side or in NARR-MONO; for player side */
+  .narr.mono{
+    border-left:2px solid var(--mauve);
+    background:rgba(164,139,160,0.08);
+    font-style:italic;
+  }
+  .narr.mono .narr-label{color:var(--mauve);}
+  /* Plain narration / scene / event */
+  .narr.scene{
+    border-left:2px solid var(--sage);
+    background:rgba(156,175,136,0.07);
+  }
+  .narr.scene .narr-label{color:var(--sage);}
+  /* Stat-change pill */
+  .narr.stat-change{
+    border:1px dashed rgba(168,98,94,0.4);
+    border-left:2px solid var(--rose);
+    background:rgba(201,138,138,0.07);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--ink);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .narr.stat-change .delta{
+    display:inline-flex;align-items:center;gap:3px;
+    padding:2px 8px;border-radius:99px;
+    background:rgba(255,253,247,0.6);
+    font-weight:500;
+  }
+  .narr.stat-change .delta.up{color:#7a8f5e;}
+  .narr.stat-change .delta.down{color:#b85555;}
+  .narr.stat-change .delta.flat{color:var(--ink-mute);}
+  body.intimate .narr{background:rgba(255,250,242,0.25);}
+  body.intimate .narr.action{background:rgba(184,133,90,0.1);}
+  body.intimate .narr.mono{background:rgba(164,139,160,0.12);}
+  body.intimate .narr.scene{background:rgba(156,175,136,0.1);}
+
+  /* When bubble is empty (all narration, no speech) — hide it */
+  .bubble.empty-bubble{display:none;}
+
+  .msg.system{justify-content:center;}
+  .msg.system .bubble-wrap{align-items:center;max-width:none;}
+  .msg.system .bubble{
+    background:rgba(255,253,247,0.5);
+    -webkit-backdrop-filter:blur(12px);
+    backdrop-filter:blur(12px);
+    border:1px solid var(--glass-border-soft);
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--ink-mute);
+    letter-spacing:0.06em;
+    padding:5px 12px;
+    border-radius:99px;
+  }
+  .msg.system.error .bubble{
+    background:rgba(184,85,85,0.1);
+    border-color:rgba(184,85,85,0.3);
+    color:var(--err);
+  }
+  .msg.system .msg-avatar{display:none;}
+
+  .typing{display:flex;gap:4px;padding:4px 2px;}
+  .typing span{
+    width:6px;height:6px;border-radius:50%;background:var(--ink-mute);
+    animation:bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2){animation-delay:0.15s;}
+  .typing span:nth-child(3){animation-delay:0.3s;}
+  @keyframes bounce{
+    0%,60%,100%{opacity:0.3;transform:translateY(0);}
+    30%{opacity:1;transform:translateY(-3px);}
+  }
+
+  /* ─── Tag bar (above input) ─── */
+  .tag-bar{
+    flex-shrink:0;
+    padding:8px 14px 0;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-top:1px solid var(--glass-border-soft);
+    display:flex;align-items:center;gap:6px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tag-bar::-webkit-scrollbar{display:none;}
+  .tag-btn{
+    flex-shrink:0;
+    background:rgba(255,253,247,0.55);
+    border:1px solid var(--glass-border-soft);
+    border-radius:99px;
+    padding:5px 11px;
+    font-family:'Noto Serif SC',serif;
+    font-size:11px;font-weight:500;
+    color:var(--ink-mute);
+    cursor:pointer;
+    transition:all 0.2s;
+    display:flex;align-items:center;gap:4px;
+    line-height:1.2;
+  }
+  .tag-btn:hover{background:rgba(255,253,247,0.85);color:var(--ink-soft);}
+  .tag-btn:active{transform:scale(0.94);}
+  .tag-btn .tdot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--ink-faint);
+  }
+  .tag-btn.active{
+    color:#5a4634;
+    border-color:transparent;
+    box-shadow:0 2px 6px -1px rgba(150,120,90,0.22);
+  }
+  .tag-btn.active .tdot{background:rgba(255,255,255,0.9);}
+  /* per-tag active colour */
+  .tag-btn.t-speech.active{background:linear-gradient(135deg, #e8c4a4, #d4b094);}
+  .tag-btn.t-mono.active{background:linear-gradient(135deg, #d4c4d0, #c4b3c0);}
+  .tag-btn.t-action.active{background:linear-gradient(135deg, #e6c298, #d4b094);}
+  .tag-btn.t-scene.active{background:linear-gradient(135deg, #cdddb8, #bccfad);}
+  .tag-btn.t-pace.active{background:linear-gradient(135deg, #e0a8a8, #d09090);}
+  /* idle dot tints */
+  .tag-btn.t-speech .tdot{background:#d4a07e;}
+  .tag-btn.t-mono   .tdot{background:#a48ba0;}
+  .tag-btn.t-action .tdot{background:#d4a574;}
+  .tag-btn.t-scene  .tdot{background:#9caf88;}
+  .tag-btn.t-pace   .tdot{background:#c98a8a;}
+
+  /* Pace sub-menu (shown when 推進 is the active tag) */
+  .pace-row{
+    flex-shrink:0;
+    padding:6px 14px 0;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    display:none;align-items:center;gap:6px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .pace-row.open{display:flex;}
+  .pace-row::-webkit-scrollbar{display:none;}
+  .pace-btn{
+    flex-shrink:0;
+    background:rgba(201,138,138,0.08);
+    border:1px solid rgba(201,138,138,0.25);
+    border-radius:8px;
+    padding:5px 10px;
+    font-family:'Noto Serif SC',serif;
+    font-size:10.5px;
+    color:#8b4f4a;
+    cursor:pointer;
+    transition:all 0.18s;
+  }
+  .pace-btn:hover{background:rgba(201,138,138,0.18);}
+  .pace-btn:active{transform:scale(0.95);}
+  .pace-btn.active{background:linear-gradient(135deg, #e0a8a8, #d09090);color:#5a3838;border-color:transparent;}
+
+  /* ─── Input ─── */
+  .input-bar{
+    flex-shrink:0;
+    padding:10px 14px 18px;
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(140%);
+    backdrop-filter:blur(22px) saturate(140%);
+    border-top:1px solid var(--glass-border-soft);
+  }
+  .input-shell{
+    background:rgba(255,253,247,0.7);
+    border:1px solid var(--glass-border);
+    border-radius:22px;
+    display:flex;align-items:flex-end;gap:6px;
+    padding:6px 6px 6px 14px;
+    transition:border-color 0.2s, box-shadow 0.2s;
+    box-shadow:0 2px 10px -4px rgba(100,75,50,0.15);
+  }
+  .input-shell:focus-within{
+    border-color:rgba(176,137,104,0.5);
+    box-shadow:0 0 0 4px rgba(176,137,104,0.1);
+  }
+  textarea{
+    flex:1;background:transparent;border:none;outline:none;resize:none;
+    color:var(--ink);
+    font-family:'Noto Serif SC',serif;font-size:14px;line-height:1.5;
+    padding:8px 4px;
+    max-height:120px;min-height:22px;
+  }
+  textarea::placeholder{color:var(--ink-faint);}
+  .send-btn{
+    flex-shrink:0;
+    width:34px;height:34px;border-radius:50%;border:none;
+    background:linear-gradient(135deg, #e8c4a4, #d4b094);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:all 0.2s;
+    box-shadow:0 4px 14px -2px rgba(140,100,75,0.45);
+  }
+  body.intimate .send-btn{
+    background:linear-gradient(135deg, #d8a098, #c08580);
+  }
+  .send-btn:disabled{
+    background:rgba(160,135,105,0.3);
+    color:#fff;box-shadow:none;cursor:not-allowed;
+  }
+  .send-btn:not(:disabled):active{transform:scale(0.92);}
+  .send-btn.streaming{background:linear-gradient(135deg, #e0a8a8, #c89090) !important;}
+  .input-hint{font-size:9px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;text-align:center;margin-top:6px;}
+
+  /* ─── Drawers ─── */
+  .scrim{
+    position:absolute;inset:0;z-index:10;
+    background:rgba(60,40,25,0.3);
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    opacity:0;pointer-events:none;transition:opacity 0.3s;
+  }
+  .scrim.open{opacity:1;pointer-events:auto;}
+
+  .drawer{
+    position:absolute;left:0;right:0;bottom:0;z-index:11;
+    background:rgba(255,253,247,0.88);
+    -webkit-backdrop-filter:blur(30px) saturate(160%);
+    backdrop-filter:blur(30px) saturate(160%);
+    border-top:1px solid rgba(255,253,247,0.9);
+    border-radius:28px 28px 0 0;
+    max-height:85%;
+    transform:translateY(100%);
+    transition:transform 0.4s cubic-bezier(.4,1.2,.4,1);
+    display:flex;flex-direction:column;
+    box-shadow:0 -20px 60px -10px rgba(100,75,50,0.25);
+  }
+  .drawer.open{transform:translateY(0);}
+  .drawer-handle{
+    width:44px;height:4px;border-radius:99px;background:rgba(100,75,50,0.2);
+    margin:10px auto 4px;flex-shrink:0;
+  }
+  .drawer-head{
+    padding:8px 20px 14px;
+    border-bottom:1px solid var(--glass-border-soft);
+    flex-shrink:0;
+    display:flex;align-items:center;gap:10px;
+  }
+  .drawer-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:600;color:var(--ink);}
+  .drawer-sub{font-size:10px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.12em;margin-left:auto;}
+  .drawer-body{padding:18px 20px 28px;overflow-y:auto;flex:1;}
+  .drawer-body::-webkit-scrollbar{width:0;}
+
+  .field{margin-bottom:16px;}
+  .field-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .field-label{
+    display:flex;align-items:center;gap:6px;
+    font-size:9px;color:var(--ink-mute);
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.16em;text-transform:uppercase;
+  }
+  .field-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tea);}
+
+  select, .seg-group, input[type="text"], input[type="password"], .ta-field{
+    width:100%;
+    background:rgba(255,253,247,0.7);
+    border:1px solid var(--glass-border-soft);
+    color:var(--ink);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:'Noto Serif SC',serif;font-size:13px;line-height:1.5;
+    outline:none;
+  }
+  .ta-field{resize:vertical;min-height:60px;max-height:200px;display:block;width:100%;}
+  input[type="text"]:focus, input[type="password"]:focus, .ta-field:focus, select:focus{
+    border-color:rgba(176,137,104,0.5);
+    box-shadow:0 0 0 3px rgba(176,137,104,0.1);
+  }
+  input[type="password"]{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;}
+  select{
+    appearance:none;-webkit-appearance:none;
+    font-family:'Outfit',sans-serif;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%23a39482' d='M0 0l5 6 5-6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
+  }
+
+  .seg-group{padding:4px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px;}
+  .seg{
+    background:transparent;border:none;color:var(--ink-mute);
+    padding:7px 0;font-family:'Outfit',sans-serif;font-size:12px;
+    border-radius:7px;cursor:pointer;transition:all 0.2s;
+  }
+  .seg.active{
+    background:linear-gradient(135deg, rgba(176,137,104,0.22), rgba(212,160,126,0.18));
+    color:var(--ink);
+    box-shadow:inset 0 0 0 1px rgba(176,137,104,0.35);
+  }
+
+  input[type="range"]{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;
+    background:rgba(160,135,105,0.22);border-radius:99px;outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:16px;height:16px;
+    border-radius:50%;background:#fff;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(176,137,104,0.4), 0 2px 6px rgba(100,75,50,0.3);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;background:#fff;border:none;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(176,137,104,0.4);
+  }
+  .range-end{display:flex;justify-content:space-between;font-size:9px;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;margin-top:6px;letter-spacing:0.04em;}
+
+  .danger-btn, .primary-btn{
+    width:100%;padding:11px;margin-top:8px;
+    border-radius:10px;cursor:pointer;
+    font-family:'Outfit',sans-serif;font-size:12px;letter-spacing:0.04em;
+    transition:all 0.2s;border:1px solid transparent;
+  }
+  .danger-btn{
+    background:rgba(184,85,85,0.08);
+    border-color:rgba(184,85,85,0.25);
+    color:var(--err);
+  }
+  .danger-btn:hover{background:rgba(184,85,85,0.15);}
+  .primary-btn{
+    background:linear-gradient(135deg, #e8c4a4, #d4b094);
+    color:#5a4634;
+    box-shadow:0 3px 10px -2px rgba(150,120,90,0.28);
+  }
+  .primary-btn:hover{filter:brightness(1.05);}
+
+  /* ─── Avatar uploader ─── */
+  .avatar-up{
+    display:flex;align-items:center;gap:14px;
+    padding:6px 0 16px;
+    border-bottom:1px dashed var(--glass-border-soft);
+    margin-bottom:14px;
+  }
+  .avatar-prev{
+    width:72px;height:72px;border-radius:50%;
+    flex-shrink:0;
+    background:linear-gradient(135deg, #efe0ce, #e0cdb4);
+    background-size:cover;background-position:center;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-mute);
+    font-family:'Noto Serif SC',serif;
+    font-size:24px;
+    box-shadow:0 0 0 1px rgba(255,255,253,0.95), 0 4px 12px -3px rgba(150,120,90,0.18);
+    position:relative;overflow:hidden;
+    cursor:pointer;
+    transition:transform 0.15s;
+  }
+  .avatar-prev:hover{transform:scale(1.03);}
+  .avatar-prev:active{transform:scale(0.97);}
+  .avatar-prev.has-img{color:transparent;}
+  .avatar-prev::after{
+    content:'';position:absolute;inset:0;
+    background:rgba(80,55,30,0);
+    transition:background 0.2s;
+  }
+  .avatar-prev:hover::after{background:rgba(80,55,30,0.18);}
+  .avatar-up-actions{flex:1;display:flex;flex-direction:column;gap:6px;}
+  .avatar-up-title{
+    font-family:'Outfit',sans-serif;font-size:11px;
+    color:var(--ink-soft);
+    letter-spacing:0.06em;text-transform:uppercase;
+  }
+  .avatar-up-sub{
+    font-family:'Outfit',sans-serif;font-size:10px;color:var(--ink-mute);
+    line-height:1.5;
+  }
+  .avatar-up-row{display:flex;gap:6px;margin-top:2px;}
+  .avatar-up-btn{
+    flex:1;
+    padding:6px 10px;border-radius:8px;
+    border:1px solid var(--glass-border-soft);
+    background:rgba(255,253,247,0.65);
+    color:var(--ink-soft);
+    font-family:'Outfit',sans-serif;font-size:11px;
+    cursor:pointer;transition:all 0.15s;
+  }
+  .avatar-up-btn:hover{background:rgba(255,253,247,0.9);color:var(--ink);}
+  .avatar-up-btn.danger{color:var(--err);}
+  .avatar-up-btn.danger:hover{background:rgba(201,112,112,0.1);}
+  input[type="file"].hidden-file{display:none;}
+
+  .note{
+    font-size:10px;color:var(--ink-mute);
+    font-family:'Outfit',sans-serif;
+    line-height:1.5;margin-top:6px;
+    padding:8px 10px;
+    background:rgba(212,165,116,0.12);
+    border:1px solid rgba(176,137,104,0.25);
+    border-radius:8px;
+  }
+  .note strong{color:#8a6543;}
+
+  /* ─── My Page / Card patches ─── */
+  .section-head{
+    font-family:'Noto Serif SC',serif;font-size:13px;font-weight:500;
+    color:var(--ink-soft);
+    margin:18px 0 10px;
+    padding-bottom:5px;
+    border-bottom:1px dashed var(--glass-border-soft);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-head .sh-dot{
+    width:6px;height:6px;border-radius:50%;background:var(--apricot);
+  }
+  .section-head .sh-sub{
+    margin-left:auto;font-family:'JetBrains Mono',monospace;
+    font-size:9px;font-weight:400;color:var(--ink-mute);
+    letter-spacing:0.1em;text-transform:uppercase;
+  }
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .twocol .field{margin-bottom:10px;}
+  .field.compact{margin-bottom:10px;}
+  .patch-list{
+    background:rgba(212,165,116,0.06);
+    border:1px solid rgba(176,137,104,0.18);
+    border-radius:10px;
+    padding:8px 10px;
+    max-height:200px;overflow-y:auto;
+  }
+  .patch-list:empty::after{
+    content:'还没有自动补完的内容。和角色对话久了,AI 观察到的新设定会自动加进来。';
+    display:block;
+    font-family:'Noto Serif SC',serif;font-size:11px;
+    color:var(--ink-mute);line-height:1.6;padding:6px 4px;
+  }
+  .patch-item{
+    padding:7px 8px;
+    border-bottom:1px dashed rgba(176,137,104,0.18);
+    font-family:'Noto Serif SC',serif;font-size:12px;
+    color:var(--ink-soft);line-height:1.5;
+  }
+  .patch-item:last-child{border-bottom:none;}
+  .patch-head{
+    display:flex;align-items:baseline;gap:6px;
+    font-family:'JetBrains Mono',monospace;font-size:9px;
+    color:var(--ink-mute);
+    margin-bottom:3px;letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .patch-head .pwho{color:var(--tea);}
+  .patch-head .pfield{color:var(--rose);font-style:normal;}
+  .patch-item .ptext{display:block;color:var(--ink);}
+
+  /* Card patch banner in chat — distinct from regular system message */
+  .msg.system.patch .bubble{
+    background:rgba(212,165,116,0.15);
+    border-color:rgba(176,137,104,0.4);
+    color:#7a5a3a;
+    font-family:'Noto Serif SC',serif;
+    font-size:10.5px;
+    letter-spacing:0.02em;
+    padding:6px 14px;
+  }
+</style>
+</head>
+<body class="story">
+
+<div class="stage">
+  <div class="phone">
+
+    <div class="backdrop">
+      <div class="orb a"></div>
+      <div class="orb b"></div>
+      <div class="orb c"></div>
+      <div class="orb d"></div>
+    </div>
+    <div class="grain"></div>
+
+    <div class="ui">
+
+      <div class="topbar">
+        <div class="ava-mini empty" id="openCharBtn" role="button" aria-label="角色卡">?</div>
+        <div class="top-info">
+          <div class="top-name empty" id="topName">未设定角色</div>
+          <div class="top-status offline" id="topStatus"><span class="dot"></span><span id="statusText">no token</span></div>
+        </div>
+        <button class="icon-btn" id="openKeyBtn" aria-label="API token">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </button>
+        <button class="icon-btn" id="openMeBtn" aria-label="我的设定">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+        </button>
+        <button class="icon-btn" id="openSettingsBtn" aria-label="设置">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+
+      <!-- Mode switch -->
+      <div class="mode-bar">
+        <div class="mode-seg">
+          <button class="mode-btn active" data-mode="story">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            故事
+          </button>
+          <button class="mode-btn" data-mode="intimate">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+            亲密
+          </button>
+        </div>
+      </div>
+
+      <!-- Status panel: Story -->
+      <div class="status-wrap">
+        <div class="status-panel" id="storyPanel">
+          <div class="story-grid">
+            <div class="stat">
+              <div class="stat-head">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="#c98a8a"><path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+                好感
+              </div>
+              <div class="stat-val"><span id="affNum">0</span><span class="max">/100</span></div>
+              <div class="stat-bar"><div class="stat-fill affinity" id="affFill" style="width:0%"></div></div>
+            </div>
+            <div class="stat">
+              <div class="stat-head">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#b08968" stroke-width="2.4"><path d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0z"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>
+                亲密
+              </div>
+              <div class="stat-val"><span id="intNum">0</span><span class="max">/100</span></div>
+              <div class="stat-bar"><div class="stat-fill intimacy" id="intFill" style="width:0%"></div></div>
+            </div>
+            <div class="stat">
+              <div class="stat-head">心情</div>
+              <div class="stat-mood">
+                <span class="emoji" id="moodEmoji">😌</span>
+                <span class="cn" id="moodText">平静</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="status-panel hidden" id="intimatePanel">
+          <div class="intimate-row">
+            <div class="ambiance">
+              <span class="pulse"></span>
+              <span id="ambianceText">暧昧</span>
+            </div>
+            <div class="lead-seg" id="leadSeg">
+              <button class="lead-btn" data-lead="她">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                她
+              </button>
+              <button class="lead-btn active" data-lead="互动">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/></svg>
+                互动
+              </button>
+              <button class="lead-btn" data-lead="我">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                我
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <!-- Tag bar (above input) -->
+      <div class="tag-bar" id="tagBar">
+        <button class="tag-btn t-speech active" data-tag="speech"><span class="tdot"></span>语言</button>
+        <button class="tag-btn t-mono" data-tag="mono"><span class="tdot"></span>心理</button>
+        <button class="tag-btn t-action" data-tag="action"><span class="tdot"></span>动作</button>
+        <button class="tag-btn t-scene" data-tag="scene"><span class="tdot"></span>旁白</button>
+        <button class="tag-btn t-pace" data-tag="pace"><span class="tdot"></span>推进</button>
+      </div>
+      <!-- Pace submenu (shown when 推進 tag is active) -->
+      <div class="pace-row" id="paceRow">
+        <button class="pace-btn active" data-pace="advance">推进剧情</button>
+        <button class="pace-btn" data-pace="continue">承接续写</button>
+        <button class="pace-btn" data-pace="timejump">时间跳跃</button>
+        <button class="pace-btn" data-pace="event">突发事件</button>
+      </div>
+
+      <div class="input-bar">
+        <div class="input-shell">
+          <textarea id="input" rows="1" placeholder="说点什么..."></textarea>
+          <button class="send-btn" id="sendBtn" disabled aria-label="发送">
+            <svg id="sendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter 发送 · Shift+Enter 换行</div>
+      </div>
+
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+
+    <!-- Token drawer -->
+    <div class="drawer" id="keyDrawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-head">
+        <div class="drawer-title">API Token</div>
+        <div class="drawer-sub">credentials</div>
+      </div>
+      <div class="drawer-body">
+        <div class="field">
+          <div class="field-head"><div class="field-label">◇ DZMM Token</div></div>
+          <input type="password" id="tokenInput" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx" autocomplete="off">
+          <div class="note">
+            <strong>提示</strong>:Token 存在浏览器 localStorage 中。<br>
+            正式部署应通过自己的后端代理调用,不要把 token 放在前端。
+          </div>
+        </div>
+        <button class="primary-btn" id="saveTokenBtn">保存并连接</button>
+        <button class="danger-btn" id="clearTokenBtn">清除 token</button>
+      </div>
+    </div>
+
+    <!-- Character drawer -->
+    <div class="drawer" id="charDrawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-head">
+        <div class="drawer-title">Character Card</div>
+        <div class="drawer-sub" id="charSub">new</div>
+      </div>
+      <div class="drawer-body">
+        <div class="avatar-up">
+          <div class="avatar-prev" id="cAvaPrev" title="点击上传头像">+</div>
+          <div class="avatar-up-actions">
+            <div class="avatar-up-title">角色头像</div>
+            <div class="avatar-up-sub">点击图片上传 · JPG/PNG/WebP · 建议正方形</div>
+            <div class="avatar-up-row">
+              <button class="avatar-up-btn" id="cAvaPick">选择图片</button>
+              <button class="avatar-up-btn danger" id="cAvaClear">移除</button>
+            </div>
+            <input type="file" class="hidden-file" id="cAvaInput" accept="image/*">
+          </div>
+        </div>
+        <div class="section-head"><span class="sh-dot"></span>基本资料<span class="sh-sub">identity</span></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Name</div></div><input type="text" id="cName" placeholder="例:艾琳"></div>
+        <div class="twocol">
+          <div class="field compact"><div class="field-head"><div class="field-label">✦ Nickname</div></div><input type="text" id="cNickname" placeholder="昵称"></div>
+          <div class="field compact"><div class="field-head"><div class="field-label">✦ Birthday</div></div><input type="text" id="cBirthday" placeholder="如:7月8日"></div>
+        </div>
+        <div class="twocol">
+          <div class="field compact"><div class="field-head"><div class="field-label">✦ Gender</div></div><input type="text" id="cGender" placeholder="性别"></div>
+          <div class="field compact"><div class="field-head"><div class="field-label">✦ Orientation</div></div><input type="text" id="cOrientation" placeholder="性取向"></div>
+        </div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Birthplace</div></div><input type="text" id="cBirthplace" placeholder="出身地"></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Tagline</div></div><input type="text" id="cTag" placeholder="一句话简介"></div>
+
+        <div class="section-head"><span class="sh-dot"></span>人物设定<span class="sh-sub">profile</span></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Personality</div></div><textarea class="ta-field" id="cPersonality" rows="3" placeholder="性格、说话方式、特征..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Scenario</div></div><textarea class="ta-field" id="cScenario" rows="2" placeholder="开场时的场景设定..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Description</div></div><textarea class="ta-field" id="cDescription" rows="3" placeholder="背景、与用户的关系..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Opening Line</div></div><textarea class="ta-field" id="cFirst" rows="2" placeholder="角色对你说的第一句话..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ System Prompt</div></div><textarea class="ta-field" id="cSystem" rows="2" placeholder="额外的系统指令(可选)"></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">✦ Calls User</div></div><input type="text" id="cUserName" placeholder="角色如何称呼你"></div>
+
+        <div class="section-head"><span class="sh-dot"></span>AI 补完<span class="sh-sub">auto-grown</span></div>
+        <div class="patch-list" id="charPatchList"></div>
+
+        <button class="primary-btn" id="saveCharBtn">保存角色卡</button>
+        <button class="danger-btn" id="clearCharBtn">清除角色卡</button>
+      </div>
+    </div>
+
+    <!-- My Page drawer -->
+    <div class="drawer" id="meDrawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-head">
+        <div class="drawer-title">My Page</div>
+        <div class="drawer-sub">player profile</div>
+      </div>
+      <div class="drawer-body">
+        <div class="avatar-up">
+          <div class="avatar-prev" id="mAvaPrev" title="点击上传头像">+</div>
+          <div class="avatar-up-actions">
+            <div class="avatar-up-title">玩家头像</div>
+            <div class="avatar-up-sub">点击图片上传 · JPG/PNG/WebP · 建议正方形</div>
+            <div class="avatar-up-row">
+              <button class="avatar-up-btn" id="mAvaPick">选择图片</button>
+              <button class="avatar-up-btn danger" id="mAvaClear">移除</button>
+            </div>
+            <input type="file" class="hidden-file" id="mAvaInput" accept="image/*">
+          </div>
+        </div>
+        <div class="section-head"><span class="sh-dot"></span>基本资料<span class="sh-sub">identity</span></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Name</div></div><input type="text" id="mName" placeholder="你的姓名"></div>
+        <div class="twocol">
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Nickname</div></div><input type="text" id="mNickname" placeholder="你想被怎么称呼"></div>
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Birthday</div></div><input type="text" id="mBirthday" placeholder="如:7月8日"></div>
+        </div>
+        <div class="twocol">
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Gender</div></div><input type="text" id="mGender" placeholder="性别"></div>
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Orientation</div></div><input type="text" id="mOrientation" placeholder="性取向"></div>
+        </div>
+        <div class="twocol">
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Age</div></div><input type="text" id="mAge" placeholder="年龄"></div>
+          <div class="field compact"><div class="field-head"><div class="field-label">◇ Birthplace</div></div><input type="text" id="mBirthplace" placeholder="出身地"></div>
+        </div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Identity</div></div><input type="text" id="mIdentity" placeholder="身份(学生/同事/粉丝...)"></div>
+
+        <div class="section-head"><span class="sh-dot"></span>性格与喜好<span class="sh-sub">profile</span></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Personality</div></div><textarea class="ta-field" id="mPersonality" rows="3" placeholder="性格、说话方式..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Likes</div></div><textarea class="ta-field" id="mLikes" rows="2" placeholder="喜欢的事物、爱好..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Dislikes</div></div><textarea class="ta-field" id="mDislikes" rows="2" placeholder="讨厌的事物、雷区..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Appearance</div></div><textarea class="ta-field" id="mAppearance" rows="2" placeholder="外貌、穿着风格..."></textarea></div>
+
+        <div class="section-head"><span class="sh-dot"></span>与她的关系<span class="sh-sub">relation</span></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Relation</div></div><textarea class="ta-field" id="mRelation" rows="3" placeholder="你与她是怎么认识的、目前的关系..."></textarea></div>
+        <div class="field"><div class="field-head"><div class="field-label">◇ Secret</div></div><textarea class="ta-field" id="mSecret" rows="2" placeholder="她暂时不知道的事(可选)..."></textarea></div>
+
+        <div class="section-head"><span class="sh-dot"></span>AI 补完<span class="sh-sub">auto-grown</span></div>
+        <div class="patch-list" id="mePatchList"></div>
+
+        <button class="primary-btn" id="saveMeBtn">保存我的设定</button>
+        <button class="danger-btn" id="clearMeBtn">清除我的设定</button>
+      </div>
+    </div>
+
+    <!-- Settings drawer -->
+    <div class="drawer" id="setDrawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-head">
+        <div class="drawer-title">Settings</div>
+        <div class="drawer-sub">params</div>
+      </div>
+      <div class="drawer-body">
+        <div class="field">
+          <div class="field-head"><div class="field-label">◇ Model</div></div>
+          <select id="modelSel"><option value="">— 加载中 —</option></select>
+        </div>
+        <div class="field">
+          <div class="field-head"><div class="field-label">◇ Style</div></div>
+          <div class="seg-group" id="styleGroup">
+            <button class="seg active" data-val="standard">standard</button>
+            <button class="seg" data-val="literary">literary</button>
+            <button class="seg" data-val="playful">playful</button>
+            <button class="seg" data-val="intense">intense</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-head"><div class="field-label">◇ Temperature</div><div class="field-val" id="tempVal">0.80</div></div>
+          <input type="range" id="tempRange" min="0" max="1.5" step="0.05" value="0.8">
+          <div class="range-end"><span>precise</span><span>creative</span></div>
+        </div>
+        <div class="field">
+          <div class="field-head"><div class="field-label">◇ Max tokens</div><div class="field-val" id="tokVal">800</div></div>
+          <input type="range" id="tokRange" min="100" max="2000" step="50" value="800">
+        </div>
+        <button class="danger-btn" id="resetBtn">Reset conversation</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── Config ───
+  const API_BASE = "https://www.gpt4novel.com/api/xiaoshuoai/ext";
+  const MODELS_URL = `${API_BASE}/v2/models`;
+  const CHAT_URL = `${API_BASE}/v2/chat/completions`;
+
+  const USER_ID = "user_" + (localStorage.getItem("dzmm_uid") || (() => {
+    const id = Math.random().toString(36).slice(2, 10);
+    localStorage.setItem("dzmm_uid", id);
+    return id;
+  })());
+  const CONVERSATION_ID = "conv_" + Math.random().toString(36).slice(2, 10);
+
+  // mood progression keyed by affinity
+  const MOODS = [
+    { min: 0,  emoji: "😐", text: "陌生" },
+    { min: 15, emoji: "😌", text: "平静" },
+    { min: 30, emoji: "🙂", text: "亲近" },
+    { min: 50, emoji: "😊", text: "愉悦" },
+    { min: 70, emoji: "😳", text: "心动" },
+    { min: 85, emoji: "🥰", text: "沉溺" },
+  ];
+  // ambiance by intimacy
+  const AMBIS = [
+    { min: 0,  text: "暧昧" },
+    { min: 30, text: "微醺" },
+    { min: 55, text: "缠绵" },
+    { min: 80, text: "炽热" },
+  ];
+
+  // ─── State ───
+  let token = localStorage.getItem("dzmm_token") || "";
+  let card = null;
+  try { const raw = localStorage.getItem("dzmm_card"); if (raw) card = JSON.parse(raw); } catch(e){}
+
+  // Player profile ("My Page")
+  let me = null;
+  try { const raw = localStorage.getItem("dzmm_me"); if (raw) me = JSON.parse(raw); } catch(e){}
+
+  // AI-grown patches (append-only)
+  let charPatches = [];
+  try { const raw = localStorage.getItem("dzmm_char_patches"); if (raw) charPatches = JSON.parse(raw); } catch(e){}
+  let mePatches = [];
+  try { const raw = localStorage.getItem("dzmm_me_patches"); if (raw) mePatches = JSON.parse(raw); } catch(e){}
+
+  let history = [];
+  let stats = { affinity: 0, intimacy: 0 };
+  let mode = localStorage.getItem("dzmm_mode") || "story";  // "story" | "intimate"
+  let lead = "互动"; // "她" | "互动" | "我"
+
+  // Input tagging
+  let currentTag = "speech";   // "speech" | "mono" | "action" | "scene" | "pace"
+  let currentPace = "advance"; // "advance" | "continue" | "timejump" | "event"
+
+  let currentModel = "";
+  let currentStyle = "standard";
+  let currentTemp = 0.8;
+  let currentMaxTokens = 800;
+  let abortController = null;
+  let isStreaming = false;
+
+  // ─── Helpers ───
+  const $ = (id) => document.getElementById(id);
+  const messages = $("messages");
+  const input = $("input");
+  const sendBtn = $("sendBtn");
+  const scrim = $("scrim");
+
+  function setStatus(text, online) {
+    $("statusText").textContent = text;
+    $("topStatus").classList.toggle("offline", !online);
+    document.querySelector(".ava-mini").classList.toggle("offline", !online && !!card);
+  }
+  function setKeyAlert(on) { $("openKeyBtn").classList.toggle("alert", on); }
+
+  function refreshTopBar() {
+    const ava = document.querySelector(".ava-mini");
+    const name = $("topName");
+    if (card && card.name) {
+      ava.classList.remove("empty");
+      name.textContent = card.name;
+      name.classList.remove("empty");
+      paintAvatarPreview(ava, card.avatar, card.name.slice(0, 1));
+      input.placeholder = mode === "intimate"
+        ? `靠近${card.name}...`
+        : `和${card.name}说点什么...`;
+    } else {
+      ava.classList.add("empty");
+      paintAvatarPreview(ava, "", "?");
+      name.textContent = "未设定角色";
+      name.classList.add("empty");
+      input.placeholder = "说点什么...";
+    }
+  }
+
+  function applyMode() {
+    document.body.classList.toggle("intimate", mode === "intimate");
+    document.body.classList.toggle("story", mode === "story");
+    document.querySelectorAll(".mode-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.mode === mode);
+    });
+    $("storyPanel").classList.toggle("hidden", mode !== "story");
+    $("intimatePanel").classList.toggle("hidden", mode !== "intimate");
+    refreshTopBar();
+  }
+
+  function refreshStats() {
+    $("affNum").textContent = stats.affinity;
+    $("affFill").style.width = stats.affinity + "%";
+    $("intNum").textContent = stats.intimacy;
+    $("intFill").style.width = stats.intimacy + "%";
+    const mood = [...MOODS].reverse().find(m => stats.affinity >= m.min);
+    $("moodEmoji").textContent = mood.emoji;
+    $("moodText").textContent = mood.text;
+    const amb = [...AMBIS].reverse().find(a => stats.intimacy >= a.min);
+    $("ambianceText").textContent = amb.text;
+  }
+
+  function bumpStats() {
+    // affinity always tickles up
+    stats.affinity = Math.min(100, stats.affinity + Math.floor(Math.random() * 3));
+    // intimacy only in intimate mode
+    if (mode === "intimate") {
+      stats.intimacy = Math.min(100, stats.intimacy + 1 + Math.floor(Math.random() * 3));
+    }
+    refreshStats();
+  }
+
+  // Apply explicit delta from a [STATS]X[/STATS] block emitted by the model.
+  function applyStatDelta(affDelta, intimDelta) {
+    if (typeof affDelta === "number") {
+      stats.affinity = Math.max(0, Math.min(100, stats.affinity + affDelta));
+    }
+    if (typeof intimDelta === "number") {
+      stats.intimacy = Math.max(0, Math.min(100, stats.intimacy + intimDelta));
+    }
+    refreshStats();
+  }
+
+  // ─── Avatar helpers ───
+  // Compress an uploaded image to a small square data URL (~160px) to keep
+  // localStorage usage reasonable. Returns a Promise<string>.
+  function compressImageToDataURL(file, size = 200, quality = 0.85) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith("image/")) {
+        reject(new Error("不是图片文件")); return;
+      }
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          // Cover-fit: crop center square
+          const min = Math.min(img.width, img.height);
+          const sx = (img.width  - min) / 2;
+          const sy = (img.height - min) / 2;
+          ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+          URL.revokeObjectURL(url);
+          // Prefer webp for smaller size, fall back to jpeg
+          let out = canvas.toDataURL("image/webp", quality);
+          if (!out || out.length < 100) out = canvas.toDataURL("image/jpeg", quality);
+          resolve(out);
+        } catch (e) { URL.revokeObjectURL(url); reject(e); }
+      };
+      img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error("无法加载图片")); };
+      img.src = url;
+    });
+  }
+
+  // Paint a circular preview element with either an image data URL or fallback glyph.
+  function paintAvatarPreview(el, dataUrl, fallbackGlyph) {
+    if (!el) return;
+    if (dataUrl) {
+      el.style.backgroundImage = `url('${dataUrl}')`;
+      el.classList.add("has-img");
+      el.textContent = "";
+    } else {
+      el.style.backgroundImage = "";
+      el.classList.remove("has-img");
+      el.textContent = fallbackGlyph || "";
+    }
+  }
+
+  // Wire up an avatar uploader given the IDs of preview, file-input, pick button,
+  // clear button, plus a getter/setter for the current avatar data URL.
+  function wireAvatarUploader({ preview, input, pickBtn, clearBtn, fallback, getAvatar, setAvatar }) {
+    const prev = $(preview);
+    const fileIn = $(input);
+    const pick = $(pickBtn);
+    const clear = $(clearBtn);
+    if (!prev || !fileIn || !pick || !clear) return;
+    const trigger = () => fileIn.click();
+    prev.addEventListener("click", trigger);
+    pick.addEventListener("click", trigger);
+    clear.addEventListener("click", () => {
+      setAvatar("");
+      paintAvatarPreview(prev, "", fallback);
+    });
+    fileIn.addEventListener("change", async (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      try {
+        const dataUrl = await compressImageToDataURL(f, 200, 0.85);
+        setAvatar(dataUrl);
+        paintAvatarPreview(prev, dataUrl, fallback);
+      } catch (err) {
+        alert("头像上传失败:" + err.message);
+      } finally {
+        // Reset the input so picking the same file again still fires change
+        fileIn.value = "";
+      }
+    });
+  }
+
+  // ─── Player profile → system block ───
+  function buildMeBlock() {
+    if (!me) return "";
+    const rows = [];
+    const push = (label, v) => { if (v && String(v).trim()) rows.push(`• ${label}:${v}`); };
+    push("姓名", me.name);
+    push("昵称(角色应这样称呼玩家)", me.nickname);
+    push("生日", me.birthday);
+    push("性别", me.gender);
+    push("性取向", me.orientation);
+    push("年龄", me.age);
+    push("出身地", me.birthplace);
+    push("身份/职业", me.identity);
+    push("性格", me.personality);
+    push("喜好", me.likes);
+    push("讨厌的事", me.dislikes);
+    push("外貌/穿着", me.appearance);
+    push("与角色的关系", me.relation);
+    push("玩家的秘密(角色暂不知)", me.secret);
+    if (!rows.length) return "";
+    return `═══ 玩家档案(My Page)═══\n${rows.join("\n")}\n请在对话中自然地体现这些设定,但角色不能直接复述"玩家档案"这种元信息。`;
+  }
+
+  function buildPatchBlock(patches, who) {
+    if (!patches || !patches.length) return "";
+    const lines = patches.map(p => `• [${p.field}] ${p.text}`).join("\n");
+    return `═══ 已积累的"${who}"补完设定(请保持一致,不要矛盾,可继续叠加但不要删减)═══\n${lines}`;
+  }
+
+  // Parse [CARD_PATCH]目标:X|字段:Y|内容:Z[/CARD_PATCH] from completed response.
+  // Returns array of {target:'char'|'me', field, text}.
+  function extractCardPatches(rawText) {
+    const out = [];
+    const re = /\[CARD_PATCH\]([\s\S]*?)\[\/CARD_PATCH\]/g;
+    let m;
+    while ((m = re.exec(rawText))) {
+      const body = m[1];
+      // Pull target/field/text using flexible parsing
+      const tMatch = body.match(/目标[::]\s*(角色|玩家|char|me)/i);
+      const fMatch = body.match(/字段[::]\s*([^|\n]+)/);
+      const cMatch = body.match(/内容[::]\s*([\s\S]+?)(?:\||$)/);
+      if (!tMatch || !cMatch) continue;
+      const tgt = /玩家|me/i.test(tMatch[1]) ? "me" : "char";
+      const field = fMatch ? fMatch[1].trim() : "其他";
+      const text = cMatch[1].trim().replace(/\s*\|\s*$/, "");
+      if (!text) continue;
+      out.push({ target: tgt, field, text });
+    }
+    return out;
+  }
+
+  function applyCardPatches(rawText) {
+    const patches = extractCardPatches(rawText);
+    if (!patches.length) return [];
+    const applied = [];
+    const now = Date.now();
+    patches.forEach(p => {
+      // De-dupe: if exact same text already exists, skip
+      const arr = p.target === "me" ? mePatches : charPatches;
+      if (arr.some(x => x.field === p.field && x.text === p.text)) return;
+      const entry = { field: p.field, text: p.text, t: now };
+      arr.push(entry);
+      applied.push(p);
+    });
+    if (applied.length) {
+      localStorage.setItem("dzmm_char_patches", JSON.stringify(charPatches));
+      localStorage.setItem("dzmm_me_patches",   JSON.stringify(mePatches));
+      renderPatchLists();
+      // Inline notice in chat
+      applied.forEach(p => {
+        const who = p.target === "me" ? "玩家" : (card?.name || "角色");
+        addSystem(`✦ ${who}卡补完[${p.field}]:${p.text}`, false, "patch");
+      });
+    }
+    return applied;
+  }
+
+  function renderPatchLists() {
+    const renderInto = (id, arr) => {
+      const el = $(id);
+      if (!el) return;
+      el.innerHTML = "";
+      // newest first
+      [...arr].reverse().forEach(p => {
+        const item = document.createElement("div");
+        item.className = "patch-item";
+        const date = new Date(p.t || Date.now());
+        const dstr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`;
+        item.innerHTML = `
+          <div class="patch-head">
+            <span class="pfield">${p.field}</span>
+            <span class="pwho">${dstr}</span>
+          </div>
+          <div class="ptext"></div>`;
+        item.querySelector(".ptext").textContent = p.text;
+        el.appendChild(item);
+      });
+    };
+    renderInto("charPatchList", charPatches);
+    renderInto("mePatchList",   mePatches);
+  }
+
+  function renderMessages() {
+    messages.innerHTML = "";
+    if (!card) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.innerHTML = `
+        <div class="empty-orb">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s-7-4.5-9.5-9C.5 8 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4 4.5 8-2.5 4.5-9.5 9-9.5 9z"/>
+          </svg>
+        </div>
+        <div class="empty-title cn">还没有角色</div>
+        <div class="empty-sub">建立一张角色卡来开始对话。</div>
+        <button class="empty-btn" id="emptyCreateBtn">建立角色卡</button>
+      `;
+      messages.appendChild(empty);
+      $("emptyCreateBtn").addEventListener("click", () => openDrawer($("charDrawer")));
+      return;
+    }
+    history.forEach(m => {
+      if (m.role === "assistant" || m.role === "user") addBubble(m.role, m.content);
+    });
+  }
+
+  // ─── Narrative parser ───
+  // Splits text into segments:
+  //   {type:'speech', text}  → goes into the bubble
+  //   {type:'action', text}  → out-of-bubble box (parens / [NARR][/NARR])
+  //   {type:'mono',   text}  → out-of-bubble box (asterisks / [MONO][/MONO])
+  //   {type:'scene',  text}  → out-of-bubble box ([SCENE][/SCENE])
+  //   {type:'stat',   aff, intim} → stat-change pill ([STATS]...[/STATS])
+  // For streaming: returns {segments, tail} where `tail` is unparseable trailing
+  // text (an unclosed bracket / paren / asterisk run) we should not yet commit.
+  function parseNarrative(raw, { partial = false } = {}) {
+    const segments = [];
+    let buf = "";
+    let i = 0;
+    const n = raw.length;
+
+    const pushSpeech = (t) => {
+      if (!t) return;
+      // Trim leading/trailing whitespace-only chunks
+      if (!t.replace(/[\s\u3000]+/g, "")) return;
+      segments.push({ type: "speech", text: t });
+    };
+
+    // Pairs of bracket-like delimiters that mark "out-of-bubble" content.
+    // Order matters: try multi-char tags first.
+    const TAGS = [
+      // [STATS]X[/STATS]
+      { open: "[STATS]", close: "[/STATS]", kind: "stat" },
+      { open: "[CARD_PATCH]", close: "[/CARD_PATCH]", kind: "_swallow" },
+      { open: "[MONO]",  close: "[/MONO]",  kind: "mono" },
+      { open: "[NARR]",  close: "[/NARR]",  kind: "action" },
+      { open: "[SCENE]", close: "[/SCENE]", kind: "scene" },
+      { open: "[ACT]",   close: "[/ACT]",   kind: "action" },
+    ];
+    // Single-char paired delimiters (treat full-width and half-width)
+    // open char → {close char, kind}
+    const PAIRS = {
+      "(":  { close: ")",  kind: "action" },
+      "（": { close: "）", kind: "action" },
+      "*":  { close: "*",  kind: "mono"   },
+    };
+
+    while (i < n) {
+      // Try multi-char tags first
+      let matchedTag = null;
+      for (const tg of TAGS) {
+        if (raw.startsWith(tg.open, i)) { matchedTag = tg; break; }
+      }
+      if (matchedTag) {
+        const endIdx = raw.indexOf(matchedTag.close, i + matchedTag.open.length);
+        if (endIdx === -1) {
+          // Unclosed — if streaming, defer everything from `i` onward as tail.
+          if (partial) {
+            pushSpeech(buf); buf = "";
+            return { segments, tail: raw.slice(i) };
+          }
+          // Final: treat the open tag as literal text
+          buf += matchedTag.open;
+          i += matchedTag.open.length;
+          continue;
+        }
+        // Got a complete tag — flush prior speech, then push segment
+        pushSpeech(buf); buf = "";
+        const inner = raw.slice(i + matchedTag.open.length, endIdx).trim();
+        if (matchedTag.kind === "stat") {
+          const stat = parseStatBlock(inner);
+          if (stat) segments.push({ type: "stat", ...stat });
+        } else if (matchedTag.kind === "_swallow") {
+          // intentionally not rendered; consumed elsewhere
+        } else {
+          if (inner) segments.push({ type: matchedTag.kind, text: inner });
+        }
+        i = endIdx + matchedTag.close.length;
+        continue;
+      }
+
+      const ch = raw[i];
+      const pair = PAIRS[ch];
+      if (pair) {
+        // For "*", treat **...** as literal markdown bold, NOT as mono.
+        if (ch === "*" && raw[i + 1] === "*") {
+          // Skip the leading **, copy through, find closing ** and copy that too.
+          const after = raw.indexOf("**", i + 2);
+          if (after === -1) {
+            // No closing — copy what we have literally
+            buf += raw.slice(i);
+            i = n;
+            continue;
+          }
+          buf += raw.slice(i, after + 2);
+          i = after + 2;
+          continue;
+        }
+        const closeIdx = raw.indexOf(pair.close, i + 1);
+        if (closeIdx === -1) {
+          if (partial) {
+            pushSpeech(buf); buf = "";
+            return { segments, tail: raw.slice(i) };
+          }
+          // Final: literal
+          buf += ch; i++;
+          continue;
+        }
+        // For paren-like, avoid swallowing huge speech if close is suspiciously far away?
+        // Keep simple: always pair greedily on first match.
+        pushSpeech(buf); buf = "";
+        const inner = raw.slice(i + 1, closeIdx).trim();
+        if (inner) segments.push({ type: pair.kind, text: inner });
+        i = closeIdx + 1;
+        continue;
+      }
+
+      buf += ch;
+      i++;
+    }
+    pushSpeech(buf);
+    return { segments, tail: "" };
+  }
+
+  function parseStatBlock(inner) {
+    // Accept formats like: 好感:+3,亲密:-1   好感:+0,親密:+2
+    const norm = inner.replace(/[，;；]/g, ",");
+    let aff = 0, intim = 0, foundAff = false, foundInt = false;
+    norm.split(",").forEach(seg => {
+      const m = seg.trim().match(/(好感|親密|亲密|intim|aff)[^\-+0-9]*([+\-]?\d+)/i);
+      if (!m) return;
+      const v = parseInt(m[2], 10);
+      const k = m[1];
+      if (/好感|aff/i.test(k)) { aff = v; foundAff = true; }
+      else { intim = v; foundInt = true; }
+    });
+    if (!foundAff && !foundInt) return null;
+    return { aff, intim };
+  }
+
+  // Build DOM for a parsed message (full or partial)
+  function renderParsedInto(container, segments, { streaming = false } = {}) {
+    // container is the .bubble-wrap (we'll insert narrative blocks before/after bubble)
+    // We rebuild fully each time during streaming (cheap enough for short messages).
+    container.innerHTML = "";
+    // Re-add name line
+    const nameSpan = document.createElement("div");
+    nameSpan.className = "msg-name";
+    nameSpan.textContent = container.dataset.name || "";
+    container.appendChild(nameSpan);
+
+    // We'll interleave: each segment renders in order. Speech segments concatenate into
+    // a single bubble per consecutive run; non-speech each get their own narr block.
+    let speechBuf = "";
+    let bubbleEl = null;
+    const flushBubble = () => {
+      if (speechBuf.trim()) {
+        bubbleEl = document.createElement("div");
+        bubbleEl.className = "bubble";
+        bubbleEl.textContent = speechBuf.trim();
+        container.appendChild(bubbleEl);
+      }
+      speechBuf = "";
+    };
+    segments.forEach(seg => {
+      if (seg.type === "speech") {
+        speechBuf += (speechBuf ? "\n" : "") + seg.text.trim();
+        return;
+      }
+      flushBubble();
+      if (seg.type === "stat") {
+        const el = document.createElement("div");
+        el.className = "narr stat-change";
+        const affClass = seg.aff > 0 ? "up" : seg.aff < 0 ? "down" : "flat";
+        const intClass = seg.intim > 0 ? "up" : seg.intim < 0 ? "down" : "flat";
+        const sign = (v) => v > 0 ? `+${v}` : `${v}`;
+        el.innerHTML = `
+          <span class="narr-label">状态</span>
+          <span class="delta ${affClass}">♡ 好感 ${sign(seg.aff)}</span>
+          <span class="delta ${intClass}">✦ 亲密 ${sign(seg.intim)}</span>`;
+        container.appendChild(el);
+        return;
+      }
+      const el = document.createElement("div");
+      el.className = "narr " + seg.type;
+      const label = seg.type === "action" ? "动作 · 场景"
+                   : seg.type === "mono"   ? "心绪"
+                   :                          "旁白";
+      el.innerHTML = `<span class="narr-label">${label}</span>`;
+      el.appendChild(document.createTextNode(seg.text));
+      container.appendChild(el);
+    });
+    flushBubble();
+    if (streaming && bubbleEl) bubbleEl.classList.add("streaming");
+    return bubbleEl;
+  }
+
+  function addBubble(role, content) {
+    const el = document.createElement("div");
+    el.className = "msg " + role;
+    const charInitial = (card && card.name) ? card.name.slice(0,1) : "?";
+    const meInitial = (me && (me.nickname || me.name)) ? (me.nickname || me.name).slice(0,1) : "你";
+    const fallbackGlyph = role === "user" ? meInitial : charInitial;
+    const avatarUrl = role === "user" ? (me && me.avatar) : (card && card.avatar);
+    const name = role === "user"
+      ? ((me && (me.nickname || me.name)) || "you")
+      : (card?.name || "assistant");
+    el.innerHTML = `
+      <div class="msg-avatar"></div>
+      <div class="bubble-wrap"></div>`;
+    const avaEl = el.querySelector(".msg-avatar");
+    paintAvatarPreview(avaEl, avatarUrl || "", fallbackGlyph);
+    const wrap = el.querySelector(".bubble-wrap");
+    wrap.dataset.name = name;
+    wrap.dataset.role = role;
+    messages.appendChild(el);
+
+    // Parse and render. For non-streaming (history replay) call once.
+    const { segments } = parseNarrative(content || "", { partial: false });
+    if (!segments.length && content) {
+      // Fallback: render raw as plain bubble
+      const nameSpan = document.createElement("div");
+      nameSpan.className = "msg-name";
+      nameSpan.textContent = name;
+      wrap.appendChild(nameSpan);
+      const b = document.createElement("div");
+      b.className = "bubble";
+      b.textContent = content;
+      wrap.appendChild(b);
+    } else {
+      renderParsedInto(wrap, segments, { streaming: false });
+    }
+
+    // Apply any STAT segments to actual stats (for history replay we leave them visual-only)
+    // Live stat application happens in the streaming path.
+    messages.scrollTop = messages.scrollHeight;
+    return wrap; // return the wrap so streaming can re-render into it
+  }
+  function addSystem(text, isError = false, extraClass = "") {
+    const el = document.createElement("div");
+    el.className = "msg system" + (isError ? " error" : "") + (extraClass ? " " + extraClass : "");
+    el.innerHTML = `<div class="bubble-wrap"><div class="bubble"></div></div>`;
+    el.querySelector(".bubble").textContent = text;
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function addTyping() {
+    const charInitial = (card && card.name) ? card.name.slice(0,1) : "?";
+    const msg = document.createElement("div");
+    msg.className = "msg assistant";
+    msg.id = "typingMsg";
+    msg.innerHTML = `
+      <div class="msg-avatar"></div>
+      <div class="bubble-wrap">
+        <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+      </div>`;
+    paintAvatarPreview(msg.querySelector(".msg-avatar"), (card && card.avatar) || "", charInitial);
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function removeTyping(){ const t = $("typingMsg"); if (t) t.remove(); }
+
+  function setStreamingUI(on) {
+    isStreaming = on;
+    sendBtn.classList.toggle("streaming", on);
+    if (on) {
+      $("sendIcon").outerHTML = `<svg id="sendIcon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+      sendBtn.disabled = false;
+    } else {
+      $("sendIcon").outerHTML = `<svg id="sendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+      sendBtn.disabled = !input.value.trim() || !card;
+    }
+  }
+  function updateSendBtn() {
+    if (isStreaming) return;
+    const allowEmpty = currentTag === "pace";
+    sendBtn.disabled = (!allowEmpty && !input.value.trim()) || !card;
+  }
+
+  // ─── Models ───
+  async function loadModels() {
+    if (!token) {
+      setStatus("no token", false); setKeyAlert(true);
+      $("modelSel").innerHTML = `<option value="">— 请先填 token —</option>`; return;
+    }
+    setStatus("loading...", true);
+    try {
+      const r = await fetch(MODELS_URL, { headers: { Authorization: `Bearer ${token}` } });
+      if (!r.ok) throw new Error(`${r.status} ${(await r.text()).slice(0,80)}`);
+      const data = await r.json();
+      const list = data.data || data.models || [];
+      if (!list.length) { $("modelSel").innerHTML = `<option value="">— 无可用模型 —</option>`; setStatus("no models", false); return; }
+      $("modelSel").innerHTML = list.map(m => `<option value="${m.id}">${m.id}</option>`).join("");
+      currentModel = list[0].id;
+      $("modelSel").value = currentModel;
+      setStatus(card ? "online" : "ready", true);
+      setKeyAlert(false);
+    } catch (err) {
+      console.error(err);
+      setStatus("auth failed", false); setKeyAlert(true);
+      addSystem(`模型加载失败: ${err.message}`, true);
+    }
+  }
+
+  // ─── Send (streaming) ───
+  // Wrap the raw input text according to the currently active tag.
+  // Returns { displayText, sentText } — displayText is what the user sees in their
+  // own bubble (parsed); sentText is what goes to the model in messages[].
+  function wrapInput(raw, tag, pace) {
+    const t = (raw || "").trim();
+    if (!t && tag !== "pace") return null;
+    switch (tag) {
+      case "speech":
+        return { displayText: `「${t}」`, sentText: `「${t}」` };
+      case "mono":
+        return { displayText: `*${t}*`, sentText: `*${t}*` };
+      case "action":
+        return { displayText: `(${t})`, sentText: `(${t})` };
+      case "scene":
+        return { displayText: `[SCENE]${t}[/SCENE]`, sentText: `[SCENE]${t}[/SCENE]` };
+      case "pace": {
+        let directive = "";
+        let userVisible = "";
+        if (pace === "advance") {
+          directive = t
+            ? `(请主动推进情节,围绕这个方向:${t})`
+            : `(请主动推进情节,自行制造一个突发事件或场景转折)`;
+          userVisible = t ? `▸ 推进剧情:${t}` : `▸ 推进剧情`;
+        } else if (pace === "continue") {
+          directive = `(请承接你刚才的话题与场景,继续扩写大段精彩描写、心理变化或环境铺陈)`;
+          userVisible = t ? `▸ 承接续写(${t})` : `▸ 承接续写`;
+        } else if (pace === "timejump") {
+          directive = t
+            ? `(时间悄悄流逝,此时:${t}。请根据时间的推进,主动切换舞台,先用 [SCENE]...[/SCENE] 重写环境变化(灯光、气氛),再接角色姿态与开场白。)`
+            : `(时间悄悄流逝。请自行决定一个合理的时间跳跃,先用 [SCENE]...[/SCENE] 描写环境变化,再接角色姿态。)`;
+          userVisible = t ? `▸ 时间跳跃:${t}` : `▸ 时间跳跃`;
+        } else if (pace === "event") {
+          directive = t
+            ? `(请马上插入一个突发事件,围绕:${t}。事件用 [SCENE]...[/SCENE] 描写)`
+            : `(请马上插入一个突发事件——突然有人闯入、角色不小心摔倒、天气骤变、或者主动提及一个隐藏的秘密。用 [SCENE]...[/SCENE] 描写)`;
+          userVisible = t ? `▸ 突发事件:${t}` : `▸ 突发事件`;
+        }
+        return { displayText: userVisible, sentText: directive, isDirective: true };
+      }
+    }
+    return null;
+  }
+
+  async function send() {
+    if (isStreaming) { if (abortController) abortController.abort(); return; }
+    const raw = input.value.trim();
+    if (!raw && currentTag !== "pace") return;  // pace can fire with empty text
+    if (!card) { openDrawer($("charDrawer")); return; }
+    if (!token) { addSystem("请先在顶部填入 API token", true); return; }
+    if (!currentModel) { addSystem("没有可用模型", true); return; }
+
+    const wrapped = wrapInput(raw, currentTag, currentPace);
+    if (!wrapped) return;
+
+    // Push the *sent* form into history (so the model sees the structured tag),
+    // but render the *display* form in the user's bubble.
+    history.push({ role: "user", content: wrapped.sentText });
+    addBubble("user", wrapped.displayText);
+    input.value = ""; input.style.height = "auto";
+    addTyping();
+    setStreamingUI(true);
+    abortController = new AbortController();
+
+    // ─── System prompt assembly ───
+    // 1. Mode instruction
+    const modeInstruction = mode === "intimate"
+      ? `[模式:亲密] 这是私密场景。主动方:${lead === "互动" ? "双方互动" : (lead === "她" ? "由你(角色)主动" : "由用户主动")}。注意氛围、感官细节、节奏,保持人设。`
+      : `[模式:故事] 这是日常剧情对话。专注于推进剧情、心理刻画、角色互动。`;
+
+    // 2. Player profile (My Page)
+    const meBlock = buildMeBlock();
+    // 3. Char patches (AI-grown character details)
+    const charPatchBlock = buildPatchBlock(charPatches, "角色");
+    const mePatchBlock   = buildPatchBlock(mePatches,   "玩家");
+
+    // 4. Output format reminder + card-patch instruction
+    const formatReminder = `
+═══ 输出格式提醒 ═══
+本次回复必须严格遵守标记:
+• 角色说出口的话 → 直接写文字(可用「」包,但不强制)。
+• 动作/神态/场景细节 → (这样包) 或 (这样包),会渲染成独立"动作·场景"框。
+• 角色内心独白 → *这样包*,会渲染成"心绪"框(玩家可能看不见,氛围用)。
+• 大段旁白/场景转换 → [SCENE]内容[/SCENE]。
+• 状态变化 → 末尾单独一行 [STATS]好感:X,亲密:Y[/STATS](必须)。
+
+═══ 角色卡补完机制 ═══
+对话中,如果你(作为角色扮演的执行者)发现:
+A) 关于"角色"自身的某个设定,需要在原本的角色卡上"新增、扩展、丰富"(不删减、不矛盾);或
+B) 关于"玩家"的某个新设定,从玩家的输入中显现出来,需要记录下来,以便后续保持一致;
+那就在 [STATS] 之前(或之后),单独再加一行(或多行)如下格式的补完:
+
+[CARD_PATCH]目标:角色|字段:习惯|内容:她其实习惯在卸妆后泡一杯热麦茶,这件事她从未对外讲过[/CARD_PATCH]
+[CARD_PATCH]目标:玩家|字段:身份|内容:他是大阪某剧场的舞台监督,工作上认识ARI[/CARD_PATCH]
+
+要求:
+• 目标只能填"角色"或"玩家"。
+• 字段是一个 2-6 字的简短标签(如:习惯/秘密/喜好/口头禅/身体记忆/身份/家庭/职业)。
+• 内容是一句完整的、可被未来对话引用的设定描述。
+• 只在确实"新增"了信息时才写,不要重复已知设定。
+• 一次回复可以 0 条、也可以多条。不强求。
+• 这是"只增不减"的,永远不要试图否定或推翻已有设定。
+`;
+
+    const baseSystem = card.system_prompt || "";
+    const fullSystem = [
+      baseSystem,
+      meBlock,
+      charPatchBlock,
+      mePatchBlock,
+      modeInstruction,
+      formatReminder
+    ].filter(Boolean).join("\n\n");
+
+    const body = {
+      model: currentModel,
+      style: currentStyle,
+      user_name: (me && me.nickname) || (me && me.name) || card.user_name || "用户",
+      user_id: USER_ID,
+      conversation_id: CONVERSATION_ID,
+      request_id: `req_${Date.now()}`,
+      card: {
+        name: card.name,
+        description: card.description || "",
+        personality: card.personality || "",
+        scenario: card.scenario || "",
+        first_message: card.first_message || "",
+        system_prompt: fullSystem
+      },
+      context: [],
+      messages: history,
+      max_tokens: currentMaxTokens,
+      temperature: currentTemp,
+      stream: true
+    };
+
+    let assistantWrap = null;   // .bubble-wrap element
+    let assistantText = "";
+    let appliedStatKey = null;   // dedupe stat application during streaming
+
+    const reRenderStreaming = () => {
+      if (!assistantWrap) return;
+      const { segments, tail } = parseNarrative(assistantText, { partial: true });
+      // Append tail as a provisional speech segment so user can see it ticking
+      const segs = segments.slice();
+      if (tail) segs.push({ type: "speech", text: tail });
+      renderParsedInto(assistantWrap, segs, { streaming: true });
+      // Apply any complete stat block live (only the last one wins, only once)
+      const lastStat = [...segments].reverse().find(s => s.type === "stat");
+      if (lastStat) {
+        const key = `${lastStat.aff}|${lastStat.intim}`;
+        if (key !== appliedStatKey) {
+          appliedStatKey = key;
+          applyStatDelta(lastStat.aff, lastStat.intim);
+        }
+      }
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    try {
+      const r = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+        signal: abortController.signal
+      });
+      if (!r.ok || !r.body) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+      removeTyping();
+      assistantWrap = addBubble("assistant", "");
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          try {
+            const event = JSON.parse(payload);
+            const delta = event.choices?.[0]?.delta?.content;
+            if (delta) {
+              assistantText += delta;
+              reRenderStreaming();
+            }
+          } catch (e) {}
+        }
+      }
+      // Final render (non-streaming)
+      if (assistantWrap) {
+        const { segments } = parseNarrative(assistantText, { partial: false });
+        renderParsedInto(assistantWrap, segments, { streaming: false });
+        // Final-pass stat application (in case the only stat block arrived in a partial)
+        const lastStat = [...segments].reverse().find(s => s.type === "stat");
+        if (lastStat) {
+          const key = `${lastStat.aff}|${lastStat.intim}`;
+          if (key !== appliedStatKey) {
+            applyStatDelta(lastStat.aff, lastStat.intim);
+          }
+        }
+      }
+      if (assistantText) {
+        history.push({ role: "assistant", content: assistantText });
+        // Apply any card patches the model emitted this turn
+        applyCardPatches(assistantText);
+      } else {
+        addSystem("(收到空回复)", true);
+      }
+    } catch (err) {
+      removeTyping();
+      if (err.name === "AbortError") {
+        if (assistantText) { history.push({ role: "assistant", content: assistantText }); addSystem("— 已停止生成 —"); }
+        else addSystem("— 已停止 —");
+      } else {
+        console.error(err);
+        addSystem(`请求失败: ${err.message}`, true);
+        if (String(err.message).startsWith("401")) { setStatus("auth failed", false); setKeyAlert(true); }
+      }
+    } finally {
+      abortController = null;
+      setStreamingUI(false);
+    }
+  }
+
+  // ─── Input ───
+  const autoGrow = () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  };
+  input.addEventListener("input", () => { autoGrow(); updateSendBtn(); });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!sendBtn.disabled) send();
+    }
+  });
+  sendBtn.addEventListener("click", send);
+
+  // ─── Drawers ───
+  const charDrawer = $("charDrawer");
+  const setDrawer = $("setDrawer");
+  const keyDrawer = $("keyDrawer");
+  const meDrawer = $("meDrawer");
+  function openDrawer(d) {
+    closeDrawers();
+    if (d === charDrawer) populateCharForm();
+    if (d === meDrawer) populateMeForm();
+    d.classList.add("open"); scrim.classList.add("open");
+  }
+  function closeDrawers() {
+    charDrawer.classList.remove("open");
+    setDrawer.classList.remove("open");
+    keyDrawer.classList.remove("open");
+    meDrawer.classList.remove("open");
+    scrim.classList.remove("open");
+  }
+  $("openCharBtn").addEventListener("click", () => openDrawer(charDrawer));
+  $("openSettingsBtn").addEventListener("click", () => openDrawer(setDrawer));
+  $("openKeyBtn").addEventListener("click", () => { $("tokenInput").value = token; openDrawer(keyDrawer); });
+  $("openMeBtn").addEventListener("click", () => openDrawer(meDrawer));
+  scrim.addEventListener("click", closeDrawers);
+  [charDrawer, setDrawer, keyDrawer, meDrawer].forEach(d => {
+    let startY = null;
+    d.addEventListener("touchstart", e => { startY = e.touches[0].clientY; });
+    d.addEventListener("touchmove", e => {
+      if (startY === null) return;
+      const dy = e.touches[0].clientY - startY;
+      if (dy > 80) { closeDrawers(); startY = null; }
+    });
+    d.addEventListener("touchend", () => { startY = null; });
+  });
+
+  // ─── Tag bar ───
+  function applyTag() {
+    document.querySelectorAll(".tag-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.tag === currentTag);
+    });
+    // Show pace submenu only when 推進 is active
+    $("paceRow").classList.toggle("open", currentTag === "pace");
+    // Adjust input placeholder
+    const placeholders = {
+      speech:   card ? `对${card.name}说...` : "说...",
+      mono:     "(心里在想什么...)",
+      action:   "(你的动作/神态/场景...)",
+      scene:    "(描述场景或环境...)",
+      pace:     paceHint(),
+    };
+    input.placeholder = placeholders[currentTag] || "";
+    updateSendBtn();
+  }
+  function paceHint() {
+    return {
+      advance:  "推进方向(可留空,让 AI 自行发挥)",
+      continue: "承接上一段(可留空)",
+      timejump: "时间点(如:第二天清晨)",
+      event:    "事件类型(如:有人闯进来。可留空)",
+    }[currentPace] || "";
+  }
+  function applyPace() {
+    document.querySelectorAll(".pace-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.pace === currentPace);
+    });
+    input.placeholder = paceHint();
+  }
+  document.querySelectorAll(".tag-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      currentTag = b.dataset.tag;
+      applyTag();
+    });
+  });
+  document.querySelectorAll(".pace-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      currentPace = b.dataset.pace;
+      applyPace();
+    });
+  });
+
+  // ─── Mode switching ───
+  document.querySelectorAll(".mode-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      mode = b.dataset.mode;
+      localStorage.setItem("dzmm_mode", mode);
+      applyMode();
+    });
+  });
+  document.querySelectorAll(".lead-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".lead-btn").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      lead = b.dataset.lead;
+    });
+  });
+
+  // ─── Character form ───
+  function populateCharForm() {
+    const c = card || {};
+    $("cName").value = c.name || "";
+    $("cNickname").value = c.nickname || "";
+    $("cBirthday").value = c.birthday || "";
+    $("cGender").value = c.gender || "";
+    $("cOrientation").value = c.orientation || "";
+    $("cBirthplace").value = c.birthplace || "";
+    $("cTag").value = c.tagline || "";
+    $("cPersonality").value = c.personality || "";
+    $("cScenario").value = c.scenario || "";
+    $("cDescription").value = c.description || "";
+    $("cFirst").value = c.first_message || "";
+    $("cSystem").value = c.system_prompt || "";
+    $("cUserName").value = c.user_name || "";
+    $("charSub").textContent = card ? "edit" : "new";
+    paintAvatarPreview($("cAvaPrev"), c.avatar, "+");
+    renderPatchLists();
+  }
+  $("saveCharBtn").addEventListener("click", () => {
+    const name = $("cName").value.trim();
+    if (!name) { alert("请至少填一个名字"); return; }
+    const newCard = {
+      name,
+      nickname: $("cNickname").value.trim(),
+      birthday: $("cBirthday").value.trim(),
+      gender: $("cGender").value.trim(),
+      orientation: $("cOrientation").value.trim(),
+      birthplace: $("cBirthplace").value.trim(),
+      tagline: $("cTag").value.trim(),
+      personality: $("cPersonality").value.trim(),
+      scenario: $("cScenario").value.trim(),
+      description: $("cDescription").value.trim(),
+      first_message: $("cFirst").value.trim(),
+      system_prompt: $("cSystem").value.trim(),
+      user_name: $("cUserName").value.trim() || "用户",
+      avatar: (card && card.avatar) || ""
+    };
+    const isNew = !card;
+    card = newCard;
+    localStorage.setItem("dzmm_card", JSON.stringify(card));
+    if (isNew) {
+      history = [];
+      if (card.first_message) history.push({ role: "assistant", content: card.first_message });
+      stats = { affinity: 0, intimacy: 0 };
+      refreshStats();
+    }
+    refreshTopBar();
+    renderMessages();
+    updateSendBtn();
+    if (token && currentModel) setStatus("online", true);
+    closeDrawers();
+  });
+  $("clearCharBtn").addEventListener("click", () => {
+    if (!confirm("确定清除角色卡?对话历史与 AI 补完也会一并清空。")) return;
+    card = null; history = []; stats = { affinity: 0, intimacy: 0 };
+    charPatches = [];
+    localStorage.removeItem("dzmm_card");
+    localStorage.removeItem("dzmm_char_patches");
+    refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn(); renderPatchLists();
+    setStatus(token ? "ready" : "no token", !!token);
+    closeDrawers();
+  });
+
+  // ─── My Page form ───
+  function populateMeForm() {
+    const m = me || {};
+    $("mName").value = m.name || "";
+    $("mNickname").value = m.nickname || "";
+    $("mBirthday").value = m.birthday || "";
+    $("mGender").value = m.gender || "";
+    $("mOrientation").value = m.orientation || "";
+    $("mAge").value = m.age || "";
+    $("mBirthplace").value = m.birthplace || "";
+    $("mIdentity").value = m.identity || "";
+    $("mPersonality").value = m.personality || "";
+    $("mLikes").value = m.likes || "";
+    $("mDislikes").value = m.dislikes || "";
+    $("mAppearance").value = m.appearance || "";
+    $("mRelation").value = m.relation || "";
+    $("mSecret").value = m.secret || "";
+    paintAvatarPreview($("mAvaPrev"), m.avatar, "+");
+    renderPatchLists();
+  }
+  $("saveMeBtn").addEventListener("click", () => {
+    me = {
+      name: $("mName").value.trim(),
+      nickname: $("mNickname").value.trim(),
+      birthday: $("mBirthday").value.trim(),
+      gender: $("mGender").value.trim(),
+      orientation: $("mOrientation").value.trim(),
+      age: $("mAge").value.trim(),
+      birthplace: $("mBirthplace").value.trim(),
+      identity: $("mIdentity").value.trim(),
+      personality: $("mPersonality").value.trim(),
+      likes: $("mLikes").value.trim(),
+      dislikes: $("mDislikes").value.trim(),
+      appearance: $("mAppearance").value.trim(),
+      relation: $("mRelation").value.trim(),
+      secret: $("mSecret").value.trim(),
+      avatar: (me && me.avatar) || ""
+    };
+    localStorage.setItem("dzmm_me", JSON.stringify(me));
+    refreshTopBar();
+    renderMessages();
+    closeDrawers();
+    addSystem(`◇ 玩家档案已更新`, false, "patch");
+  });
+  $("clearMeBtn").addEventListener("click", () => {
+    if (!confirm("确定清除你的设定与 AI 补完?")) return;
+    me = null; mePatches = [];
+    localStorage.removeItem("dzmm_me");
+    localStorage.removeItem("dzmm_me_patches");
+    populateMeForm();
+    renderPatchLists();
+    closeDrawers();
+  });
+
+  // ─── Token ───
+  $("saveTokenBtn").addEventListener("click", async () => {
+    const v = $("tokenInput").value.trim();
+    if (!v) { alert("请输入 token"); return; }
+    token = v; localStorage.setItem("dzmm_token", v);
+    closeDrawers(); await loadModels();
+  });
+  $("clearTokenBtn").addEventListener("click", () => {
+    token = ""; localStorage.removeItem("dzmm_token");
+    $("tokenInput").value = "";
+    setStatus("no token", false); setKeyAlert(true);
+    $("modelSel").innerHTML = `<option value="">— 请先填 token —</option>`;
+  });
+
+  // ─── Settings ───
+  $("modelSel").addEventListener("change", e => { currentModel = e.target.value; });
+  document.querySelectorAll("#styleGroup .seg").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#styleGroup .seg").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      currentStyle = b.dataset.val;
+    });
+  });
+  $("tempRange").addEventListener("input", e => { currentTemp = parseFloat(e.target.value); $("tempVal").textContent = currentTemp.toFixed(2); });
+  $("tokRange").addEventListener("input", e => { currentMaxTokens = parseInt(e.target.value); $("tokVal").textContent = currentMaxTokens; });
+  $("resetBtn").addEventListener("click", () => {
+    if (!card) { closeDrawers(); return; }
+    history = [];
+    if (card.first_message) history.push({ role: "assistant", content: card.first_message });
+    stats = { affinity: 0, intimacy: 0 };
+    refreshStats(); renderMessages(); closeDrawers();
+  });
+
+  // ─── Avatar uploaders wiring ───
+  wireAvatarUploader({
+    preview: "cAvaPrev", input: "cAvaInput", pickBtn: "cAvaPick", clearBtn: "cAvaClear",
+    fallback: "+",
+    getAvatar: () => (card && card.avatar) || "",
+    setAvatar: (v) => {
+      if (!card) card = { name: "", user_name: "用户" };
+      card.avatar = v;
+      localStorage.setItem("dzmm_card", JSON.stringify(card));
+      refreshTopBar();
+      renderMessages();
+    }
+  });
+  wireAvatarUploader({
+    preview: "mAvaPrev", input: "mAvaInput", pickBtn: "mAvaPick", clearBtn: "mAvaClear",
+    fallback: "+",
+    getAvatar: () => (me && me.avatar) || "",
+    setAvatar: (v) => {
+      if (!me) me = {};
+      me.avatar = v;
+      localStorage.setItem("dzmm_me", JSON.stringify(me));
+      refreshTopBar();
+      renderMessages();
+    }
+  });
+
+  // ─── Init ───
+  if (card && card.first_message) history.push({ role: "assistant", content: card.first_message });
+  applyMode();
+  applyTag();
+  applyPace();
+  refreshStats();
+  refreshTopBar();
+  renderMessages();
+  renderPatchLists();
+  updateSendBtn();
+  if (token) loadModels(); else { setKeyAlert(true); setStatus("no token", false); }
+</script>
+</body>
+</html>
