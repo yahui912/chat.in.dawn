@@ -499,21 +499,15 @@
 
   .hidden-file{display:none;}
 
-  /* Level ring */
-  .level-stat{
+  /* Cumulative stat number */
+  .stat-line{
     display:flex;align-items:center;gap:8px;
   }
-  .level-num{
+  .stat-num{
     font-family:'Inter','Noto Sans SC',sans-serif;font-size:22px;font-weight:600;
     color:var(--primary);line-height:1;
+    transition:color 0.35s;
   }
-  .level-meta{display:flex;flex-direction:column;gap:1px;}
-  .level-label{
-    font-size:9px;color:var(--ink-faint);
-    font-family:'JetBrains Mono',monospace;
-    letter-spacing:0.16em;text-transform:uppercase;
-  }
-  .level-exp{font-size:10px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;}
 
   /* Level-up flash */
   @keyframes levelup-flash{
@@ -521,7 +515,7 @@
     40%{transform:scale(1.15);text-shadow:0 0 16px rgba(212,163,163,0.7);}
     100%{transform:scale(1);text-shadow:none;}
   }
-  .level-num.flash{animation:levelup-flash 0.9s ease-out;}
+  .stat-num.flash{animation:levelup-flash 0.9s ease-out;}
 
   /* ─── Marker buttons (必选: 对白/动作/心绪) ─── */
   .marker-btn{
@@ -571,6 +565,248 @@
     margin:6px 2px;
     background:linear-gradient(to bottom, transparent, rgba(180,175,195,0.35), transparent);
   }
+
+  /* ─── Toast (replaces in-chat system messages) ─── */
+  .toast-host{
+    position:fixed;top:calc(env(safe-area-inset-top, 0px) + 12px);
+    right:12px;left:12px;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    pointer-events:none;
+    z-index:200;
+  }
+  .toast{
+    pointer-events:auto;
+    max-width:340px;
+    padding:10px 16px;
+    background:rgba(255,255,255,0.75);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:14px;
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:12.5px;
+    color:#5a5562;
+    box-shadow:0 8px 24px rgba(148,139,161,0.18);
+    opacity:0;
+    transform:translateY(-12px);
+    transition:opacity 0.28s ease, transform 0.28s cubic-bezier(.4,1.4,.6,1);
+  }
+  .toast.toast-show{opacity:1;transform:translateY(0);}
+  .toast.toast-out{opacity:0;transform:translateY(-6px);}
+  .toast.toast-error{
+    background:rgba(255,238,236,0.85);
+    border-color:rgba(220,150,150,0.5);
+    color:#9a5a5a;
+  }
+
+  /* ─── Message action menu (#7) ─── */
+  .msg-row{position:relative;}
+  .msg-row .msg-actions{
+    display:none;
+    position:absolute;
+    top:-6px;
+    z-index:5;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    border:1px solid rgba(180,175,195,0.3);
+    border-radius:99px;
+    box-shadow:0 6px 18px rgba(80,75,100,0.15);
+    padding:3px;
+    gap:1px;
+  }
+  .msg-row.user-row .msg-actions{ right:8px; flex-direction:row-reverse; }
+  .msg-row.ai-row   .msg-actions{ left:8px;  flex-direction:row; }
+  .msg-row.actions-open .msg-actions{ display:flex; }
+  .msg-act-btn{
+    width:28px;height:28px;border-radius:99px;border:none;
+    background:transparent;color:#7c7b88;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;
+    transition:background 0.15s;
+  }
+  .msg-act-btn:hover{background:rgba(148,139,161,0.12);color:var(--ink);}
+  .msg-act-btn.danger:hover{background:rgba(184,85,85,0.12);color:var(--err);}
+  /* inline-edit textarea */
+  .msg-edit-ta{
+    width:100%;
+    min-height:60px;max-height:200px;
+    background:rgba(255,255,255,0.85);
+    border:1px solid rgba(148,139,161,0.4);
+    border-radius:12px;
+    padding:8px 10px;
+    font-family:'Noto Serif SC',serif;
+    font-size:13.5px;line-height:1.7;
+    color:#5a5562;
+    outline:none;resize:vertical;
+  }
+  .msg-edit-row{display:flex;gap:6px;margin-top:6px;justify-content:flex-end;}
+  .msg-edit-btn{
+    font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid rgba(180,175,195,0.3);
+    background:rgba(255,255,255,0.7);color:#7c7b88;cursor:pointer;
+    font-family:'Inter','Noto Sans SC',sans-serif;
+  }
+  .msg-edit-btn.primary{
+    background:linear-gradient(135deg, #a89eb3, #948ba1);
+    color:#fff;border-color:transparent;
+  }
+  .msg-edit-btn:hover{filter:brightness(1.04);}
+
+  /* ─── Scroll-to-bottom pill (#8) ─── */
+  .scroll-pill{
+    --kb-inset: 0px;
+    position:absolute;
+    bottom:175px;
+    left:50%;
+    transform:translateX(-50%) translateY(calc(8px - var(--kb-inset)));
+    z-index:20;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(16px) saturate(180%);
+    -webkit-backdrop-filter:blur(16px) saturate(180%);
+    border:1px solid rgba(255,255,255,0.7);
+    box-shadow:0 8px 22px rgba(80,75,100,0.18);
+    border-radius:99px;
+    padding:7px 14px 7px 11px;
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:12px;
+    color:#5a5562;
+    display:flex;align-items:center;gap:6px;
+    cursor:pointer;
+    opacity:0;pointer-events:none;
+    transition:opacity 0.22s ease, transform 0.22s cubic-bezier(.4,1.3,.5,1);
+  }
+  .scroll-pill.show{
+    opacity:1;pointer-events:auto;
+    transform:translateX(-50%) translateY(calc(0px - var(--kb-inset)));
+  }
+  .scroll-pill .dot{
+    width:6px;height:6px;border-radius:99px;
+    background:#c98787;
+    box-shadow:0 0 0 3px rgba(201,135,135,0.18);
+  }
+  .scroll-pill.no-new .dot{display:none;}
+
+  /* ─── Summary divider (#15) ─── */
+  .summary-card{
+    align-self:stretch;
+    margin:6px 4px 4px;
+    padding:10px 14px;
+    background:rgba(255,255,255,0.38);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px dashed rgba(168,158,179,0.4);
+    border-radius:14px;
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  .summary-card:hover{background:rgba(255,255,255,0.55);}
+  .summary-head{
+    display:flex;align-items:center;gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    color:#a89eb3;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-bottom:4px;
+  }
+  .summary-head .caret{
+    margin-left:auto;
+    transition:transform 0.25s;
+    font-size:10px;
+  }
+  .summary-card.open .summary-head .caret{ transform:rotate(90deg); }
+  .summary-body{
+    font-family:'Noto Serif SC',serif;
+    font-size:12px;
+    color:#7c7283;
+    line-height:1.7;
+    white-space:pre-wrap;
+  }
+  .summary-card:not(.open) .summary-body{
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+
+  /* ─── Scene picker pop (#13) ─── */
+  .scene-pop{
+    position:absolute;
+    bottom:110px;
+    left:16px;right:16px;
+    z-index:38;
+    max-height:48vh;
+    background:rgba(255,255,253,0.96);
+    backdrop-filter:blur(26px) saturate(160%);
+    -webkit-backdrop-filter:blur(26px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.85);
+    border-radius:20px;
+    box-shadow:0 20px 50px -10px rgba(80,75,100,0.3);
+    opacity:0;transform:translateY(12px) scale(0.96);pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s cubic-bezier(.4,1.3,.5,1);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .scene-pop.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .scene-pop-head{
+    padding:12px 16px 8px;
+    border-bottom:1px solid rgba(180,175,195,0.18);
+    flex-shrink:0;
+  }
+  .scene-pop-title{
+    font-family:'Noto Serif SC',serif;font-size:14px;color:#5a5562;
+    display:flex;align-items:center;gap:6px;
+  }
+  .scene-pop-sub{
+    font-size:10px;color:#9b9aa5;
+    font-family:'JetBrains Mono',monospace;
+    letter-spacing:0.08em;margin-top:2px;
+  }
+  .scene-pop-search{
+    width:100%;margin-top:8px;
+    padding:6px 10px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.7);
+    border:1px solid rgba(180,175,195,0.22);
+    font-size:12px;outline:none;
+    font-family:'Noto Sans SC',sans-serif;
+  }
+  .scene-pop-body{
+    overflow-y:auto;padding:8px;flex:1;
+  }
+  .scene-pop-body::-webkit-scrollbar{width:4px;}
+  .scene-pop-body::-webkit-scrollbar-thumb{background:rgba(148,139,161,0.3);border-radius:2px;}
+  .scene-pop-item{
+    padding:8px 11px;border-radius:10px;cursor:pointer;
+    display:flex;flex-direction:column;gap:2px;
+    transition:background 0.15s;
+  }
+  .scene-pop-item:hover{background:rgba(148,139,161,0.1);}
+  .scene-pop-item .nm{font-size:12.5px;color:#5a5562;font-family:'Noto Sans SC',sans-serif;}
+  .scene-pop-item .ds{font-size:10.5px;color:#9b9aa5;font-family:'Noto Sans SC',sans-serif;line-height:1.5;}
+  .scene-pop-empty{padding:24px;text-align:center;font-size:11.5px;color:#9b9aa5;}
+
+  /* time-of-day indicator chip in header */
+  .time-chip{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;letter-spacing:0.1em;
+    color:#9b9aa5;
+    margin-left:4px;
+    opacity:0.85;
+  }
+
+  /* token reveal toggle */
+  .token-input-wrap{position:relative;}
+  .token-input-wrap .input{padding-right:38px;}
+  .token-eye{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;
+    background:transparent;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:8px;color:#9b9aa5;
+    transition:color 0.18s, background 0.18s;
+  }
+  .token-eye:hover{background:rgba(0,0,0,0.04);color:#5a5562;}
+  .token-eye i{font-size:16px;}
 </style>
 </head>
 <body class="story">
@@ -595,7 +831,10 @@
         </div>
         <div class="min-w-0 flex-1">
           <h1 class="font-medium text-[15px] leading-tight text-[#5a5562] truncate" id="charNameDisplay">未设定角色</h1>
-          <p class="text-[10px] mono uppercase tracking-wider text-[#9b9aa5] mt-0.5" id="charTagDisplay">点击新建角色卡</p>
+          <p class="text-[10px] mono uppercase tracking-wider text-[#9b9aa5] mt-0.5 flex items-center gap-1">
+            <span id="charTagDisplay">点击新建角色卡</span>
+            <span class="time-chip" id="timeChip" title="当前时段（注入到 prompt）"></span>
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-0.5 pr-1 flex-shrink-0">
@@ -624,12 +863,8 @@
             <i class="ph-fill ph-heart text-[#c98787] text-[11px]"></i>
             <span class="text-[8.5px] font-medium uppercase tracking-widest text-[#a89eb3]">好感</span>
           </div>
-          <div class="level-stat">
-            <span class="level-num" id="affLevel">0</span>
-            <div class="level-meta">
-              <span class="level-label">Lv</span>
-              <span class="level-exp"><span id="affExp">0</span>/100</span>
-            </div>
+          <div class="stat-line">
+            <span class="stat-num" id="affNum">0</span>
           </div>
           <div class="h-1 bg-[#ede9f0] rounded-full overflow-hidden mt-1.5">
             <div class="h-full bg-gradient-to-r from-[#d4a3a3] to-[#e8c5c5] transition-all duration-700" id="affBar" style="width:0%"></div>
@@ -644,12 +879,8 @@
             <i class="ph-fill ph-sparkle text-[#a89eb3] text-[11px]"></i>
             <span class="text-[8.5px] font-medium uppercase tracking-widest text-[#a89eb3]">亲密</span>
           </div>
-          <div class="level-stat">
-            <span class="level-num" id="intLevel">0</span>
-            <div class="level-meta">
-              <span class="level-label">Lv</span>
-              <span class="level-exp"><span id="intExp">0</span>/100</span>
-            </div>
+          <div class="stat-line">
+            <span class="stat-num" id="intNum">0</span>
           </div>
           <div class="h-1 bg-[#ede9f0] rounded-full overflow-hidden mt-1.5">
             <div class="h-full bg-gradient-to-r from-[#a89eb3] to-[#c8b8d8] transition-all duration-700" id="intBar" style="width:0%"></div>
@@ -671,6 +902,23 @@
 
   <!-- MESSAGES -->
   <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 pb-[170px] flex flex-col gap-3" id="chatArea"></div>
+
+  <!-- Smart scroll pill (#8) -->
+  <button class="scroll-pill" id="scrollPill" type="button">
+    <span class="dot"></span>
+    <i class="ph ph-arrow-down text-[12px]"></i>
+    <span id="scrollPillText">回到底部</span>
+  </button>
+
+  <!-- Scene picker pop (#13) -->
+  <div class="scene-pop" id="scenePop">
+    <div class="scene-pop-head">
+      <div class="scene-pop-title"><i class="ph ph-map-pin text-[#a89eb3]"></i>切换场景</div>
+      <div class="scene-pop-sub">选一个地点，让角色自然切到那里</div>
+      <input type="text" id="sceneSearch" class="scene-pop-search" placeholder="搜地点…" />
+    </div>
+    <div class="scene-pop-body" id="scenePopBody"></div>
+  </div>
 
   <!-- INPUT -->
   <footer class="absolute bottom-0 left-0 right-0 p-4 pt-2 pointer-events-none">
@@ -701,6 +949,10 @@
         <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
           <i class="ph ph-clock-clockwise text-[12px]"></i>
           <span class="cn">时跳</span>
+        </button>
+        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" id="scenePickerBtn" title="切换场景">
+          <i class="ph ph-map-pin text-[12px]"></i>
+          <span class="cn">场景</span>
         </button>
       </div>
 
@@ -754,7 +1006,10 @@
     <div class="drawer-body">
       <div class="field">
         <div class="field-head"><span class="field-label"><i class="ph ph-key"></i> DZMM Token</span></div>
-        <input type="password" class="input" id="tokenInput" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx" autocomplete="off">
+        <div class="token-input-wrap">
+          <input type="password" class="input" id="tokenInput" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx" autocomplete="off">
+          <button type="button" class="token-eye" id="tokenEye" title="显示/隐藏" aria-label="切换显示"><i class="ph ph-eye" id="tokenEyeIcon"></i></button>
+        </div>
         <div class="note"><strong>提示</strong>:Token 保存在浏览器本地存储。正式部署应通过自己的后端代理调用 API。</div>
       </div>
       <button class="btn primary" id="saveTokenBtn"><i class="ph ph-check"></i>保存并连接</button>
@@ -771,11 +1026,17 @@
     </div>
     <div class="drawer-body">
 
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn ghost" id="importBtn" title="导入单张角色卡 JSON"><i class="ph ph-upload-simple"></i>导入卡</button>
+        <button class="btn ghost" id="exportBtn" title="导出当前角色卡为 JSON"><i class="ph ph-download-simple"></i>导出卡</button>
+      </div>
       <div class="btn-row" style="margin-bottom:14px;">
-        <button class="btn ghost" id="importBtn"><i class="ph ph-upload-simple"></i>导入</button>
-        <button class="btn ghost" id="exportBtn"><i class="ph ph-download-simple"></i>导出</button>
+        <button class="btn ghost" id="exportAllBtn" title="导出全部数据 (角色卡 + 历史 + 数值 + 档案)"><i class="ph ph-archive"></i>导出全部</button>
+        <button class="btn ghost" id="importAllBtn" title="导入全部数据 (会覆盖现有内容!)"><i class="ph ph-database"></i>导入全部</button>
+        <button class="btn ghost" id="exportChatBtn" title="只导出当前模式的对话历史"><i class="ph ph-chats"></i>导出对话</button>
       </div>
       <input type="file" id="fileInput" class="hidden-file" accept=".txt,.json,application/json,text/plain">
+      <input type="file" id="fileInputAll" class="hidden-file" accept=".json,application/json">
 
       <div class="accordion open" data-acc="basic">
         <div class="acc-head">
@@ -855,9 +1116,27 @@
           <div class="acc-title"><i class="ph ph-sparkle text-[14px] text-[#a89eb3]"></i>对话补完 <span class="acc-count" id="patchCount">0</span></div>
         </div>
         <div class="acc-body">
-          <div class="note" style="background:rgba(168,158,179,0.1);border-color:rgba(168,158,179,0.22);"><strong>由对话自动累积</strong>:角色在对话中发现的新信息(习惯、秘密、玩家身份等)。下次对话会注入到 prompt。</div>
+          <div class="note" style="background:rgba(168,158,179,0.1);border-color:rgba(168,158,179,0.22);"><strong>由对话自动累积</strong>:角色在对话中发现的新信息(习惯、秘密、玩家身份等)。下次对话会注入到 prompt。已自动去重,上限 50 条。</div>
           <div class="chip-list" id="patchList" style="flex-direction:column;align-items:stretch;"></div>
           <div id="patchEmpty" class="text-[11px] text-[#a89eb3] cn text-center py-3" style="display:none;">还没有补完内容</div>
+          <button class="btn ghost" id="clearPatchesBtn" style="margin-top:8px;"><i class="ph ph-trash"></i>清空全部补完</button>
+        </div>
+      </div>
+
+      <div class="accordion" data-acc="jsonedit">
+        <div class="acc-head">
+          <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
+          <div class="acc-title"><i class="ph ph-code text-[14px] text-[#a89eb3]"></i>原始 JSON</div>
+        </div>
+        <div class="acc-body">
+          <div class="note">直接编辑角色卡的完整 JSON。点「读取」从当前卡同步到下面的编辑框,改完点「应用」覆盖回去。这是高级用法 — 格式错会拒绝保存。</div>
+          <textarea class="ta mono" id="jsonEditArea" rows="12" placeholder="点上方「读取」按钮把当前卡载入到这里…" style="font-size:11.5px;line-height:1.55;"></textarea>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn ghost" id="jsonLoadBtn"><i class="ph ph-arrow-down"></i>读取</button>
+            <button class="btn ghost" id="jsonApplyBtn"><i class="ph ph-check"></i>应用</button>
+            <button class="btn ghost" id="jsonCopyBtn"><i class="ph ph-copy"></i>复制</button>
+          </div>
+          <div id="jsonEditStatus" class="text-[10.5px] mono mt-1.5" style="min-height:14px;"></div>
         </div>
       </div>
 
@@ -918,6 +1197,21 @@
         <div class="field-head"><span class="field-label">最大输出</span><span class="field-val" id="tokVal">1200</span></div>
         <input type="range" id="tokRange" min="100" max="4000" step="50" value="1200">
       </div>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label" title="超过这个轮数后，旧消息会自动压缩成一段摘要再发给 API（你仍能在聊天里看到原文）">压缩历史阈值</span>
+          <span class="field-val" id="summarizeVal">30 轮</span>
+        </div>
+        <input type="range" id="summarizeRange" min="0" max="80" step="5" value="30">
+        <div class="range-end"><span>0 = 关闭</span><span>80 轮</span></div>
+      </div>
+      <div class="field">
+        <div class="field-head"><span class="field-label">时间感</span></div>
+        <div class="seg-group" id="timeModeGroup">
+          <button class="seg active" data-val="auto">跟系统时间</button>
+          <button class="seg" data-val="off">关闭</button>
+        </div>
+      </div>
       <button class="btn danger" id="resetBtn"><i class="ph ph-arrow-counter-clockwise"></i>重置当前模式对话</button>
     </div>
   </div>
@@ -956,29 +1250,19 @@ const DEFAULT_CARD = () => ({
   secondary_characters: [], locations: []
 });
 
+// ─── Tiny synchronous values stay in localStorage (needed at boot, small) ───
 let token = localStorage.getItem("dzmm_token") || "";
-let card = null;
-try { const raw = localStorage.getItem("dzmm_card"); if (raw) card = JSON.parse(raw); } catch(e){}
-
-// Player profile — shared across modes
-let profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
-try { const raw = localStorage.getItem("dzmm_profile"); if (raw) profile = Object.assign(profile, JSON.parse(raw)); } catch(e){}
-
-let histories = { story: [], intimate: [] };
-try {
-  const raw = localStorage.getItem("dzmm_histories");
-  if (raw) histories = Object.assign({ story: [], intimate: [] }, JSON.parse(raw));
-} catch(e){}
-
-// Level system: { affLevel, affExp, intLevel, intExp } per mode? — affinity tracks across story, intimacy across intimate
-let stats = { affLevel: 0, affExp: 0, intLevel: 0, intExp: 0 };
-try {
-  const raw = localStorage.getItem("dzmm_stats");
-  if (raw) stats = Object.assign({ affLevel: 0, affExp: 0, intLevel: 0, intExp: 0 }, JSON.parse(raw));
-} catch(e){}
-
 let mode = localStorage.getItem("dzmm_mode") || "story";
 let ageConfirmed = localStorage.getItem("dzmm_age_ok") === "yes";
+
+// ─── Big values live in IndexedDB. These are mutable placeholders; the
+//     async bootstrap below will fill them in from idb (with localStorage
+//     migration on first run). ───
+let card = null;
+let profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
+let histories = { story: [], intimate: [] };
+let stats = { story: { aff: 0, int: 0 }, intimate: { aff: 0, int: 0 } };
+function getCurStats(){ return stats[mode] || (stats[mode] = { aff:0, int:0 }); }
 
 let currentModel = "";
 let currentStyle = "standard";
@@ -987,6 +1271,20 @@ let currentMaxTokens = 1200;
 let abortController = null;
 let isStreaming = false;
 
+// ─── New: smart-scroll state (#8) ───
+let isPinnedToBottom = true;     // is the user near the bottom?
+let hasUnseenBelow = false;       // new content arrived while not pinned?
+
+// ─── New: per-chat soft-summary cache (#15) ───
+//  Shape: { story: { upTo:N, text:"..." } | null, intimate: ... }
+//  "upTo" = index in histories[mode] up to (exclusive) which is summarized.
+let summaries = { story: null, intimate: null };
+
+// ─── New: settings (#15 #14) ───
+let summarizeThreshold = parseInt(localStorage.getItem("dzmm_sum_th") || "30");  // 0 = off
+let timeMode = localStorage.getItem("dzmm_time_mode") || "auto"; // 'auto' | 'off'
+let _isSummarizing = false;       // throttle re-entrant summary calls
+
 const $ = (id) => document.getElementById(id);
 const chatArea = $("chatArea");
 const input = $("input");
@@ -994,12 +1292,143 @@ const sendBtn = $("sendBtn");
 const scrim = $("scrim");
 
 // ═══════════════════════════════════════════════════════════
-// Persistence
+// Persistence — IndexedDB layer with debounced writes
 // ═══════════════════════════════════════════════════════════
-function persistCard(){ if(card) localStorage.setItem("dzmm_card", JSON.stringify(card)); }
-function persistProfile(){ localStorage.setItem("dzmm_profile", JSON.stringify(profile)); }
-function persistHistories(){ localStorage.setItem("dzmm_histories", JSON.stringify(histories)); }
-function persistStats(){ localStorage.setItem("dzmm_stats", JSON.stringify(stats)); }
+// Minimal idb wrapper. One db (`dzmm`), one store (`kv`), key = string.
+const IDB_NAME = "dzmm";
+const IDB_STORE = "kv";
+let _db = null;
+function _openDB(){
+  if (_db) return Promise.resolve(_db);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)){
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => { _db = req.result; resolve(_db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key){
+  const db = await _openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result === undefined ? null : req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, val){
+  const db = await _openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).put(val, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+async function idbDel(key){
+  const db = await _openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readwrite");
+    tx.objectStore(IDB_STORE).delete(key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function idbAll(){
+  const db = await _openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, "readonly");
+    const store = tx.objectStore(IDB_STORE);
+    const out = {};
+    const cur = store.openCursor();
+    cur.onsuccess = (ev) => {
+      const c = ev.target.result;
+      if (c){ out[c.key] = c.value; c.continue(); }
+      else resolve(out);
+    };
+    cur.onerror = () => reject(cur.error);
+  });
+}
+
+// Debounced writers — coalesce rapid edits to ~one write per 300ms per key.
+const _pendingTimers = {};
+const _pendingValues = {};
+function _scheduleWrite(key, value){
+  _pendingValues[key] = value;
+  if (_pendingTimers[key]) return;
+  _pendingTimers[key] = setTimeout(async () => {
+    _pendingTimers[key] = null;
+    const val = _pendingValues[key];
+    delete _pendingValues[key];
+    try { await idbSet(key, val); }
+    catch(e){
+      console.error("[idb] write failed for", key, e);
+      // No fallback: re-schedule once after a delay; final loss is logged.
+      // (A localStorage fallback would never be read on next boot, so it's misleading.)
+    }
+  }, 300);
+}
+// Flush any pending writes immediately (used before unload + before export).
+async function flushPending(){
+  const keys = Object.keys(_pendingTimers).filter(k => _pendingTimers[k]);
+  await Promise.all(keys.map(async k => {
+    clearTimeout(_pendingTimers[k]);
+    _pendingTimers[k] = null;
+    const val = _pendingValues[k];
+    delete _pendingValues[k];
+    try { await idbSet(k, val); } catch(e){ console.error(e); }
+  }));
+}
+window.addEventListener("beforeunload", () => {
+  // Synchronous-ish: schedule the writes (browser will try to complete them).
+  // Best effort — IDB doesn't support truly sync writes.
+  for (const k of Object.keys(_pendingTimers)){
+    if (_pendingTimers[k]){
+      clearTimeout(_pendingTimers[k]);
+      _pendingTimers[k] = null;
+      idbSet(k, _pendingValues[k]).catch(()=>{});
+    }
+  }
+});
+
+function persistCard(){ if(card) _scheduleWrite("card", card); }
+function persistProfile(){ _scheduleWrite("profile", profile); }
+function persistHistories(){ _scheduleWrite("histories", histories); }
+function persistStats(){ _scheduleWrite("stats", stats); }
+function persistSummaries(){ _scheduleWrite("summaries", summaries); }
+
+// ═══════════════════════════════════════════════════════════
+// Time of day (#14)
+// ═══════════════════════════════════════════════════════════
+//  bucket the user's local clock so the model can flavor scenes accordingly.
+function getTimeOfDay(now){
+  now = now || new Date();
+  const h = now.getHours();
+  // 5-8 晨光, 9-11 上午, 12-13 中午, 14-16 午后, 17-18 傍晚, 19-22 夜晚, 23-4 深夜
+  if (h >= 5 && h < 9)  return { key:"dawn",     label:"晨光",     desc:"清晨，天色刚亮，空气清冷，街道还没完全醒过来" };
+  if (h >= 9 && h < 12) return { key:"morning",  label:"上午",     desc:"上午时段，阳光明亮，人活动起来，正常工作生活节奏" };
+  if (h >= 12 && h < 14)return { key:"noon",     label:"中午",     desc:"接近正午，光线很亮，节奏稍微放松，是吃饭/午休的时间" };
+  if (h >= 14 && h < 17)return { key:"afternoon",label:"午后",     desc:"下午时段，光线慢慢偏暖，节奏略缓，适合悠闲交流" };
+  if (h >= 17 && h < 19)return { key:"dusk",     label:"傍晚",     desc:"夕阳时分，光线染上金色和橙红，气温下降，城市进入下班节奏" };
+  if (h >= 19 && h < 23)return { key:"evening",  label:"夜晚",     desc:"入夜后，店铺灯光亮起，街上行人放慢，气氛更亲密、放松" };
+  return                       { key:"latenight",label:"深夜",     desc:"深夜，街道安静，只剩零星灯光，大部分人都已经入眠" };
+}
+
+function refreshTimeChip(){
+  const el = $("timeChip");
+  if (!el) return;
+  if (timeMode === "off"){ el.textContent = ""; return; }
+  const t = getTimeOfDay();
+  el.textContent = `· ${t.label}`;
+}
+// auto-refresh the chip every 60s so labels update across boundaries
+setInterval(() => { refreshTimeChip(); }, 60_000);
 
 // ═══════════════════════════════════════════════════════════
 // Top bar / status
@@ -1025,6 +1454,7 @@ function refreshTopBar() {
     tag.textContent = token ? "点击新建角色卡" : "点击新建角色卡";
     input.placeholder = "说点什么...";
   }
+  refreshTimeChip();
 }
 
 function refreshInputPlaceholder(){
@@ -1051,42 +1481,39 @@ function applyMode() {
 // Level system
 // ═══════════════════════════════════════════════════════════
 function applyStatChange(kind, delta){
-  // kind = "aff" or "int"; delta = integer
-  const prevLvl = stats[kind+"Level"];
-  let lvl = stats[kind+"Level"];
-  let exp = stats[kind+"Exp"] + delta;
-  while (exp >= 100){
-    exp -= 100; lvl += 1;
+  // kind = "aff" or "int"; delta = integer. Mutates current-mode substats.
+  const cur = getCurStats();
+  const prev = cur[kind] || 0;
+  let next = prev + delta;
+  if (next < 0) next = 0;  // floor at 0
+  cur[kind] = next;
+
+  const prevMile = Math.floor(prev / 50);
+  const nextMile = Math.floor(next / 50);
+  if (nextMile > prevMile && delta > 0){
+    flashMilestone(kind, next);
   }
-  while (exp < 0 && lvl > 0){
-    exp += 100; lvl -= 1;
-  }
-  if (exp < 0) exp = 0;
-  stats[kind+"Level"] = lvl;
-  stats[kind+"Exp"] = exp;
-  if (lvl > prevLvl){
-    flashLevelUp(kind, lvl);
-  }
+
   refreshStats();
   persistStats();
 }
 
 function refreshStats() {
-  $("affLevel").textContent = stats.affLevel;
-  $("affExp").textContent = stats.affExp;
-  $("affBar").style.width = stats.affExp + "%";
-  $("intLevel").textContent = stats.intLevel;
-  $("intExp").textContent = stats.intExp;
-  $("intBar").style.width = stats.intExp + "%";
+  const cur = getCurStats();
+  const aff = cur.aff || 0;
+  const intt = cur.int || 0;
+  $("affNum").textContent = aff;
+  $("intNum").textContent = intt;
+  $("affBar").style.width = (aff % 100) + "%";
+  $("intBar").style.width = (intt % 100) + "%";
 }
 
-function flashLevelUp(kind, newLvl){
-  const el = kind === "aff" ? $("affLevel") : $("intLevel");
+function flashMilestone(kind, newVal){
+  const el = kind === "aff" ? $("affNum") : $("intNum");
+  if (!el) return;
   el.classList.remove("flash");
   void el.offsetWidth;
   el.classList.add("flash");
-  const label = kind === "aff" ? "好感" : "亲密";
-  addSystemMessage(`✦ ${label}等级 ↑ Lv.${newLvl}`);
 }
 
 function currentHistory(){ return histories[mode]; }
@@ -1219,22 +1646,34 @@ function parseAssistantOutput(text, partial){
   return { segments, stats: statsList, patches, streamingTail };
 }
 
+const PATCH_CAP = 50;
+function _patchSig(n){
+  // signature used for dedupe — ignore timestamp & target casing
+  return [(n.target||"").trim(), (n.field||"").trim(), (n.content||"").trim()].join("|");
+}
 function applyCardPatches(patches){
   if (!patches.length || !card) return;
-  let added = 0;
+  if (!card.notes) card.notes = [];
+  const have = new Set(card.notes.map(_patchSig));
+  let added = 0, skipped = 0;
   for (const p of patches){
-    const target = p["目标"] || p["target"];
+    const target = p["目标"] || p["target"] || "";
     const field = p["字段"] || p["field"];
     const content = p["内容"] || p["content"];
     if (!field || !content) continue;
-    if (!card.notes) card.notes = [];
+    const sig = _patchSig({ target, field, content });
+    if (have.has(sig)){ skipped++; continue; } // dedupe
+    have.add(sig);
     card.notes.push({ target, field, content, ts: Date.now() });
     added++;
   }
-  persistCard();
+  // Cap: keep newest PATCH_CAP entries (FIFO drop)
+  if (card.notes.length > PATCH_CAP){
+    card.notes = card.notes.slice(-PATCH_CAP);
+  }
+  if (added || skipped) persistCard();
   if (added){
-    addSystemMessage(`✦ 角色卡补完 +${added}`);
-    // If the char drawer is currently open, refresh its accordion
+    addSystemMessage(`✦ 角色卡补完 +${added}` + (skipped ? ` (已去重 ${skipped})` : ""));
     if (charDrawer.classList.contains("open")) renderPatches();
   }
 }
@@ -1242,8 +1681,75 @@ function applyCardPatches(patches){
 // ═══════════════════════════════════════════════════════════
 // Rendering
 // ═══════════════════════════════════════════════════════════
+
+// ─── Smart-scroll helpers (#8) ───
+//  Auto-scroll only when user is already pinned to the bottom.
+//  When the user has scrolled up to read, new content arriving instead
+//  shows a "↓ 新消息" pill that they can tap to jump down.
+const NEAR_BOTTOM_PX = 90;
+function isNearBottom(){
+  const gap = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+  return gap <= NEAR_BOTTOM_PX;
+}
+function maybeScrollToBottom(force){
+  if (force || isPinnedToBottom){
+    chatArea.scrollTop = chatArea.scrollHeight;
+    hasUnseenBelow = false;
+  } else {
+    hasUnseenBelow = true;
+  }
+  refreshScrollPill();
+}
+function refreshScrollPill(){
+  const pill = $("scrollPill");
+  if (!pill) return;
+  if (isPinnedToBottom){
+    pill.classList.remove("show");
+    return;
+  }
+  pill.classList.add("show");
+  pill.classList.toggle("no-new", !hasUnseenBelow);
+  $("scrollPillText").textContent = hasUnseenBelow ? "新消息" : "回到底部";
+}
+// hook up listeners after element exists
+function _wireSmartScroll(){
+  chatArea.addEventListener("scroll", () => {
+    const wasPinned = isPinnedToBottom;
+    isPinnedToBottom = isNearBottom();
+    if (isPinnedToBottom && !wasPinned){ hasUnseenBelow = false; }
+    refreshScrollPill();
+  }, { passive: true });
+  $("scrollPill")?.addEventListener("click", () => {
+    chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: "smooth" });
+    isPinnedToBottom = true;
+    hasUnseenBelow = false;
+    refreshScrollPill();
+  });
+}
+
+// ─── Summary card (#15) ───
+function renderSummaryCard(sum, idx){
+  const card = document.createElement("div");
+  card.className = "summary-card";
+  card.dataset.summary = "1";
+  card.innerHTML = `
+    <div class="summary-head">
+      <i class="ph ph-book-bookmark"></i>
+      <span>剧情回顾 · 前 ${sum.upTo} 轮</span>
+      <i class="ph ph-caret-right caret"></i>
+    </div>
+    <div class="summary-body">${escapeHTML(sum.text)}</div>
+  `;
+  card.addEventListener("click", () => card.classList.toggle("open"));
+  chatArea.appendChild(card);
+}
+
 function renderMessages() {
   chatArea.innerHTML = "";
+  // Reset smart-scroll state on any full re-render
+  isPinnedToBottom = true;
+  hasUnseenBelow = false;
+  refreshScrollPill();
   if (!card) {
     const empty = document.createElement("div");
     empty.className = "flex flex-col items-center justify-center text-center gap-3 mt-16";
@@ -1274,23 +1780,41 @@ function renderMessages() {
     return;
   }
   // Render
-  for (const m of h){
-    if (m.role === "user") renderUserMessage(m.display || m.content);
-    else if (m.role === "assistant") renderAssistantStored(m);
+  const sum = summaries[mode];
+  const sumUpTo = (sum && sum.upTo) ? sum.upTo : 0;
+  for (let idx = 0; idx < h.length; idx++){
+    // Insert the summary card right before the first verbatim-kept message
+    if (sum && idx === sumUpTo){
+      renderSummaryCard(sum, idx);
+    }
+    const m = h[idx];
+    if (m.role === "user") renderUserMessage(m.display || m.content, idx);
+    else if (m.role === "assistant") renderAssistantStored(m, idx);
     else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
   }
-  chatArea.scrollTop = chatArea.scrollHeight;
+  // edge case: history is short, but a summary exists covering everything — still show it
+  if (sum && sumUpTo >= h.length){
+    renderSummaryCard(sum, h.length);
+  }
+  // Use rAF to make sure layout has settled before scrolling
+  requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
 }
 
-function renderUserMessage(content){
+function renderUserMessage(content, idx){
   const wrap = document.createElement("div");
-  wrap.className = "flex flex-col items-end gap-0.5 fade-up";
+  wrap.className = "msg-row user-row flex flex-col items-end gap-0.5 fade-up";
+  if (idx !== undefined) wrap.dataset.idx = idx;
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   wrap.innerHTML = `
     <span class="meta-line">你 · ${time}</span>
     <div class="bubble-user">
       <div class="user-text"></div>
     </div>
+    ${idx !== undefined ? `
+      <div class="msg-actions" role="menu">
+        <button class="msg-act-btn" data-act="edit" title="编辑"><i class="ph ph-pencil-simple"></i></button>
+        <button class="msg-act-btn danger" data-act="delete" title="删除"><i class="ph ph-trash"></i></button>
+      </div>` : ''}
   `;
   // If wrapped with （...） treat as action marker styling; *...* inner; else dialogue
   const ut = wrap.querySelector(".user-text");
@@ -1304,13 +1828,26 @@ function renderUserMessage(content){
     ut.textContent = content;
   }
   chatArea.appendChild(wrap);
-  chatArea.scrollTop = chatArea.scrollHeight;
+  // Note: scroll handled by caller via maybeScrollToBottom; we used to force it here
+  maybeScrollToBottom();
 }
 
-function renderAssistantStored(msg){
+function renderAssistantStored(msg, idx){
   // msg = { role, content, parsed? }
-  const parsed = msg.parsed || parseAssistantOutput(msg.content, false);
   const wrap = buildAssistantBubble(msg.content, msg.statsApplied, false);
+  if (idx !== undefined){
+    wrap.dataset.idx = idx;
+    // Decorate with action menu — assistant gets an extra "regenerate" button
+    const actions = document.createElement("div");
+    actions.className = "msg-actions";
+    actions.setAttribute("role", "menu");
+    actions.innerHTML = `
+      <button class="msg-act-btn" data-act="regen" title="重新生成"><i class="ph ph-arrow-clockwise"></i></button>
+      <button class="msg-act-btn" data-act="edit" title="编辑"><i class="ph ph-pencil-simple"></i></button>
+      <button class="msg-act-btn danger" data-act="delete" title="删除"><i class="ph ph-trash"></i></button>
+    `;
+    wrap.appendChild(actions);
+  }
   return wrap;
 }
 
@@ -1322,7 +1859,7 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap){
   const newBubble = !wrap;
   if (newBubble){
     wrap = document.createElement("div");
-    wrap.className = "flex flex-col items-start gap-0.5 fade-up";
+    wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const name = card?.name || "角色";
     wrap.innerHTML = `
@@ -1392,7 +1929,7 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap){
     chips.style.display = "none";
   }
 
-  if (newBubble) chatArea.scrollTop = chatArea.scrollHeight;
+  if (newBubble) maybeScrollToBottom();
   return wrap;
 }
 
@@ -1403,12 +1940,35 @@ function renderSystemDivider(text, isError){
     ? `<span class="sys-error">${escapeHTML(text)}</span>`
     : `<span class="sys-divider">${escapeHTML(text)}</span>`;
   chatArea.appendChild(div);
-  chatArea.scrollTop = chatArea.scrollHeight;
+  maybeScrollToBottom();
 }
 
 function addSystemMessage(text, isError){
-  renderSystemDivider(text, isError);
-  // Don't persist into history (avoid pollution)
+  showToast(text, isError);
+  // Toasts are ephemeral — don't pollute chat history.
+}
+
+// ─── Toast system ───
+function showToast(text, isError){
+  let host = document.getElementById("toastHost");
+  if (!host){
+    host = document.createElement("div");
+    host.id = "toastHost";
+    host.className = "toast-host";
+    document.body.appendChild(host);
+  }
+  const t = document.createElement("div");
+  t.className = "toast" + (isError ? " toast-error" : "");
+  t.textContent = text;
+  host.appendChild(t);
+  // animate in
+  requestAnimationFrame(() => t.classList.add("toast-show"));
+  // schedule out
+  setTimeout(() => {
+    t.classList.remove("toast-show");
+    t.classList.add("toast-out");
+    setTimeout(() => t.remove(), 300);
+  }, isError ? 4500 : 2800);
 }
 
 function addTyping() {
@@ -1422,7 +1982,7 @@ function addTyping() {
     </div>
   `;
   chatArea.appendChild(wrap);
-  chatArea.scrollTop = chatArea.scrollHeight;
+  maybeScrollToBottom();
 }
 function removeTyping(){ const t = $("typingMsg"); if (t) t.remove(); }
 
@@ -1548,6 +2108,17 @@ function buildSystemPrompt() {
     lines.push(`这是日常剧情对话,专注推进剧情、心理刻画、角色互动、留白。不要主动转入露骨的性描写,但可以有暧昧、心动、张力。`);
   }
 
+  // ─── Time of day (#14) ───
+  if (timeMode === "auto"){
+    const t = getTimeOfDay();
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,"0");
+    const mm = String(now.getMinutes()).padStart(2,"0");
+    lines.push(`\n## 当前时段`);
+    lines.push(`现实世界此刻是 ${hh}:${mm}，对应「${t.label}」——${t.desc}。`);
+    lines.push(`如果剧情没有强行设定时间，请让场景的光线、温度、人流、节奏自然吻合这个时段。不要每句都点明时间，但氛围要对得上。`);
+  }
+
   // Current relationship state — story uses live levels, intimate is fixed "lovers"
   if (mode === "intimate"){
     lines.push(`\n## 当前关系状态`);
@@ -1556,7 +2127,8 @@ function buildSystemPrompt() {
     lines.push(`\n## 当前关系基调`);
     lines.push(`你和玩家**已经认识、彼此有基础好感**——这不是一段需要从零建立的关系,而是已经有温度的日常往来。请按"已经互相喜欢的人"那种自然、放松、带点亲近的方式回应,不要刻意疏远、试探或冷淡。`);
     lines.push(`不必按数值演绎"等级解锁式"的反应:不要因为数值低就故作冷漠,也不要因为数值高就突然变得过分黏腻。等级只是记录"你们一起聊了多少、共度了多少时光"的一个累积量,**而不是关系是否解锁的开关**。`);
-    lines.push(`当前累积:好感经验 ${stats.affLevel}·${stats.affExp}/100, 亲密经验 ${stats.intLevel}·${stats.intExp}/100`);
+    const cs = getCurStats();
+    lines.push(`当前累积数值:好感 ${cs.aff||0}, 亲密 ${cs.int||0} (这两个数字只是记录我们一起聊了多久、共度多少情绪,不代表关系阶段;不要因为数字低就摆出陌生人姿态,也不要因为数字高就突然爆发缠绵)`);
     lines.push(`\n### 数值在演绎中的微调作用(仅微调,不要剧烈切换)`);
     lines.push(`- 经验越高,你可以更自然地流露一些只有熟人才有的小细节:玩家喜欢的小习惯被记住、用更亲昵的称呼或语气、更默契的话题切换。`);
     lines.push(`- 经验仍低时,基础好感还在,只是共度的时间还不算长,可以偶尔流露"还想多了解你"的兴趣。`);
@@ -1617,6 +2189,146 @@ function buildSystemPrompt() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Soft summary (#15) — compress old turns into a paragraph
+// ═══════════════════════════════════════════════════════════
+//  When histories[mode] grows past `summarizeThreshold`, we ask the model to
+//  condense everything older than the last ~20 turns into a short narrative
+//  summary. The summary is stored separately (summaries[mode]) and is what
+//  goes to the API in place of those old messages. The original messages
+//  remain visible in the chat scrollback.
+//
+//  Re-summarization happens incrementally: each time history grows by a
+//  significant amount past the last summary's "upTo", we extend the summary.
+//
+//  Failure mode: any error → silently fall back to "send everything",
+//  show a toast.
+
+const KEEP_RECENT = 20;  // never summarize the last N turns — they stay verbatim
+const RESUMMARIZE_GROWTH = 12; // re-summarize when history has grown by this many turns past last upTo
+
+function _shouldSummarize(){
+  if (summarizeThreshold <= 0) return false;
+  const h = histories[mode] || [];
+  if (h.length < summarizeThreshold) return false;
+  const existing = summaries[mode];
+  // older portion that would be summarized
+  const upTo = h.length - KEEP_RECENT;
+  if (upTo <= 0) return false;
+  if (!existing) return true;
+  // re-summarize if we have substantially more old content than was previously summarized
+  return (upTo - (existing.upTo || 0)) >= RESUMMARIZE_GROWTH;
+}
+
+// Build the "what's being summarized" text as a plain transcript.
+function _historyToTranscript(slice){
+  const me = (profile && profile.name) || (card && card.user_name) || "玩家";
+  const them = (card && card.name) || "角色";
+  const lines = [];
+  for (const m of slice){
+    if (m.role === "user"){
+      const raw = m.display || m.content || "";
+      lines.push(`${me}: ${raw}`);
+    } else if (m.role === "assistant"){
+      // strip tag noise so the summary stays clean
+      const cleaned = String(m.content || "")
+        .replace(/\[STATS\][\s\S]*?\[\/STATS\]/g, "")
+        .replace(/\[CARD_PATCH\][\s\S]*?\[\/CARD_PATCH\]/g, "")
+        .replace(/\[\/?SCENE\]/g, "")
+        .trim();
+      lines.push(`${them}: ${cleaned}`);
+    }
+  }
+  return lines.join("\n");
+}
+
+async function summarizeIfNeeded(){
+  if (_isSummarizing) return;
+  if (!_shouldSummarize()) return;
+  if (!token || !currentModel) return;
+  _isSummarizing = true;
+
+  const h = histories[mode];
+  const upTo = h.length - KEEP_RECENT;
+  // If we already had a summary, fold it in as context so we don't lose earlier beats.
+  const prev = summaries[mode];
+  const prevStart = prev ? (prev.upTo || 0) : 0;
+  // What's new since the last summary:
+  const newSlice = h.slice(prev ? prev.upTo : 0, upTo);
+  if (newSlice.length === 0){ _isSummarizing = false; return; }
+
+  const newTranscript = _historyToTranscript(newSlice);
+
+  const sysPrompt = `你是一位剧情书记员。任务：把一段角色扮演对话压缩成一段精炼的"剧情回顾"，供未来对话回忆使用。\n\n要求：\n- 用中文、第三人称、过去时叙述。\n- 抓住：发生的关键场景、情感转折、双方关系的变化、暴露出来的人物背景、留下的悬念。\n- 不要逐句重述，不要保留对白原文。\n- 不要使用括号 / 星号 / 标签等格式标记。\n- 长度控制在 200-400 字。\n- 如果给出了"已有摘要"，你的输出应该是把"新增片段"自然地接续在它后面的整段更新摘要，而不是只写新增部分。`;
+  const userPrompt = prev
+    ? `# 已有摘要（截至第 ${prev.upTo} 轮）\n${prev.text}\n\n# 新增对话片段（第 ${prevStart+1} 到 ${upTo} 轮）\n${newTranscript}\n\n请输出更新后的整段摘要。`
+    : `# 待压缩的对话片段（截至第 ${upTo} 轮）\n${newTranscript}\n\n请输出剧情回顾。`;
+
+  try {
+    const body = {
+      model: currentModel,
+      style: "standard",
+      user_name: card?.user_name || "玩家",
+      user_id: USER_ID,
+      conversation_id: `summary_${mode}`,
+      request_id: `sum_${Date.now()}`,
+      card: {
+        name: "书记员",
+        description: "", personality: "",
+        scenario: "",
+        first_message: "",
+        system_prompt: sysPrompt
+      },
+      context: [],
+      messages: [{ role: "user", content: userPrompt }],
+      max_tokens: 700,
+      temperature: 0.3,
+      stream: false
+    };
+
+    showToast("正在压缩历史…");
+    const r = await fetch(CHAT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", Authorization:`Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`${r.status}`);
+    const data = await r.json();
+    const text = (data.choices && data.choices[0] && (data.choices[0].message?.content || data.choices[0].text)) || "";
+    if (!text.trim()) throw new Error("空摘要");
+
+    summaries[mode] = { upTo, text: text.trim(), at: Date.now() };
+    persistSummaries();
+    // Re-render so the summary card appears above the kept-verbatim turns
+    renderMessages();
+    showToast(`已压缩前 ${upTo} 轮为剧情回顾`);
+  } catch(err){
+    console.warn("[summary] failed:", err);
+    showToast("历史压缩失败，本次仍发送完整记录", true);
+  } finally {
+    _isSummarizing = false;
+  }
+}
+
+// Build the message array we actually send to the API:
+//  - if a summary exists for this mode, prepend a system note carrying it,
+//    and drop the original messages it covers.
+function buildApiMessages(history){
+  const s = summaries[mode];
+  if (!s || !s.upTo){
+    return history.map(m => ({ role: m.role, content: m.content }));
+  }
+  const kept = history.slice(s.upTo);
+  const out = [{
+    role: "system",
+    content: `## 之前的剧情回顾（前 ${s.upTo} 轮的压缩摘要）\n${s.text}\n\n请基于这段回顾、以及下面"最近的对话"继续推进。不要重述摘要内容，把它当作已经发生的背景即可。`
+  }];
+  for (const m of kept){
+    out.push({ role: m.role, content: m.content });
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════
 // Send (streaming with live parsing & token-by-token render)
 // ═══════════════════════════════════════════════════════════
 async function send(forcedText, opts) {
@@ -1651,7 +2363,7 @@ async function send(forcedText, opts) {
 
   const h = currentHistory();
   h.push({ role: "user", content: sentText, display: displayText });
-  renderUserMessage(displayText);
+  renderUserMessage(displayText, h.length - 1);
   if (forcedText === undefined){ input.value = ""; input.style.height = "auto"; }
   addTyping();
   setStreamingUI(true);
@@ -1660,7 +2372,8 @@ async function send(forcedText, opts) {
   const fullSystem = buildSystemPrompt();
 
   // Send `content` to the API (which is the packaged form), not display
-  const apiMessages = h.map(m => ({ role: m.role, content: m.content }));
+  // If a soft summary exists for this mode, it'll replace the older turns.
+  const apiMessages = buildApiMessages(h);
 
   const body = {
     model: currentModel,
@@ -1699,7 +2412,7 @@ async function send(forcedText, opts) {
       } else {
         buildAssistantBubble(assistantText, null, true, liveBubble);
       }
-      chatArea.scrollTop = chatArea.scrollHeight;
+      maybeScrollToBottom();
     });
   };
 
@@ -1761,6 +2474,11 @@ async function send(forcedText, opts) {
       // Persist
       h.push({ role: "assistant", content: assistantText, parsed, statsApplied: totalStats });
       persistHistories();
+      // Re-render the bubble we just streamed so it gets data-idx + actions menu
+      // (the live bubble is the same DOM node, but had no idx during streaming).
+      renderMessages();
+      // After persistence, see if we should compact the older turns (#15)
+      summarizeIfNeeded();
     } else {
       addSystemMessage("(收到空回复)", true);
     }
@@ -1770,8 +2488,27 @@ async function send(forcedText, opts) {
       addSystemMessage("已停止");
     } else {
       console.error(err);
-      addSystemMessage(`请求失败: ${err.message}`, true);
-      if (String(err.message).startsWith("401")) { setKeyAlert(true); }
+      const msg = String(err.message || err);
+      // Categorize for friendlier messages
+      let friendly;
+      if (msg.startsWith("401")) {
+        friendly = "Token 无效或已过期。请重新填写 API token。";
+        setKeyAlert(true);
+      } else if (msg.startsWith("403")) {
+        friendly = "Token 没有权限。请检查账号或联系服务方。";
+        setKeyAlert(true);
+      } else if (msg.startsWith("429")) {
+        friendly = "请求过于频繁,请稍等几秒再试。";
+      } else if (msg.startsWith("5")) {
+        friendly = "服务端开小差了 (" + msg.slice(0,3) + "),稍后重试。";
+      } else if (/Failed to fetch|NetworkError|network/i.test(msg)) {
+        friendly = "网络不通。检查一下连接,然后重试。";
+      } else if (/timeout|timed out/i.test(msg)) {
+        friendly = "请求超时。可能网络慢,稍后重试。";
+      } else {
+        friendly = "请求失败: " + msg.slice(0, 120);
+      }
+      addSystemMessage(friendly, true);
     }
   } finally {
     abortController = null;
@@ -1779,39 +2516,21 @@ async function send(forcedText, opts) {
   }
 }
 
-// Heuristic fallback when AI forgets to emit [STATS] in story mode.
-// Philosophy: chatting is the point — baseline goes UP. Only clear hostility
-// from the player pulls it down. The system rewards engagement, not "doing
-// the right thing".
+// Heuristic fallback — only triggers when the AI forgot to emit [STATS].
+// Intentionally minimal: keyword-matching gives bad signal on irony/negation,
+// so we just return a small baseline so the bar still drifts. The real signal
+// is supposed to come from [STATS] in the AI output.
 function inferDefaultStats(userText, aiText){
-  let aff = 1, intt = 0; // baseline: every exchange counts as +1
-  const u = (userText || "").toLowerCase();
-  const a = (aiText || "");
-
-  // Clearly hostile player input — only this drags it down
-  if (/讨厌你|滚|闭嘴|去死|傻逼|垃圾|废物|fuck you|i hate you/i.test(u)) {
-    aff = -2;
-  } else if (/烦死|烦人|无聊死|蠢货/i.test(u)) {
-    aff = -1;
-  } else {
-    // Positive cues bump the baseline higher
-    if (/喜欢|爱你|想你|温柔|漂亮|可爱|帅|谢谢|对不起|抱歉|心疼/.test(u)) aff += 1;
-    // Longer or more engaged inputs are rewarded slightly
-    if ((userText || "").length >= 25) aff += 1;
+  const u = (userText || "");
+  // The only thing we trust ourselves to detect: explicit hostility.
+  // Anything else gets a tiny +1 baseline so the bar keeps moving.
+  if (/讨厌你|去死|滚开|傻逼|垃圾|废物|fuck you|i hate you/i.test(u)) {
+    return { aff: -2, int: 0 };
   }
-
-  // AI emotional tone — heart/blush/intimacy markers add to intimacy
-  if (/脸红|心跳|害羞|耳尖|发烫|凑近|靠近|轻声|含笑|心动|温柔地/.test(a)) {
-    aff += 1;
-    intt += 1;
+  if (/烦死|蠢货/i.test(u)) {
+    return { aff: -1, int: 0 };
   }
-  // AI strong-feeling markers (longer/deeper response from AI)
-  if (a.length >= 120) aff += 1;
-
-  // Cap so it stays measured
-  aff = Math.max(-3, Math.min(4, aff));
-  intt = Math.max(0, Math.min(2, intt));
-  return { aff, int: intt };
+  return { aff: 1, int: 0 };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2025,6 +2744,80 @@ function populateCharForm() {
   renderSecondary(); renderLocations(); renderPatches();
 }
 
+
+// ─── JSON edit mode (#20) ───
+function setJsonStatus(msg, kind){
+  const el = $("jsonEditStatus");
+  if (!el) return;
+  el.textContent = msg || "";
+  el.style.color = kind === "err" ? "#c87878"
+    : kind === "ok" ? "#7aa37a"
+    : "#a89eb3";
+}
+$("jsonLoadBtn")?.addEventListener("click", () => {
+  ensureCard();
+  // First sync any unsaved form edits into the card object, so the JSON reflects them
+  try { syncFormToCard(); } catch(e){}
+  $("jsonEditArea").value = JSON.stringify(card, null, 2);
+  setJsonStatus("已从当前卡读取 (尚未应用,编辑后点「应用」)", "info");
+});
+$("jsonCopyBtn")?.addEventListener("click", async () => {
+  const text = $("jsonEditArea").value;
+  if (!text){ setJsonStatus("还没东西可复制,先点「读取」", "err"); return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    setJsonStatus("已复制到剪贴板", "ok");
+  } catch(e){
+    // fallback
+    const ta = $("jsonEditArea");
+    ta.select(); document.execCommand("copy");
+    setJsonStatus("已复制 (回退方式)", "ok");
+  }
+});
+$("jsonApplyBtn")?.addEventListener("click", () => {
+  const text = $("jsonEditArea").value.trim();
+  if (!text){ setJsonStatus("编辑框是空的", "err"); return; }
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch(e){
+    setJsonStatus("JSON 格式错: " + e.message, "err");
+    return;
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)){
+    setJsonStatus("JSON 顶层必须是对象", "err");
+    return;
+  }
+  if (!parsed.name || typeof parsed.name !== "string"){
+    setJsonStatus("缺少必需字段 \"name\"", "err");
+    return;
+  }
+  // Merge with defaults to ensure required arrays exist
+  const merged = Object.assign(DEFAULT_CARD(), parsed);
+  if (!Array.isArray(merged.secondary_characters)) merged.secondary_characters = [];
+  if (!Array.isArray(merged.locations)) merged.locations = [];
+  if (!Array.isArray(merged.notes)) merged.notes = parsed.notes || [];
+  card = merged;
+  persistCard();
+  populateCharForm();
+  refreshTopBar();
+  setJsonStatus("已应用并保存", "ok");
+  addSystemMessage(`角色卡已通过 JSON 模式更新:${card.name}`);
+});
+
+// Helper: pull current form values into the card object (used before reading JSON)
+function syncFormToCard(){
+  if (!card) card = DEFAULT_CARD();
+  card.name = $("cName").value.trim() || card.name;
+  card.tagline = $("cTag").value;
+  card.user_name = $("cUserName").value;
+  card.personality = $("cPersonality").value;
+  card.description = $("cDescription").value;
+  card.scenario = $("cScenario").value;
+  card.system_prompt = $("cSystem").value;
+  card.intimate_preferences = $("cIntimate").value;
+}
+
 $("saveCharBtn").addEventListener("click", () => {
   const name = $("cName").value.trim();
   if (!name) { alert("请至少填一个名字"); return; }
@@ -2042,7 +2835,7 @@ $("saveCharBtn").addEventListener("click", () => {
   persistCard();
   if (wasNew) {
     histories = { story: [], intimate: [] };
-    stats = { affLevel: 0, affExp: 0, intLevel: 0, intExp: 0 };
+    stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
     persistHistories(); persistStats();
     refreshStats();
   }
@@ -2053,8 +2846,8 @@ $("clearCharBtn").addEventListener("click", () => {
   if (!confirm("清除角色卡 + 对话历史 + 等级?")) return;
   card = null;
   histories = { story: [], intimate: [] };
-  stats = { affLevel: 0, affExp: 0, intLevel: 0, intExp: 0 };
-  localStorage.removeItem("dzmm_card");
+  stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
+  idbDel("card").catch(()=>{});
   persistHistories(); persistStats();
   refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn();
   closeDrawers();
@@ -2086,10 +2879,29 @@ $("saveProfileBtn").addEventListener("click", () => {
 $("clearProfileBtn").addEventListener("click", () => {
   if (!confirm("清除玩家档案?")) return;
   profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
-  localStorage.removeItem("dzmm_profile");
+  idbDel("profile").catch(()=>{});
   populateProfileForm();
   closeDrawers();
 });
+
+
+// Clear all patches (with confirm)
+function _wireClearPatches(){
+  const btn = $("clearPatchesBtn");
+  if (!btn || btn._wired) return;
+  btn._wired = true;
+  btn.addEventListener("click", () => {
+    if (!card || !card.notes || !card.notes.length){
+      addSystemMessage("已经是空的", false);
+      return;
+    }
+    if (!confirm(`确定清空 ${card.notes.length} 条对话补完？此操作不可撤销。`)) return;
+    card.notes = [];
+    persistCard();
+    renderPatches();
+    addSystemMessage("已清空对话补完");
+  });
+}
 
 // Card patches accordion render
 function renderPatches(){
@@ -2100,23 +2912,24 @@ function renderPatches(){
   list.innerHTML = "";
   if (arr.length === 0){
     empty.style.display = "block";
-    return;
+  } else {
+    empty.style.display = "none";
+    arr.forEach((n, i) => {
+      const row = document.createElement("div");
+      row.className = "chip";
+      row.style.cssText = "padding:8px 10px;align-items:flex-start;gap:8px;";
+      const target = n.target || "未指定";
+      row.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:10px;color:#a89eb3;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;margin-bottom:2px;">${escapeHTML(target)} · ${escapeHTML(n.field||"")}</div>
+          <div class="chip-name" style="white-space:normal;line-height:1.5;">${escapeHTML(n.content||"")}</div>
+        </div>
+        <button class="chip-x" data-i="${i}" data-kind="patch" style="margin-top:2px;">×</button>
+      `;
+      list.appendChild(row);
+    });
   }
-  empty.style.display = "none";
-  arr.forEach((n, i) => {
-    const row = document.createElement("div");
-    row.className = "chip";
-    row.style.cssText = "padding:8px 10px;align-items:flex-start;gap:8px;";
-    const target = n.target || "未指定";
-    row.innerHTML = `
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:10px;color:#a89eb3;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;margin-bottom:2px;">${escapeHTML(target)} · ${escapeHTML(n.field||"")}</div>
-        <div class="chip-name" style="white-space:normal;line-height:1.5;">${escapeHTML(n.content||"")}</div>
-      </div>
-      <button class="chip-x" data-i="${i}" data-kind="patch" style="margin-top:2px;">×</button>
-    `;
-    list.appendChild(row);
-  });
+  _wireClearPatches();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2149,7 +2962,7 @@ $("fileInput").addEventListener("change", async (e) => {
     });
     persistCard();
     histories = { story: [], intimate: [] };
-    stats = { affLevel: 0, affExp: 0, intLevel: 0, intExp: 0 };
+    stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
     persistHistories(); persistStats();
     refreshStats(); populateCharForm(); refreshTopBar();
     renderMessages(); updateSendBtn();
@@ -2159,9 +2972,120 @@ $("fileInput").addEventListener("change", async (e) => {
   } finally { e.target.value = ""; }
 });
 
+// ─── Full data export ───
+$("exportAllBtn").addEventListener("click", async () => {
+  await flushPending();  // make sure latest in-memory state is persisted before snapshot
+  const bundle = {
+    schema: "dzmm-full-backup",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: {
+      card: card,
+      profile: profile,
+      histories: histories,
+      stats: stats
+    }
+  };
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const ts = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const stamp = `${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}`;
+  a.download = `dzmm-backup-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  addSystemMessage("全部数据已导出");
+});
+
+// ─── Full data import (replaces everything!) ───
+$("importAllBtn").addEventListener("click", () => $("fileInputAll").click());
+$("fileInputAll").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const bundle = JSON.parse(text);
+    if (!bundle || typeof bundle !== "object") throw new Error("不是有效的 JSON");
+    if (bundle.schema !== "dzmm-full-backup") throw new Error("不是 DZMM 全量备份文件");
+    const d = bundle.data;
+    if (!d || typeof d !== "object") throw new Error("缺少 data 字段");
+    const summary = [];
+    if (d.card && d.card.name) summary.push(`角色卡「${d.card.name}」`);
+    if (d.histories) summary.push(`对话 ${(d.histories.story||[]).length + (d.histories.intimate||[]).length} 条`);
+    if (!confirm(`将覆盖现有全部数据 (${summary.join(", ")||"空"})。继续?`)) {
+      e.target.value = ""; return;
+    }
+    if (d.card){ card = Object.assign(DEFAULT_CARD(), d.card); persistCard(); }
+    if (d.profile){ profile = Object.assign(profile, d.profile); persistProfile(); }
+    if (d.histories){ histories = Object.assign({story:[],intimate:[]}, d.histories); persistHistories(); }
+    if (d.stats){
+      const p = d.stats;
+      if ("story" in p || "intimate" in p){
+        stats.story = Object.assign({aff:0,int:0}, p.story||{});
+        stats.intimate = Object.assign({aff:0,int:0}, p.intimate||{});
+      } else if ("aff" in p){
+        stats.story = { aff: p.aff||0, int: p.int||0 };
+      }
+      persistStats();
+    }
+    await flushPending();
+    refreshStats(); populateCharForm(); refreshTopBar(); renderMessages(); updateSendBtn();
+    addSystemMessage("全部数据已导入");
+  } catch(err){
+    console.error(err);
+    alert("导入失败: " + err.message);
+  } finally {
+    e.target.value = "";
+  }
+});
+
+// ─── Per-chat export (#16) ───
+$("exportChatBtn").addEventListener("click", () => {
+  const h = histories[mode] || [];
+  if (!h.length){ addSystemMessage("当前模式还没有对话内容", true); return; }
+  const bundle = {
+    schema: "dzmm-chat-export",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    character: card ? { name: card.name, tagline: card.tagline } : null,
+    mode: mode,
+    stats: stats[mode],
+    messages: h
+  };
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const safeName = ((card && card.name) || "chat").replace(/[^\w\u4e00-\u9fff-]/g, "_");
+  const ts = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const stamp = `${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}`;
+  a.download = `dzmm-chat-${safeName}-${mode}-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  addSystemMessage(`已导出 ${mode === "story" ? "故事" : "亲密"}模式对话 (${h.length} 条)`);
+});
+
+
 // ═══════════════════════════════════════════════════════════
 // Token
 // ═══════════════════════════════════════════════════════════
+
+// Token reveal toggle
+$("tokenEye")?.addEventListener("click", () => {
+  const inp = $("tokenInput");
+  const icn = $("tokenEyeIcon");
+  if (inp.type === "password"){
+    inp.type = "text";
+    icn.className = "ph ph-eye-slash";
+  } else {
+    inp.type = "password";
+    icn.className = "ph ph-eye";
+  }
+});
+
 $("saveTokenBtn").addEventListener("click", async () => {
   const v = $("tokenInput").value.trim();
   if (!v) { alert("请输入 token"); return; }
@@ -2193,22 +3117,536 @@ $("resetBtn").addEventListener("click", () => {
   if (!confirm(`重置「${mode === "intimate" ? "亲密" : "故事"}」模式的对话?`)) return;
   histories[mode] = [];
   persistHistories();
-  if (mode === "story") { stats.affLevel = 0; stats.affExp = 0; }
-  else { stats.intLevel = 0; stats.intExp = 0; }
+  if (mode === "story") { stats.story = { aff:0, int:0 }; }
+  else { stats.intimate = { aff:0, int:0 }; }
   persistStats(); refreshStats();
   renderMessages(); closeDrawers();
 });
 
 // ═══════════════════════════════════════════════════════════
-// Init
+// Init — async bootstrap (open IDB, load data, then UI)
 // ═══════════════════════════════════════════════════════════
-applyMode();
-refreshStats();
-refreshTopBar();
-renderMessages();
-updateSendBtn();
-if (token) { setKeyAlert(false); loadModels(); }
-else { setKeyAlert(true); }
+
+// ─── Sync the new settings UI to loaded values (#14 #15) ───
+function _syncNewSettingsUI(){
+  const r = $("summarizeRange");
+  const v = $("summarizeVal");
+  if (r && v){
+    r.value = summarizeThreshold;
+    v.textContent = summarizeThreshold === 0 ? "关闭" : (summarizeThreshold + " 轮");
+    r.addEventListener("input", e => {
+      summarizeThreshold = parseInt(e.target.value);
+      v.textContent = summarizeThreshold === 0 ? "关闭" : (summarizeThreshold + " 轮");
+      localStorage.setItem("dzmm_sum_th", String(summarizeThreshold));
+    });
+  }
+  document.querySelectorAll("#timeModeGroup .seg").forEach(b => {
+    b.classList.toggle("active", b.dataset.val === timeMode);
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#timeModeGroup .seg").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      timeMode = b.dataset.val;
+      localStorage.setItem("dzmm_time_mode", timeMode);
+      refreshTimeChip();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Message actions (#6 regenerate, #7 edit/delete)
+// ═══════════════════════════════════════════════════════════
+//  Tapping a bubble toggles a small action menu beside it.
+//  Tapping elsewhere closes any open menu.
+function _wireMessageActions(){
+  // Open / close action menus by tapping bubbles.
+  chatArea.addEventListener("click", (e) => {
+    // 1) click on an action button → read intent first, THEN clean up, THEN handle.
+    //    (Capturing idx/kind before any DOM mutation avoids invalidating refs.)
+    const actBtn = e.target.closest(".msg-act-btn");
+    if (actBtn){
+      e.stopPropagation();
+      const row = actBtn.closest(".msg-row");
+      if (!row) return;
+      const idx = parseInt(row.dataset.idx);
+      const kind = actBtn.dataset.act;
+      // Close *menus* only (don't blow away an in-place editor on another row,
+      // since edit is a separate flow that takes over its own row).
+      _closeMenusOnly();
+      handleMsgAction(idx, kind);
+      return;
+    }
+    // 2) click on a bubble → toggle that row's menu
+    const bubble = e.target.closest(".bubble-ai, .bubble-user");
+    if (bubble){
+      const row = bubble.closest(".msg-row");
+      // only rows with idx (persisted history) get actions; live-streaming bubble has none yet
+      if (row && row.dataset.idx !== undefined){
+        const wasOpen = row.classList.contains("actions-open");
+        _closeMenusOnly();
+        if (!wasOpen) row.classList.add("actions-open");
+      }
+      return;
+    }
+    // 3) click on a summary card or empty chat area → close any open menu
+    _closeMenusOnly();
+  });
+  // Also close on outside click (drawers / input bar)
+  document.addEventListener("click", (e) => {
+    if (!chatArea.contains(e.target)) _closeMenusOnly();
+  }, true);
+}
+// Just hide the action pill rows; doesn't touch any in-place editor.
+function _closeMenusOnly(){
+  chatArea.querySelectorAll(".msg-row.actions-open").forEach(r => r.classList.remove("actions-open"));
+}
+
+async function handleMsgAction(idx, kind){
+  if (isStreaming){ addSystemMessage("先等回复完成", true); return; }
+  const h = currentHistory();
+  const msg = h[idx];
+  if (!msg) return;
+
+  if (kind === "delete"){
+    if (!confirm(msg.role === "user" ? "删除这条消息？" : "删除这条角色回复？")) return;
+    h.splice(idx, 1);
+    // If we deleted something before the summary boundary, shift it back
+    const s = summaries[mode];
+    if (s && s.upTo > idx){
+      s.upTo = Math.max(0, s.upTo - 1);
+      // if nothing left to summarize, drop it
+      if (s.upTo === 0){ summaries[mode] = null; }
+      persistSummaries();
+    }
+    persistHistories();
+    renderMessages();
+    return;
+  }
+
+  if (kind === "regen"){
+    // Re-roll the last assistant message at position `idx`.
+    // Drop this assistant message + any later ones, pop the preceding user
+    // message, and replay it. _resendUserMessage handles re-rendering.
+    if (msg.role !== "assistant"){ addSystemMessage("只有角色的回复可以重新生成", true); return; }
+    let lastUserIdx = -1;
+    for (let i = idx - 1; i >= 0; i--){
+      if (h[i].role === "user"){ lastUserIdx = i; break; }
+    }
+    if (lastUserIdx === -1){ addSystemMessage("找不到对应的用户消息", true); return; }
+    // Revert stats this assistant turn awarded
+    const applied = msg.statsApplied || { aff:0, int:0 };
+    if (applied.aff) applyStatChange("aff", -applied.aff);
+    if (applied.int) applyStatChange("int", -applied.int);
+    // Drop assistant turn + anything after it, then pop the user msg (we'll re-push it)
+    h.splice(idx);
+    const lastUserMsg = h.splice(lastUserIdx, 1)[0];
+    persistHistories();
+    // Sync the DOM to the array before _resendUserMessage appends fresh bubbles
+    renderMessages();
+    await _resendUserMessage(lastUserMsg);
+    return;
+  }
+
+  if (kind === "edit"){
+    _openEditor(idx);
+    return;
+  }
+}
+
+// Re-send a user message that's already been authored, without prompting the user.
+// Mirrors send()'s logic but skips the input/marker plumbing.
+async function _resendUserMessage(userMsg){
+  if (isStreaming) return;
+  if (!card || !token || !currentModel){
+    addSystemMessage("无法重新生成（缺少角色、token 或模型）", true);
+    // put the message back so user can recover
+    const h = currentHistory();
+    h.push(userMsg);
+    persistHistories(); renderMessages();
+    return;
+  }
+  const h = currentHistory();
+  h.push(userMsg);
+  renderUserMessage(userMsg.display || userMsg.content, h.length - 1);
+  persistHistories();
+  addTyping();
+  setStreamingUI(true);
+  abortController = new AbortController();
+  const fullSystem = buildSystemPrompt();
+  const apiMessages = buildApiMessages(h);
+  const body = {
+    model: currentModel, style: currentStyle,
+    user_name: card.user_name || "玩家",
+    user_id: USER_ID,
+    conversation_id: mode === "intimate" ? CONV_INTIMATE : CONV_STORY,
+    request_id: `req_${Date.now()}`,
+    card: {
+      name: card.name,
+      description: card.description || "",
+      personality: card.personality || "",
+      scenario: card.scenario || "",
+      first_message: "",
+      system_prompt: fullSystem
+    },
+    context: [],
+    messages: apiMessages,
+    max_tokens: currentMaxTokens,
+    temperature: currentTemp,
+    stream: true
+  };
+  let assistantText = "";
+  let liveBubble = null;
+  let scheduledRender = false;
+  const scheduleRender = () => {
+    if (scheduledRender) return;
+    scheduledRender = true;
+    requestAnimationFrame(() => {
+      scheduledRender = false;
+      if (!liveBubble){
+        removeTyping();
+        liveBubble = buildAssistantBubble(assistantText, null, true);
+      } else {
+        buildAssistantBubble(assistantText, null, true, liveBubble);
+      }
+      maybeScrollToBottom();
+    });
+  };
+  try {
+    const r = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+      signal: abortController.signal
+    });
+    if (!r.ok || !r.body) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const raw of lines){
+        const line = raw.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload);
+          const delta = ev.choices?.[0]?.delta?.content;
+          if (delta){ assistantText += delta; scheduleRender(); }
+        } catch(e){}
+      }
+    }
+    removeTyping();
+    if (assistantText){
+      const parsed = parseAssistantOutput(assistantText, false);
+      let totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+      if (mode === "story" && totalStats.aff === 0 && totalStats.int === 0){
+        totalStats = inferDefaultStats(userMsg.content, assistantText);
+      }
+      if (totalStats.aff) applyStatChange("aff", totalStats.aff);
+      if (totalStats.int) applyStatChange("int", totalStats.int);
+      applyCardPatches(parsed.patches);
+      if (!liveBubble){ liveBubble = buildAssistantBubble(assistantText, totalStats, false); }
+      else { buildAssistantBubble(assistantText, totalStats, false, liveBubble); }
+      h.push({ role: "assistant", content: assistantText, parsed, statsApplied: totalStats });
+      persistHistories();
+      // Re-render so the new bubble gets data-idx + actions decorations
+      renderMessages();
+      summarizeIfNeeded();
+    } else {
+      addSystemMessage("(收到空回复)", true);
+    }
+  } catch(err){
+    removeTyping();
+    if (err.name !== "AbortError"){
+      console.error(err);
+      addSystemMessage("重新生成失败：" + String(err.message||err).slice(0,120), true);
+    }
+  } finally {
+    abortController = null;
+    setStreamingUI(false);
+  }
+}
+
+// In-place editor for a single message
+function _openEditor(idx){
+  const h = currentHistory();
+  const msg = h[idx];
+  if (!msg) return;
+  const row = chatArea.querySelector(`.msg-row[data-idx="${idx}"]`);
+  if (!row) return;
+  // Build raw text we want to edit
+  const raw = msg.role === "user" ? (msg.display || msg.content) : (msg.content || "");
+  // Replace the row's bubble content with an editable textarea
+  const bubble = row.querySelector(".bubble-ai, .bubble-user");
+  if (!bubble) return;
+  const editWrap = document.createElement("div");
+  editWrap.className = "msg-edit-wrap";
+  editWrap.style.cssText = "width:min(100%, 320px);";
+  editWrap.innerHTML = `
+    <textarea class="msg-edit-ta"></textarea>
+    <div class="msg-edit-row">
+      <button class="msg-edit-btn" data-act="cancel">取消</button>
+      <button class="msg-edit-btn primary" data-act="save">保存</button>
+    </div>
+  `;
+  const ta = editWrap.querySelector("textarea");
+  ta.value = raw;
+  // Replace bubble with editor
+  bubble.style.display = "none";
+  row.classList.remove("actions-open");
+  bubble.insertAdjacentElement("afterend", editWrap);
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+
+  editWrap.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.act === "cancel"){
+      renderMessages();
+      return;
+    }
+    if (b.dataset.act === "save"){
+      const v = ta.value.trim();
+      if (!v){ alert("不能为空"); return; }
+      if (msg.role === "user"){
+        // Re-derive the wire format from display form (parens / asterisks)
+        let display = v;
+        let sent = v;
+        if (/^（[\s\S]+）$/.test(v)){
+          sent = `[USER_ACTION] ${v.slice(1, -1)}`;
+        } else if (/^\*[\s\S]+\*$/.test(v)){
+          sent = `[USER_INNER] ${v.slice(1, -1)}`;
+        }
+        msg.display = display;
+        msg.content = sent;
+      } else {
+        msg.content = v;
+        // Re-parse so future renders are consistent
+        msg.parsed = parseAssistantOutput(v, false);
+      }
+      persistHistories();
+      renderMessages();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Scene picker (#13)
+// ═══════════════════════════════════════════════════════════
+function _wireScenePicker(){
+  const btn = $("scenePickerBtn");
+  const pop = $("scenePop");
+  const search = $("sceneSearch");
+  if (!btn || !pop) return;
+
+  let opened = false;
+  const close = () => { opened = false; pop.classList.remove("open"); };
+  const open = () => {
+    if (!card || !card.locations || !card.locations.length){
+      addSystemMessage("还没有地点设定，先在角色卡里加几个地点吧", true);
+      return;
+    }
+    opened = true;
+    pop.classList.add("open");
+    _renderScenePopList("");
+    search.value = "";
+    setTimeout(() => search.focus(), 50);
+  };
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (opened) close(); else open();
+  });
+  // outside click closes
+  document.addEventListener("click", (e) => {
+    if (!opened) return;
+    if (pop.contains(e.target) || btn.contains(e.target)) return;
+    close();
+  });
+  search.addEventListener("input", () => _renderScenePopList(search.value));
+  // delegated click on item
+  $("scenePopBody").addEventListener("click", (e) => {
+    const item = e.target.closest(".scene-pop-item");
+    if (!item) return;
+    const i = parseInt(item.dataset.idx);
+    const loc = card.locations[i];
+    if (!loc) return;
+    close();
+    const desc = loc.description ? `——${loc.description}` : "";
+    const prompt = `（场景切换到「${loc.name}」${desc}。请自然过渡到那里，重新铺陈光线、声音、氛围与人物当下的状态。不要生硬地宣布换景。）`;
+    send(prompt);
+  });
+}
+
+function _renderScenePopList(filter){
+  const body = $("scenePopBody");
+  const arr = (card && card.locations) || [];
+  const q = (filter || "").trim().toLowerCase();
+  const filtered = arr
+    .map((l, i) => ({ l, i }))
+    .filter(({l}) => !q || (l.name||"").toLowerCase().includes(q) || (l.description||"").toLowerCase().includes(q));
+  body.innerHTML = "";
+  if (!filtered.length){
+    body.innerHTML = `<div class="scene-pop-empty">没有匹配的地点</div>`;
+    return;
+  }
+  // Cap to 50 visible
+  for (const {l, i} of filtered.slice(0, 50)){
+    const it = document.createElement("div");
+    it.className = "scene-pop-item";
+    it.dataset.idx = i;
+    it.innerHTML = `
+      <div class="nm">${escapeHTML(l.name)}</div>
+      ${l.description ? `<div class="ds">${escapeHTML(l.description)}</div>` : ""}
+    `;
+    body.appendChild(it);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Keyboard inset (#19) — keep input above the mobile keyboard
+// ═══════════════════════════════════════════════════════════
+function _wireKeyboardInset(){
+  if (!window.visualViewport) return; // fallback: nothing to do
+  const footer = document.querySelector("footer");
+  if (!footer) return;
+  const pill = $("scrollPill");
+  const apply = () => {
+    const vv = window.visualViewport;
+    const inset = window.innerHeight - vv.height - vv.offsetTop;
+    // Only adjust when there's a meaningful difference (keyboard up)
+    if (inset > 80){
+      footer.style.transform = `translateY(-${inset}px)`;
+      if (pill) pill.style.setProperty("--kb-inset", inset + "px");
+      // also shrink the chat scroll viewport so latest content is visible
+      chatArea.style.paddingBottom = (170 + inset) + "px";
+      // keep the input in view
+      if (isPinnedToBottom){
+        requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
+      }
+    } else {
+      footer.style.transform = "";
+      if (pill) pill.style.setProperty("--kb-inset", "0px");
+      chatArea.style.paddingBottom = "";
+    }
+  };
+  window.visualViewport.addEventListener("resize", apply);
+  window.visualViewport.addEventListener("scroll", apply);
+  // also on focus / blur as a fallback for browsers where resize doesn't fire reliably
+  input.addEventListener("focus", () => setTimeout(apply, 100));
+  input.addEventListener("blur", () => setTimeout(apply, 100));
+}
+
+// ═══════════════════════════════════════════════════════════
+// Init — async bootstrap (open IDB, load data, then UI)
+// ═══════════════════════════════════════════════════════════
+async function _loadFromIDB(){
+  const all = await idbAll();
+  // card
+  if (all.card && typeof all.card === "object"){
+    card = all.card;
+  }
+  // profile
+  if (all.profile && typeof all.profile === "object"){
+    profile = Object.assign(profile, all.profile);
+  }
+  // histories
+  if (all.histories && typeof all.histories === "object"){
+    histories = Object.assign({ story:[], intimate:[] }, all.histories);
+  }
+  // stats — apply same migration logic as before, in case data was stored old-shape
+  if (all.stats && typeof all.stats === "object"){
+    const p = all.stats;
+    if ("affLevel" in p || "affExp" in p){
+      const aff = (p.affLevel || 0) * 100 + (p.affExp || 0);
+      const intt = (p.intLevel || 0) * 100 + (p.intExp || 0);
+      stats.story = { aff, int: intt };
+    } else if ("aff" in p && !("story" in p)){
+      stats.story = { aff: p.aff || 0, int: p.int || 0 };
+    } else {
+      stats.story = Object.assign({ aff:0, int:0 }, p.story || {});
+      stats.intimate = Object.assign({ aff:0, int:0 }, p.intimate || {});
+    }
+  }
+  // summaries (#15)
+  if (all.summaries && typeof all.summaries === "object"){
+    summaries = Object.assign({ story:null, intimate:null }, all.summaries);
+  }
+}
+
+async function _migrateFromLocalStorageIfNeeded(){
+  // Detect: if IDB has nothing yet AND localStorage has the old keys,
+  // copy them over (one-time). Mark "_migrated_v1" in IDB.
+  const flag = await idbGet("_migrated_v1");
+  if (flag) return;
+
+  let migrated = 0;
+  // card
+  try {
+    const raw = localStorage.getItem("dzmm_card");
+    if (raw){
+      const obj = JSON.parse(raw);
+      await idbSet("card", obj);
+      migrated++;
+    }
+  } catch(e){}
+  // profile
+  try {
+    const raw = localStorage.getItem("dzmm_profile");
+    if (raw){
+      await idbSet("profile", JSON.parse(raw));
+      migrated++;
+    }
+  } catch(e){}
+  // histories
+  try {
+    const raw = localStorage.getItem("dzmm_histories");
+    if (raw){
+      await idbSet("histories", JSON.parse(raw));
+      migrated++;
+    }
+  } catch(e){}
+  // stats (keep raw shape; load logic will normalize)
+  try {
+    const raw = localStorage.getItem("dzmm_stats");
+    if (raw){
+      await idbSet("stats", JSON.parse(raw));
+      migrated++;
+    }
+  } catch(e){}
+
+  await idbSet("_migrated_v1", { at: Date.now(), count: migrated });
+  if (migrated){
+    console.log(`[migration] copied ${migrated} key(s) from localStorage → IndexedDB`);
+  }
+}
+
+(async () => {
+  try {
+    await _migrateFromLocalStorageIfNeeded();
+    await _loadFromIDB();
+  } catch(err){
+    console.error("[init] storage load failed:", err);
+    addSystemMessage("数据加载失败,使用空状态。控制台有详细信息。", true);
+  }
+  applyMode();
+  refreshStats();
+  refreshTopBar();
+  // Sync new settings UI to loaded values BEFORE rendering
+  _syncNewSettingsUI();
+  _wireSmartScroll();
+  _wireMessageActions();
+  _wireScenePicker();
+  _wireKeyboardInset();
+  renderMessages();
+  updateSendBtn();
+  if (token) { setKeyAlert(false); loadModels(); }
+  else { setKeyAlert(true); }
+})();
 </script>
 
 </body>
