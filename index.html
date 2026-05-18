@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>梦回 · AI 剧场</title>
+<title>和她聊聊天吧！</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -2217,6 +2217,24 @@ function parseAssistantOutput(text, partial){
   // of the buffer is assumed to belong to that speaker. If we see a partial
   // opener like "[SPEAKER" or "[SPEAKER:abc" without the closing "]", we hide
   // the partial opener so it doesn't render as raw text.
+  //
+  // Tolerance: CJK models commonly emit full-width punctuation around tags
+  // (［SPEAKER：name］, [SPEAKER： name ], [SPEAKER:name］). Normalize the
+  // bracket/colon/slash characters used by SPEAKER tags to canonical ASCII
+  // form before scanning. We scope this to the immediate vicinity of the
+  // word "SPEAKER" so we don't disturb other content.
+  t = t.replace(
+    /([\[\uFF3B\u3010])\s*(\/|\uFF0F)?\s*SPEAKER\s*([:\uFF1A])?\s*([^\]\uFF3D\u3011\n]*?)\s*([\]\uFF3D\u3011])/gi,
+    (m, _open, slash, colon, name, _close) => {
+      if (slash){
+        return "[/SPEAKER]";
+      }
+      const n = (name || "").trim();
+      if (!n) return m; // weird empty — leave as-is, won't match opener regex either
+      return `[SPEAKER:${n}]`;
+    }
+  );
+
   const speakerSpans = []; // [{start, end, name}] in post-strip coordinates
   {
     let scanFrom = 0;
@@ -3008,7 +3026,7 @@ function buildSystemPrompt() {
     };
     lines.push(`- **频率**: ${freqDesc[secFreq] || freqDesc.medium}`);
 
-    lines.push(`- **格式**: 当一个次要角色说话/做出动作时,**必须**用 \`[SPEAKER:角色名]...[/SPEAKER]\` 把 ta 的内容包起来。例如:`);
+    lines.push(`- **格式**: 当一个次要角色说话/做出动作时,**必须**用 \`[SPEAKER:角色名]...[/SPEAKER]\` 把 ta 的内容包起来。⚠️ **标签内的方括号、冒号、斜杠必须是半角符号**(\`[\` \`]\` \`:\` \`/\` ASCII),**不要写成全角的 \`［\` \`］\` \`：\` \`／\`**——否则系统识别不出来,标签会直接漏到屏幕上。例如:`);
     lines.push(`  \`\`\``);
     lines.push(`  [SPEAKER:红咲ハル]`);
     lines.push(`  (端着碟子凑过来) 咲ちゃん!这个给你吧?我已经吃饱啦。`);
