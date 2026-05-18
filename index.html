@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>与她一同｜本地内测版</title>
+<title>梦回 · AI 剧场</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -562,15 +562,10 @@
     transition:color 0.35s;
   }
   .stat-frac{
-    display:inline-flex;align-items:baseline;
     font-family:'JetBrains Mono',monospace;
     font-size:10.5px;
     color:var(--ink-faint);
     letter-spacing:0.02em;
-  }
-  .stat-frac-sep{
-    margin:0 1px;
-    opacity:0.55;
   }
   body.intimate .stat-frac{ color:#b59a9e; }
 
@@ -599,6 +594,57 @@
   body.intimate .stat-bar-int{
     background:linear-gradient(90deg, #b67a86, #c89aa3);
   }
+  .stat-bar-arousal{
+    background:linear-gradient(90deg, #c98787, #d8a5b3, #b67a86);
+  }
+  .stat-bar-fill.surge{
+    animation:bar-surge 0.7s cubic-bezier(.4,1.5,.4,1);
+  }
+  @keyframes bar-surge{
+    0%, 100% { filter:brightness(1); }
+    50%      { filter:brightness(1.4) saturate(1.3); }
+  }
+
+  /* Mode-aware visibility: story-stats only when body.story, intimate-stats only when body.intimate */
+  .intimate-stats{ display:none !important; }
+  .story-stats{ display:flex !important; }
+  body.intimate .story-stats{ display:none !important; }
+  body.intimate .intimate-stats{ display:flex !important; }
+
+  /* ─── Initiator toggle ─── */
+  .initiator-display{
+    display:flex;align-items:center;gap:6px;
+    line-height:1;
+    margin-top:2px;
+    flex-wrap:wrap;
+  }
+  /* The active-side chip — outlined style matching ×0 stat-tier */
+  .initiator-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;font-weight:500;
+    color:#b67a86;
+    line-height:1;
+    padding:2px 7px;
+    border-radius:99px;
+    background:rgba(200,138,138,0.12);
+    border:1px solid rgba(200,138,138,0.25);
+    transition:all 0.25s;
+    letter-spacing:0.06em;
+  }
+  #initiatorCol{ transition:transform 0.15s; }
+  #initiatorCol:active{ transform:scale(0.97); }
+  #initiatorCol:active .initiator-label{ filter:brightness(1.08); }
+
+  /* ─── Orgasm flash (arousal hits 100) ─── */
+  @keyframes climax-flash{
+    0%   { transform:scale(1); color:var(--primary); text-shadow:none; }
+    20%  { transform:scale(1.4); color:#fff; text-shadow:0 0 30px rgba(212,90,90,1); }
+    50%  { transform:scale(1.2); color:#c98787; text-shadow:0 0 22px rgba(212,90,90,0.7); }
+    100% { transform:scale(1); color:var(--primary); text-shadow:none; }
+  }
+  .stat-num.climax-flash{
+    animation:climax-flash 1.8s cubic-bezier(.3,1.4,.5,1) both;
+  }
 
   /* Number-level flash (normal累积 — kept for completeness, currently unused) */
   @keyframes levelup-flash{
@@ -616,6 +662,80 @@
   }
   .stat-num.milestone-flash{
     animation:milestone-flash 1.4s cubic-bezier(.3,1.2,.4,1) both;
+  }
+
+  /* ─── Bulk-import textarea modal ─── */
+  .bulk-import-pop{
+    margin-top:8px;
+    background:rgba(255,255,255,0.55);
+    border:1px solid rgba(180,175,195,0.25);
+    border-radius:10px;
+    padding:10px;
+    display:none;
+  }
+  .bulk-import-pop.open{ display:block; }
+  .bulk-import-pop textarea{
+    width:100%;
+    min-height:80px;
+    background:rgba(255,255,255,0.7);
+    border:1px solid rgba(180,175,195,0.22);
+    border-radius:8px;
+    padding:7px 9px;
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:11px;
+    color:#5a5562;
+    outline:none;resize:vertical;
+  }
+  .bulk-import-hint{
+    font-size:9.5px;
+    font-family:'JetBrains Mono',monospace;
+    color:#9b9aa5;
+    margin-bottom:6px;
+    line-height:1.5;
+  }
+  .bulk-import-actions{
+    display:flex;gap:6px;justify-content:flex-end;margin-top:6px;
+  }
+
+  /* ─── Prop chip (亲密模式道具) ─── */
+  .prop-chip{
+    background:rgba(255,255,255,0.5);
+    border:1px solid rgba(180,175,195,0.3);
+    cursor:pointer;
+    transition:all 0.18s;
+  }
+  .prop-chip.enabled{
+    background:linear-gradient(135deg, rgba(201,135,135,0.18), rgba(168,158,179,0.18));
+    border-color:rgba(201,135,135,0.45);
+  }
+  .prop-chip:hover{
+    background:rgba(255,255,255,0.75);
+  }
+  .prop-chip.enabled:hover{
+    background:linear-gradient(135deg, rgba(201,135,135,0.28), rgba(168,158,179,0.25));
+  }
+  .prop-target-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:8.5px;
+    padding:1px 5px;
+    border-radius:99px;
+    background:rgba(168,158,179,0.18);
+    color:#8a7c92;
+    margin-right:4px;
+  }
+  .prop-chip.enabled .prop-target-tag{
+    background:rgba(201,135,135,0.25);
+    color:#9a5f5f;
+  }
+  .prop-toggle-dot{
+    width:6px;height:6px;border-radius:99px;
+    background:rgba(180,175,195,0.4);
+    margin-right:3px;
+    transition:all 0.2s;
+  }
+  .prop-chip.enabled .prop-toggle-dot{
+    background:#c98787;
+    box-shadow:0 0 6px rgba(201,135,135,0.6);
   }
 
   /* ─── Marker buttons (必选: 对白/动作/心绪) ─── */
@@ -956,8 +1076,8 @@
   <!-- STATUS BAR -->
   <section class="px-4 mb-3 flex-shrink-0">
     <div class="flex items-stretch gap-2">
-      <!-- Stats card -->
-      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch gap-3">
+      <!-- ─── Story mode: 好感 + 亲密 ─── -->
+      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch gap-3 story-stats">
         <!-- Affinity -->
         <div class="stat-col flex-1 min-w-0">
           <div class="stat-head">
@@ -966,7 +1086,7 @@
             <span class="stat-tier" id="affTier">LV.1</span>
           </div>
           <div class="stat-row">
-            <span class="stat-num" id="affNum">0</span><span class="stat-frac"><span id="affFracTop">0</span><span class="stat-frac-sep">/</span><span id="affFracBot">100</span></span>
+            <span class="stat-num" id="affNum">0</span><span class="stat-frac" id="affFrac">0%</span>
           </div>
           <div class="stat-bar-track">
             <div class="stat-bar-fill stat-bar-aff" id="affBar" style="width:0%"></div>
@@ -983,10 +1103,29 @@
             <span class="stat-tier" id="intTier">LV.1</span>
           </div>
           <div class="stat-row">
-            <span class="stat-num" id="intNum">0</span><span class="stat-frac"><span id="intFracTop">0</span><span class="stat-frac-sep">/</span><span id="intFracBot">100</span></span>
+            <span class="stat-num" id="intNum">0</span><span class="stat-frac" id="intFrac">0%</span>
           </div>
           <div class="stat-bar-track">
             <div class="stat-bar-fill stat-bar-int" id="intBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Intimate mode: 快感 full-width ─── -->
+      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch intimate-stats">
+        <!-- Arousal, full width; initiator chip lives inline in stat-head -->
+        <div class="stat-col flex-1 min-w-0">
+          <div class="stat-head">
+            <i class="ph-fill ph-fire text-[#c98787] text-[10px]"></i>
+            <span class="stat-label">快感</span>
+            <span class="stat-tier" id="arousalLap">×0</span>
+            <span id="initiatorCol" class="initiator-label" title="点击切换主动方">你</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-num" id="arousalNum">0</span><span class="stat-frac" id="arousalFrac">0%</span>
+          </div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill stat-bar-arousal" id="arousalBar" style="width:0%"></div>
           </div>
         </div>
       </div>
@@ -1197,6 +1336,15 @@
             <div class="btn-row">
               <button class="btn ghost" id="addLocBtn"><i class="ph ph-plus"></i>添加</button>
               <button class="btn ghost" id="loadDefaultLocBtn" title="载入宝塚 / 日比谷 / 银座 共 160 个内置地点"><i class="ph ph-download-simple"></i>载入预设</button>
+              <button class="btn ghost" id="bulkLocBtn" title="一次粘贴多条 [名字：介绍]"><i class="ph ph-stack"></i>批量</button>
+            </div>
+            <div class="bulk-import-pop" id="bulkLocPop">
+              <div class="bulk-import-hint">每行一条，格式：<code>[名字：介绍]</code> 或 <code>名字：介绍</code></div>
+              <textarea id="bulkLocText" placeholder="[花の道：从宝塚大剧場到武庫川岸的散步道，樱花季节最美]&#10;[楽屋：演员准备和卸妆的地方，私密又凌乱]"></textarea>
+              <div class="bulk-import-actions">
+                <button class="btn ghost" data-bulk-cancel="loc">取消</button>
+                <button class="btn primary" data-bulk-apply="loc">导入</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1210,6 +1358,42 @@
         <div class="acc-body">
           <div class="note warn"><strong>仅亲密模式注入</strong>:这里写的内容只在亲密模式对话时加入 prompt。所有角色必须 ≥ 18 岁。</div>
           <div class="field"><div class="field-head"><span class="field-label">偏好</span></div><textarea class="ta" id="cIntimate" rows="5" placeholder="偏好、节奏、避免、特别的设定..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="accordion" data-acc="props">
+        <div class="acc-head">
+          <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
+          <div class="acc-title"><i class="ph ph-magic-wand text-[14px] text-[#c98787]"></i>道具 <span class="acc-count" id="propCount">0</span> <span class="acc-lock">亲密模式</span></div>
+        </div>
+        <div class="acc-body">
+          <div class="note warn"><strong>仅亲密模式</strong>:点击道具卡片来启用/禁用——只有启用的道具会在亲密模式 prompt 里告诉角色"现在可以使用"。</div>
+          <div class="chip-list" id="propList" style="flex-direction:column;align-items:stretch;gap:5px;"></div>
+          <div id="propEmpty" class="text-[11px] text-[#a89eb3] cn text-center py-3" style="display:none;">还没有道具</div>
+          <div class="add-form">
+            <input type="text" class="input" id="propName" placeholder="道具名 *">
+            <input type="text" class="input" id="propDesc" placeholder="用途 / 介绍">
+            <div class="field" style="padding:0;background:transparent;border:none;">
+              <div class="field-head"><span class="field-label">谁用</span></div>
+              <div class="seg-group" id="propTargetGroup">
+                <button class="seg active" data-val="char">角色</button>
+                <button class="seg" data-val="user">玩家</button>
+                <button class="seg" data-val="both">都可以</button>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn ghost" id="addPropBtn"><i class="ph ph-plus"></i>添加</button>
+              <button class="btn ghost" id="bulkPropBtn" title="一次粘贴多条"><i class="ph ph-stack"></i>批量</button>
+            </div>
+            <div class="bulk-import-pop" id="bulkPropPop">
+              <div class="bulk-import-hint">每行一条，格式：<code>[名字：用途]</code>。默认归"角色"用，可在导入后逐个点编辑。</div>
+              <textarea id="bulkPropText" placeholder="[眼罩：遮住视线让其他感觉变敏锐]&#10;[绳子：限制手腕的活动]"></textarea>
+              <div class="bulk-import-actions">
+                <button class="btn ghost" data-bulk-cancel="prop">取消</button>
+                <button class="btn primary" data-bulk-apply="prop">导入</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1350,7 +1534,8 @@ const DEFAULT_CARD = () => ({
   name: "", tagline: "",
   personality: "", scenario: "", description: "",
   system_prompt: "", intimate_preferences: "", user_name: "",
-  secondary_characters: [], locations: []
+  secondary_characters: [], locations: [],
+  props: []  // [{ name, description, target: "char"|"user"|"both", enabled: bool }]
 });
 
 // ─── Tiny synchronous values stay in localStorage (needed at boot, small) ───
@@ -1364,8 +1549,32 @@ let ageConfirmed = localStorage.getItem("dzmm_age_ok") === "yes";
 let card = null;
 let profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
 let histories = { story: [], intimate: [] };
-let stats = { story: { aff: 0, int: 0 }, intimate: { aff: 0, int: 0 } };
-function getCurStats(){ return stats[mode] || (stats[mode] = { aff:0, int:0 }); }
+//  Story mode: aff = 好感, int = 亲密 (both 0..∞ with 100-tier system)
+//  Intimate mode: arousal = 快感 (0..100, resets after 100), initiator = "user"|"char"|"both",
+//                 laps = 累计高潮次数 (just a display chip, no mechanical effect)
+let stats = {
+  story:    { aff: 0, int: 0 },
+  intimate: { arousal: 0, initiator: "user", laps: 0 }
+};
+function getCurStats(){
+  if (mode === "intimate"){
+    if (!stats.intimate) stats.intimate = { arousal: 0, initiator: "user", laps: 0 };
+    return stats.intimate;
+  }
+  if (!stats.story) stats.story = { aff:0, int:0 };
+  return stats.story;
+}
+
+// Initiator → 累积规则 (decides what arousal deltas get counted from [AROUSAL])
+//  "user" = 玩家主动: 角色被动 → 心理(+1~2) + 生理(+5~10) 都加
+//  "char" = 角色主动: 只有玩家的话语/行为有效 → 只加心理(+1~2)
+//  "both" = 互相: 双方都参与 → 心理(+1~2) + 生理(+5~10) 都加
+const INITIATOR_CYCLE = ["user", "char", "both"];
+const INITIATOR_META = {
+  user: { label: "你",    promptLabel: "玩家", hint: "·身心都加", dots: [true,  false, false] },
+  char: { label: "角色",  promptLabel: "角色", hint: "·只加心理", dots: [false, true,  false] },
+  both: { label: "互相",  promptLabel: "互相", hint: "·身心都加", dots: [false, false, true ] }
+};
 
 let currentModel = "";
 let currentStyle = "standard";
@@ -1590,30 +1799,35 @@ function applyMode() {
     b.classList.toggle("active", b.dataset.mode === mode);
   });
   refreshTopBar();
+  refreshStats();   // sync the visible stat-bar (story vs intimate) to current mode
   renderMessages();
   updateSendBtn();
 }
 
 // ═══════════════════════════════════════════════════════════
-// Level system
+// Stat system — story uses (aff, int) tiered cumulative; intimate uses arousal 0-100 with reset
 // ═══════════════════════════════════════════════════════════
-const MILESTONE_STEP = 100;  // every 100 累积 → fire a 心动 event
+const MILESTONE_STEP = 100;  // story 模式 每 100 累积 → 心动事件 + 升级
+const AROUSAL_MAX = 100;     // 亲密模式 快感 100 = orgasm 重置
 
 function applyStatChange(kind, delta){
-  // kind = "aff" or "int"; delta = integer. Mutates current-mode substats.
+  // STORY MODE: kind = "aff" or "int", delta integer, tier system with 心动 trigger.
+  // INTIMATE MODE: kind = "arousal", delta integer, capped to AROUSAL_MAX, reset to random(0..20) on overflow.
+  if (mode === "intimate" && kind === "arousal"){
+    _applyArousalChange(delta);
+    return;
+  }
+  if (mode !== "story") return;  // intimate mode ignores aff/int
+
   const cur = getCurStats();
   const prev = cur[kind] || 0;
   let next = prev + delta;
-  if (next < 0) next = 0;  // floor at 0
+  if (next < 0) next = 0;
   cur[kind] = next;
 
-  // Detect 100-crossing (only on positive growth — undo/regen rewinds shouldn't fire).
   const prevTier = Math.floor(prev / MILESTONE_STEP);
   const nextTier = Math.floor(next / MILESTONE_STEP);
   if (nextTier > prevTier && delta > 0){
-    // The boundary we just crossed (the lowest of any multiple boundaries crossed
-    // in this single step — if 95→220, that's 100; the 200 boundary won't fire
-    // until aff is grown past 200 *again* in a future turn).
     const crossedAt = (prevTier + 1) * MILESTONE_STEP;
     _queueMilestone(kind, crossedAt);
     flashMilestone(kind);
@@ -1623,23 +1837,70 @@ function applyStatChange(kind, delta){
   persistStats();
 }
 
-// Queue a pending heart-flutter event for the current mode.
-// If one is already pending and a *different* stat also crosses this turn,
-// merge into kind:"both" so the AI gets a single event covering both.
+// 亲密模式: 快感累积，到 100 (or overflow) → 高潮事件，重置到 0~20 随机，laps++
+function _applyArousalChange(delta){
+  const cur = getCurStats();
+  let prev = cur.arousal || 0;
+  let next = prev + delta;
+  if (next < 0) next = 0;
+
+  if (next >= AROUSAL_MAX){
+    // Orgasm event! Trigger flash, increment lap, reset to random low value.
+    next = Math.floor(Math.random() * 21);  // 0..20 inclusive
+    cur.laps = (cur.laps || 0) + 1;
+    flashClimax();
+    // (No prompt injection: the AI already chose to push it over, so it'll
+    //  describe the climax in the same response. Next turn naturally resumes.)
+  }
+
+  cur.arousal = next;
+  refreshStats();
+  persistStats();
+}
+
+function cycleInitiator(){
+  if (mode !== "intimate") return;
+  const cur = getCurStats();
+  const i = INITIATOR_CYCLE.indexOf(cur.initiator || "user");
+  cur.initiator = INITIATOR_CYCLE[(i + 1) % INITIATOR_CYCLE.length];
+  refreshStats();
+  persistStats();
+}
+
+// Apply parsed [AROUSAL] entries to the live arousal stat, respecting the
+// initiator rule:
+//   user / both initiator → both psy and phy count
+//   char initiator        → only psy counts (角色作为主动方,只有玩家的话语/行为
+//                          产生心理刺激,玩家没有被实际作用,生理加分要忽略)
+// Returns { psy, phy, effective } so it can be shown on the bubble chip.
+function _applyArousalFromParsed(parsed){
+  const arr = parsed.arousal || [];
+  let psy = 0, phy = 0;
+  arr.forEach(a => { psy += (a.psy || 0); phy += (a.phy || 0); });
+  const cur = getCurStats();
+  const init = cur.initiator || "user";
+  let effective = psy;  // psy always counts
+  if (init === "user" || init === "both"){
+    effective += phy;   // phy counts when 角色 is being acted upon
+  }
+  if (effective !== 0){
+    applyStatChange("arousal", effective);
+  }
+  // Return summary (mostly for debug / future bubble chip display)
+  return { psy, phy, effective, initiator: init };
+}
+
 function _queueMilestone(kind, crossedAt){
   const existing = pendingMilestone[mode];
   if (!existing){
     pendingMilestone[mode] = { kind, newMilestone: crossedAt, at: Date.now() };
   } else if (existing.kind !== kind){
-    // Both aff & int crossed in the same turn → merge to a single combined trigger
     pendingMilestone[mode] = {
       kind: "both",
       newMilestone: Math.min(existing.newMilestone, crossedAt),
       at: Date.now()
     };
   } else {
-    // Same kind already pending (multi-cross in one turn) — keep the lower boundary,
-    // we don't want to skip ahead.
     if (crossedAt < existing.newMilestone){
       existing.newMilestone = crossedAt;
     }
@@ -1647,9 +1908,6 @@ function _queueMilestone(kind, crossedAt){
   persistPendingMilestone();
 }
 
-// Pull the pending milestone for current mode, then clear it.
-// Called only when an assistant turn lands successfully so failed sends don't
-// silently swallow the trigger.
 function consumePendingMilestone(){
   const cur = pendingMilestone[mode];
   pendingMilestone[mode] = null;
@@ -1658,33 +1916,43 @@ function consumePendingMilestone(){
 }
 
 function refreshStats() {
+  if (mode === "intimate"){
+    const cur = getCurStats();
+    const arousal = cur.arousal || 0;
+    const laps = cur.laps || 0;
+    const init = cur.initiator || "user";
+
+    const arN = $("arousalNum"); if (arN) arN.textContent = arousal;
+    const arF = $("arousalFrac"); if (arF) arF.textContent = arousal + "%";
+    const arBar = $("arousalBar"); if (arBar) arBar.style.width = arousal + "%";
+    const lapEl = $("arousalLap"); if (lapEl) lapEl.textContent = "×" + laps;
+
+    // Initiator chip
+    const meta = INITIATOR_META[init] || INITIATOR_META.user;
+    const lbl = $("initiatorCol"); if (lbl) lbl.textContent = meta.label;
+    return;
+  }
+
+  // Story mode
   const cur = getCurStats();
   const aff = cur.aff || 0;
   const intt = cur.int || 0;
   $("affNum").textContent = aff;
   $("intNum").textContent = intt;
 
-  // Tier (LV) — every MILESTONE_STEP累积 is a level
   const affTier = Math.floor(aff / MILESTONE_STEP) + 1;
   const intTier = Math.floor(intt / MILESTONE_STEP) + 1;
   const affTierEl = $("affTier"); if (affTierEl) affTierEl.textContent = "LV." + affTier;
   const intTierEl = $("intTier"); if (intTierEl) intTierEl.textContent = "LV." + intTier;
 
-  // Fraction split into top/bot so we can style separately if needed.
-  // Top = current value within tier (0~99), bot = tier ceiling (100, 200, ...)
-  const affTop = aff % MILESTONE_STEP;
-  const intTop = intt % MILESTONE_STEP;
-  const affBot = affTier * MILESTONE_STEP;
-  const intBot = intTier * MILESTONE_STEP;
-  const setTxt = (id, val) => { const e = $(id); if (e) e.textContent = val; };
-  setTxt("affFracTop", affTop);
-  setTxt("affFracBot", affBot);
-  setTxt("intFracTop", intTop);
-  setTxt("intFracBot", intBot);
+  // Fraction = "0%" format (within-tier percentage), per user's preference
+  const affPct = aff % MILESTONE_STEP;
+  const intPct = intt % MILESTONE_STEP;
+  const af = $("affFrac"); if (af) af.textContent = affPct + "%";
+  const inf = $("intFrac"); if (inf) inf.textContent = intPct + "%";
 
-  // Progress bars — 0~100% of the current tier
-  const affBar = $("affBar"); if (affBar) affBar.style.width = (affTop) + "%";
-  const intBar = $("intBar"); if (intBar) intBar.style.width = (intTop) + "%";
+  const affBar = $("affBar"); if (affBar) affBar.style.width = affPct + "%";
+  const intBar = $("intBar"); if (intBar) intBar.style.width = intPct + "%";
 }
 
 function flashMilestone(kind){
@@ -1699,8 +1967,31 @@ function flashMilestone(kind){
     tierEl.classList.remove("flash");
     void tierEl.offsetWidth;
     tierEl.classList.add("flash");
-    // strip the .flash after animation so future LV updates can re-trigger it
     setTimeout(() => tierEl.classList.remove("flash"), 1500);
+  }
+}
+
+// Orgasm flash — number gets the biggest scale animation + the bar surges before reset
+function flashClimax(){
+  const numEl = $("arousalNum");
+  const bar = $("arousalBar");
+  const lapEl = $("arousalLap");
+  if (numEl){
+    numEl.classList.remove("flash", "milestone-flash", "climax-flash");
+    void numEl.offsetWidth;
+    numEl.classList.add("climax-flash");
+  }
+  if (bar){
+    bar.classList.remove("surge");
+    void bar.offsetWidth;
+    bar.classList.add("surge");
+    setTimeout(() => bar.classList.remove("surge"), 800);
+  }
+  if (lapEl){
+    lapEl.classList.remove("flash");
+    void lapEl.offsetWidth;
+    lapEl.classList.add("flash");
+    setTimeout(() => lapEl.classList.remove("flash"), 1500);
   }
 }
 
@@ -1722,6 +2013,7 @@ function currentHistory(){ return histories[mode]; }
 function parseAssistantOutput(text, partial){
   const segments = [];
   const statsList = [];
+  const arousalList = [];
   const patches = [];
 
   let t = text;
@@ -1739,6 +2031,23 @@ function parseAssistantOutput(text, partial){
   // mid-stream STATS that hasn't closed yet — hide it from view
   if (partial){
     t = t.replace(/\[STATS\][\s\S]*$/, "");
+  }
+
+  // AROUSAL — intimate-mode tag: [AROUSAL]心理:+N,生理:+M[/AROUSAL]
+  //  N = 心理加分 (psychological): always counted
+  //  M = 生理加分 (physical): only counted when initiator allows it
+  //  (rule application happens in caller — parser just extracts numbers)
+  t = t.replace(/\[AROUSAL\]([\s\S]*?)\[\/AROUSAL\]/g, (_, body) => {
+    const psyM  = body.match(/心理\s*[::]\s*([+\-]?\d+)/);
+    const phyM  = body.match(/生理\s*[::]\s*([+\-]?\d+)/);
+    arousalList.push({
+      psy: psyM ? parseInt(psyM[1]) : 0,
+      phy: phyM ? parseInt(phyM[1]) : 0
+    });
+    return "";
+  });
+  if (partial){
+    t = t.replace(/\[AROUSAL\][\s\S]*$/, "");
   }
 
   // CARD_PATCH — only consume completed tags
@@ -1831,7 +2140,7 @@ function parseAssistantOutput(text, partial){
   }
   pushPlain(lastIdx, t.length);
 
-  return { segments, stats: statsList, patches, streamingTail };
+  return { segments, stats: statsList, arousal: arousalList, patches, streamingTail };
 }
 
 const PATCH_CAP = 50;
@@ -2099,23 +2408,41 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap){
   // Stat chips — only render once final
   const chips = wrap.querySelector(".stat-chips");
   chips.innerHTML = "";
-  if (!partial && statsApplied && (statsApplied.aff || statsApplied.int)){
-    chips.style.display = "flex";
+  let hasAnyChip = false;
+  if (!partial && statsApplied){
+    // Story-mode chips
     if (statsApplied.aff){
       const c = document.createElement("span");
       c.className = "stat-chip aff" + (statsApplied.aff < 0 ? " neg" : "");
       c.innerHTML = `<i class="ph ${statsApplied.aff>0?'ph-arrow-up':'ph-arrow-down'}"></i> 好感 ${statsApplied.aff>0?'+':''}${statsApplied.aff}`;
-      chips.appendChild(c);
+      chips.appendChild(c); hasAnyChip = true;
     }
     if (statsApplied.int){
       const c = document.createElement("span");
       c.className = "stat-chip int" + (statsApplied.int < 0 ? " neg" : "");
       c.innerHTML = `<i class="ph ${statsApplied.int>0?'ph-arrow-up':'ph-arrow-down'}"></i> 亲密 ${statsApplied.int>0?'+':''}${statsApplied.int}`;
-      chips.appendChild(c);
+      chips.appendChild(c); hasAnyChip = true;
     }
-  } else {
-    chips.style.display = "none";
+    // Intimate-mode arousal chip
+    if (statsApplied.effective !== undefined && statsApplied.effective !== 0){
+      const c = document.createElement("span");
+      c.className = "stat-chip aff" + (statsApplied.effective < 0 ? " neg" : "");
+      // If phy was reported but didn't count (角色主动 + 玩家没行动), show that visually
+      const eff = statsApplied.effective;
+      const psy = statsApplied.psy || 0;
+      const phy = statsApplied.phy || 0;
+      const init = statsApplied.initiator;
+      let detail = `${eff>0?'+':''}${eff}`;
+      if (init === "char" && phy > 0){
+        detail += `  (心${psy>0?'+':''}${psy}·生略)`;
+      } else if (psy && phy){
+        detail += `  (心${psy>0?'+':''}${psy}+生${phy>0?'+':''}${phy})`;
+      }
+      c.innerHTML = `<i class="ph ${eff>0?'ph-fire':'ph-arrow-down'}"></i> 快感 ${detail}`;
+      chips.appendChild(c); hasAnyChip = true;
+    }
   }
+  chips.style.display = hasAnyChip ? "flex" : "none";
 
   if (newBubble) maybeScrollToBottom();
   return wrap;
@@ -2384,19 +2711,72 @@ function buildSystemPrompt() {
   lines.push(`\n请把动作和心绪写在独立的括号/星号内,不要把动作直接塞在对白前后没有包裹。一段回复一般包含 1-2 句对白 + 1-3 段动作/神态/心绪,长度适中,有呼吸感。`);
 
   if (mode === "story"){
-    lines.push(`\n## 数值变化标签 (每次回复都必须输出一次)`);
-    lines.push(`在你回复的最末尾,**务必**附上一行数值变化标签,记录这一轮聊天带来的累积。格式严格如下:`);
+    lines.push(`\n## 数值变化标签 (★ 每轮必须输出 ★)`);
+    lines.push(`你**每一轮回复的末尾都必须**附上一行数值变化标签，**没有任何例外**。即使这一轮只是闲聊几句，也要给一个最小的累积（好感 +1）。格式严格如下：`);
     lines.push(`[STATS]好感:+2,亲密:+0[/STATS]`);
-    lines.push(`这是一个**鼓励多聊天**的累积系统——每次自然的来往都会让数字慢慢往上走,不需要靠"做对什么"才能加分。参考:`);
-    lines.push(`- 任何一次正常往来(哪怕只是闲聊几句): 好感 +1 ~ +2 (默认就给,不要 +0)`);
-    lines.push(`- 让你感到开心/被理解/被关心: 好感 +2 ~ +4`);
-    lines.push(`- 真情流露的瞬间、心动、靠近: 好感 +3 ~ +5, 亲密 +1 ~ +3`);
-    lines.push(`- 玩家明显不友善或情绪化(吵架、冒犯): 好感 -1 ~ -2 (不要轻易扣大量)`);
-    lines.push(`- 玩家做了真正过分的事(羞辱、伤害): 好感 -3 ~ -6,亲密 -1 ~ -2`);
-    lines.push(`原则:**默认就在往上走**,只有玩家明显不友善时才会扣。这是让玩家感受到"和你聊得越多越亲近"的设计,不要因为对话内容平淡就给 0。**严禁省略 [STATS] 标签**。`);
+    lines.push(`**漏掉这个标签 = 这轮回复未完成。**如果你忘了写，玩家屏幕上的数值条不会动，整个累积系统就失效了。`);
+    lines.push(`\n参考量级（这是一个**鼓励多聊天**的累积系统，每次自然的来往都会让数字慢慢往上走）：`);
+    lines.push(`- 平淡闲聊、寒暄、随口几句：好感 +1 ~ +2`);
+    lines.push(`- 聊得舒服、有共鸣、被理解、被关心：好感 +2 ~ +4`);
+    lines.push(`- 真情流露的瞬间、心动、对方靠近、记得了一个细节：好感 +3 ~ +5, 亲密 +1 ~ +3`);
+    lines.push(`- 真正的心动场景 / 触动很深的事件：好感 +5 ~ +8, 亲密 +2 ~ +5`);
+    lines.push(`- 玩家明显不友善（吵架、冒犯）：好感 -1 ~ -2 (不要轻易扣大量)`);
+    lines.push(`- 玩家做了真正过分的事（羞辱、伤害）：好感 -3 ~ -6, 亲密 -1 ~ -2`);
+    lines.push(`\n原则：**默认就在往上走**——只有玩家明显不友善才扣分。**不要因为对话内容平淡就给 +0**（最少也要 +1）。亲密度比好感度涨得慢得多，平淡场景给亲密 +0 是合理的，但好感不能 +0。`);
+    lines.push(`\n再次强调：标签必须出现在每一轮回复的末尾。**省略 [STATS] 视为格式错误。**`);
   } else {
-    lines.push(`\n## 数值变化标签`);
-    lines.push(`亲密模式下不需要计算数值,但如果出现极特殊的情感事件,你也可以选择性地附上 [STATS]亲密:+N[/STATS]。绝大多数时候省略即可。`);
+    // ─── INTIMATE MODE: arousal gauge replaces aff/int ───
+    const cur = getCurStats();
+    const initiator = cur.initiator || "user";
+    const arousal = cur.arousal || 0;
+    const laps = cur.laps || 0;
+
+    lines.push(`\n## 数值系统 (★ 亲密模式专属 ★)`);
+    lines.push(`亲密模式用一个**「快感累积」**系统替代故事模式的好感/亲密。`);
+    lines.push(`- 当前快感：**${arousal} / 100**（已累计达到高潮 ${laps} 次）`);
+    lines.push(`- 满 100 → 触发高潮 → 重置到 0~20 之间随机值，可以继续。`);
+    lines.push(`- 数值不到 100 时，**绝对不要主动让角色高潮 / 让场景结束**，除非玩家明确要求。`);
+
+    lines.push(`\n## ★ 主动方设定`);
+    if (initiator === "user"){
+      lines.push(`玩家是**主动方**，角色是被动接受的一方。`);
+      lines.push(`这意味着：角色的快感累积来自玩家的实际作用（被触摸、被亲吻、被推到墙上、被解开扣子……），而不是角色自己单方面的动作。**角色作为被动方，身体和心理都会被影响。**`);
+    } else if (initiator === "char"){
+      lines.push(`角色是**主动方**，玩家是被动方。`);
+      lines.push(`这意味着：**角色在主动作用于玩家**，但**角色自己**没有被玩家实质性地作用到。`);
+      lines.push(`**这种情况下，角色的快感只来自心理刺激**——比如玩家说了什么挑逗的话、玩家的反应让她兴奋、玩家的眼神/呼吸/求饶让她动情、玩家说"喜欢"或求她继续——这些都加心理分。但**没有玩家的实际行动作用在角色身上，就不能加生理分**。比如：女人用手指插入对方，自己是不会因此高潮的；舔对方耳朵，自己耳朵没被舔，所以不加生理分。`);
+    } else {
+      // both
+      lines.push(`**互相**——双方都在作用对方（互相亲吻、相互抚摸、骑乘、对视、轮流主导……）。`);
+      lines.push(`这种情况下，角色的快感**心理和生理都算**，按真实的情境给。`);
+    }
+
+    lines.push(`\n## 数值输出标签 (★ 每轮必须输出 ★)`);
+    lines.push(`每一轮回复的末尾**必须**附上一行：`);
+    lines.push(`[AROUSAL]心理:+N,生理:+M[/AROUSAL]`);
+    lines.push(`其中：`);
+    lines.push(`- **心理 (psy)**：角色因为这一轮的对话内容、情绪、玩家的话/表情/反应在心理上感受到的兴奋程度。**范围 0 ~ 2**。`);
+    lines.push(`- **生理 (phy)**：角色因为这一轮中**实际被玩家作用到身体**而产生的兴奋。**范围 0 ~ 10**。`);
+    lines.push(`\n判断要点：`);
+    lines.push(`- "心理" 永远都该有一些，只要有任何情绪互动就给 +1 或 +2。完全没有对话/动作的轮次才给 0。`);
+    lines.push(`- "生理" 只在**玩家的动作实际落在角色身上**时才有。例：玩家亲吻角色 → 生理 +5；玩家用手抚摸 → 生理 +3；玩家的指交、口活 → 生理 +8 ~ +10。`);
+    lines.push(`- 如果**角色在主动作用于玩家**但**角色自己没被玩家作用到**，**生理写 0**（系统也会过滤掉）。`);
+    lines.push(`- 玩家"说"想要做什么但还没做 → 算心理刺激（+1 或 +2），不算生理。`);
+    lines.push(`- 道具被使用：如果道具用在角色身上 → 生理增加；用在玩家身上而角色看着/操作 → 心理增加。`);
+    lines.push(`\n（说明：玩家在 UI 上手动选择了"主动方"是「${INITIATOR_META[initiator].promptLabel}」。系统会根据这个设置自动过滤生理分——你只要按真实情境如实写 [AROUSAL]，不用自己判断要不要打折，系统会处理。）`);
+    lines.push(`\n**漏掉 [AROUSAL] = 格式错误。**`);
+
+    // Inject enabled props
+    const enabledProps = (card.props || []).filter(p => p.enabled);
+    if (enabledProps.length){
+      lines.push(`\n## 本次启用的道具`);
+      lines.push(`这场景里有以下道具可以被自然地使用（不是必须每个都用，按情境取舍）：`);
+      enabledProps.forEach(p => {
+        const t = p.target === "user" ? "玩家用" : p.target === "both" ? "都可以用" : "角色用";
+        lines.push(`- **${p.name}**（${t}）：${p.description || "—"}`);
+      });
+      lines.push(`如果玩家提到要用某个道具，或当下情境合适，自然地让它进入场景。被使用的道具会影响 [AROUSAL] 的判定（按"作用在谁身上"算）。`);
+    }
   }
 
   lines.push(`\n## 角色卡补完 (可选)`);
@@ -2471,6 +2851,7 @@ function _historyToTranscript(slice){
       // strip tag noise so the summary stays clean
       const cleaned = String(m.content || "")
         .replace(/\[STATS\][\s\S]*?\[\/STATS\]/g, "")
+        .replace(/\[AROUSAL\][\s\S]*?\[\/AROUSAL\]/g, "")
         .replace(/\[CARD_PATCH\][\s\S]*?\[\/CARD_PATCH\]/g, "")
         .replace(/\[\/?SCENE\]/g, "")
         .trim();
@@ -2503,6 +2884,8 @@ async function summarizeIfNeeded(){
     : `# 待压缩的对话片段（截至第 ${upTo} 轮）\n${newTranscript}\n\n请输出剧情回顾。`;
 
   try {
+    // Note: this API only supports streaming. We send stream:true and accumulate
+    // chunks ourselves into a single string before applying.
     const body = {
       model: currentModel,
       style: "standard",
@@ -2521,7 +2904,7 @@ async function summarizeIfNeeded(){
       messages: [{ role: "user", content: userPrompt }],
       max_tokens: 700,
       temperature: 0.3,
-      stream: false
+      stream: true
     };
 
     showToast("正在压缩历史…");
@@ -2530,9 +2913,33 @@ async function summarizeIfNeeded(){
       headers:{ "Content-Type":"application/json", Authorization:`Bearer ${token}` },
       body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error(`${r.status}`);
-    const data = await r.json();
-    const text = (data.choices && data.choices[0] && (data.choices[0].message?.content || data.choices[0].text)) || "";
+    if (!r.ok || !r.body){
+      const errBody = await r.text().catch(() => "");
+      throw new Error(`${r.status} ${errBody.slice(0, 200)}`);
+    }
+    // Stream the SSE response into a single string
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let text = "";
+    while (true){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const raw of lines){
+        const line = raw.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload);
+          const delta = ev.choices?.[0]?.delta?.content;
+          if (delta) text += delta;
+        } catch(_){}
+      }
+    }
     if (!text.trim()) throw new Error("空摘要");
 
     summaries[mode] = { upTo, text: text.trim(), at: Date.now() };
@@ -2542,7 +2949,7 @@ async function summarizeIfNeeded(){
     showToast(`已压缩前 ${upTo} 轮为剧情回顾`);
   } catch(err){
     console.warn("[summary] failed:", err);
-    showToast("历史压缩失败，本次仍发送完整记录", true);
+    showToast("历史压缩失败：" + String(err.message || err).slice(0, 80), true);
   } finally {
     _isSummarizing = false;
   }
@@ -2696,27 +3103,30 @@ async function send(forcedText, opts) {
 
       const parsed = parseAssistantOutput(assistantText, false);
 
-      // Apply stats — AI-reported
-      let totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
-
-      // Fallback: if no stats reported in story mode, infer a small default
-      // so the affinity bar still moves. We don't override AI's explicit values.
-      if (mode === "story" && totalStats.aff === 0 && totalStats.int === 0){
-        totalStats = inferDefaultStats(rawText, assistantText);
+      // Apply stats based on mode
+      let statsApplied;
+      let statsPre = null;
+      if (mode === "intimate"){
+        // Snapshot pre-state so regen can correctly rewind past orgasm resets.
+        statsPre = Object.assign({}, getCurStats());
+        statsApplied = _applyArousalFromParsed(parsed);
+      } else {
+        const total = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+        if (total.aff) applyStatChange("aff", total.aff);
+        if (total.int) applyStatChange("int", total.int);
+        statsApplied = total;
       }
-      if (totalStats.aff) applyStatChange("aff", totalStats.aff);
-      if (totalStats.int) applyStatChange("int", totalStats.int);
       applyCardPatches(parsed.patches);
 
       // Final render of the live bubble (drops streaming caret, adds chips)
       if (!liveBubble){
-        liveBubble = buildAssistantBubble(assistantText, totalStats, false);
+        liveBubble = buildAssistantBubble(assistantText, statsApplied, false);
       } else {
-        buildAssistantBubble(assistantText, totalStats, false, liveBubble);
+        buildAssistantBubble(assistantText, statsApplied, false, liveBubble);
       }
 
       // Persist
-      h.push({ role: "assistant", content: assistantText, parsed, statsApplied: totalStats });
+      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre });
       persistHistories();
       // Re-render the bubble we just streamed so it gets data-idx + actions menu
       // (the live bubble is the same DOM node, but had no idx during streaming).
@@ -2760,22 +3170,8 @@ async function send(forcedText, opts) {
   }
 }
 
-// Heuristic fallback — only triggers when the AI forgot to emit [STATS].
-// Intentionally minimal: keyword-matching gives bad signal on irony/negation,
-// so we just return a small baseline so the bar still drifts. The real signal
-// is supposed to come from [STATS] in the AI output.
-function inferDefaultStats(userText, aiText){
-  const u = (userText || "");
-  // The only thing we trust ourselves to detect: explicit hostility.
-  // Anything else gets a tiny +1 baseline so the bar keeps moving.
-  if (/讨厌你|去死|滚开|傻逼|垃圾|废物|fuck you|i hate you/i.test(u)) {
-    return { aff: -2, int: 0 };
-  }
-  if (/烦死|蠢货/i.test(u)) {
-    return { aff: -1, int: 0 };
-  }
-  return { aff: 1, int: 0 };
-}
+// (旧的 inferDefaultStats 兜底函数已删除 — 故事模式现在完全依赖 AI 输出 [STATS]，
+//  prompt 已经把规则写到必须每轮输出的程度，没有 fallback。)
 
 // ═══════════════════════════════════════════════════════════
 // Input
@@ -2927,6 +3323,7 @@ document.addEventListener("click", (e) => {
     if (!card) return;
     if (kind === "sec") { card.secondary_characters.splice(i, 1); renderSecondary(); }
     else if (kind === "loc") { card.locations.splice(i, 1); renderLocations(); }
+    else if (kind === "prop") { (card.props||[]).splice(i, 1); renderProps(); }
     else if (kind === "patch") { (card.notes||[]).splice(i, 1); renderPatches(); }
     persistCard();
   }
@@ -2972,6 +3369,173 @@ $("loadDefaultLocBtn").addEventListener("click", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// Props (亲密模式道具) — UI + state
+// ═══════════════════════════════════════════════════════════
+let _propTarget = "char";  // current pick for the add-form target segmented control
+
+function renderProps(){
+  const list = $("propList");
+  const arr = (card?.props) || [];
+  const empty = $("propEmpty");
+  const count = $("propCount");
+  if (count) count.textContent = arr.length;
+  if (!list) return;
+  list.innerHTML = "";
+  if (!arr.length){
+    if (empty) empty.style.display = "block";
+    return;
+  }
+  if (empty) empty.style.display = "none";
+  arr.forEach((p, i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip prop-chip" + (p.enabled ? " enabled" : "");
+    chip.dataset.i = i;
+    const t = p.target === "user" ? "玩家" : p.target === "both" ? "都可" : "角色";
+    chip.style.cssText = "padding:7px 10px; display:flex; align-items:center; gap:6px;";
+    chip.innerHTML = `
+      <span class="prop-toggle-dot"></span>
+      <span class="prop-target-tag">${t}</span>
+      <span class="chip-name" style="flex:1;">${escapeHTML(p.name)}</span>
+      ${p.description ? `<span class="chip-sub" style="opacity:0.85;">${escapeHTML(p.description)}</span>` : ""}
+      <button class="chip-x" data-i="${i}" data-kind="prop" style="margin-left:2px;">×</button>
+    `;
+    list.appendChild(chip);
+  });
+}
+
+// Click to toggle enabled state (delegated)
+$("propList")?.addEventListener("click", (e) => {
+  // X button already handled by the global chip-x handler
+  if (e.target.matches(".chip-x")) return;
+  const chip = e.target.closest(".prop-chip");
+  if (!chip) return;
+  const i = parseInt(chip.dataset.i);
+  if (isNaN(i) || !card?.props?.[i]) return;
+  card.props[i].enabled = !card.props[i].enabled;
+  renderProps();
+  persistCard();
+});
+
+// Target segmented control
+document.querySelectorAll("#propTargetGroup .seg").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#propTargetGroup .seg").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    _propTarget = b.dataset.val;
+  });
+});
+
+$("addPropBtn")?.addEventListener("click", () => {
+  const name = $("propName").value.trim();
+  if (!name){ alert("请填写道具名"); return; }
+  ensureCard();
+  if (!Array.isArray(card.props)) card.props = [];
+  card.props.push({
+    name,
+    description: $("propDesc").value.trim(),
+    target: _propTarget,
+    enabled: true   // newly added → on by default
+  });
+  $("propName").value = ""; $("propDesc").value = "";
+  renderProps(); persistCard();
+});
+
+// ═══════════════════════════════════════════════════════════
+// Bulk import for locations / props — format: [name: desc] per line
+// ═══════════════════════════════════════════════════════════
+function _parseBulkImport(text){
+  //  Accept lines like:
+  //    [花の道：从宝塚...]
+  //    花の道：从宝塚...
+  //    花の道: from Takarazuka...
+  //    [name]   (no description)
+  //  Returns [{name, description}, ...]
+  const out = [];
+  const lines = String(text || "").split(/\r?\n/);
+  for (let raw of lines){
+    let s = raw.trim();
+    if (!s) continue;
+    // strip wrapping brackets if present
+    if (s.startsWith("[") && s.endsWith("]")) s = s.slice(1, -1).trim();
+    if (!s) continue;
+    // split on first : or ：
+    const m = s.match(/^\s*([^:：]+?)\s*[:：]\s*([\s\S]*)$/);
+    let name, desc;
+    if (m){ name = m[1].trim(); desc = (m[2] || "").trim(); }
+    else  { name = s; desc = ""; }
+    if (!name) continue;
+    out.push({ name, description: desc });
+  }
+  return out;
+}
+
+// Wire up the bulk-import open / cancel / apply buttons for both loc and prop.
+function _wireBulkImport(){
+  const open = (kind) => {
+    const pop = $(kind === "loc" ? "bulkLocPop" : "bulkPropPop");
+    if (!pop) return;
+    pop.classList.add("open");
+    setTimeout(() => $(kind === "loc" ? "bulkLocText" : "bulkPropText")?.focus(), 60);
+  };
+  const close = (kind) => {
+    const pop = $(kind === "loc" ? "bulkLocPop" : "bulkPropPop");
+    if (pop) pop.classList.remove("open");
+  };
+  $("bulkLocBtn")?.addEventListener("click", () => open("loc"));
+  $("bulkPropBtn")?.addEventListener("click", () => open("prop"));
+  // delegated cancel / apply via data-attr
+  document.addEventListener("click", (e) => {
+    const cancel = e.target.closest("[data-bulk-cancel]");
+    if (cancel){ close(cancel.dataset.bulkCancel); return; }
+    const apply = e.target.closest("[data-bulk-apply]");
+    if (!apply) return;
+    const kind = apply.dataset.bulkApply;
+    if (kind === "loc"){
+      const txt = $("bulkLocText").value;
+      const items = _parseBulkImport(txt);
+      if (!items.length){ alert("没有解析到任何条目"); return; }
+      ensureCard();
+      if (!Array.isArray(card.locations)) card.locations = [];
+      const have = new Set(card.locations.map(l => l.name));
+      let added = 0;
+      for (const it of items){
+        if (have.has(it.name)) continue;
+        card.locations.push(it);
+        have.add(it.name); added++;
+      }
+      $("bulkLocText").value = "";
+      close("loc");
+      renderLocations(); persistCard();
+      const btn = $("bulkLocBtn");
+      if (btn){ const o = btn.innerHTML; btn.innerHTML = `<i class="ph ph-check"></i>+${added}`; setTimeout(() => btn.innerHTML = o, 1500); }
+    } else if (kind === "prop"){
+      const txt = $("bulkPropText").value;
+      const items = _parseBulkImport(txt);
+      if (!items.length){ alert("没有解析到任何条目"); return; }
+      ensureCard();
+      if (!Array.isArray(card.props)) card.props = [];
+      const have = new Set(card.props.map(p => p.name));
+      let added = 0;
+      for (const it of items){
+        if (have.has(it.name)) continue;
+        card.props.push({
+          name: it.name,
+          description: it.description,
+          target: "char",   // bulk-imported default; user can edit later
+          enabled: true
+        });
+        have.add(it.name); added++;
+      }
+      $("bulkPropText").value = "";
+      close("prop");
+      renderProps(); persistCard();
+      const btn = $("bulkPropBtn");
+      if (btn){ const o = btn.innerHTML; btn.innerHTML = `<i class="ph ph-check"></i>+${added}`; setTimeout(() => btn.innerHTML = o, 1500); }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
 // Character form
 // ═══════════════════════════════════════════════════════════
 function populateCharForm() {
@@ -2985,7 +3549,7 @@ function populateCharForm() {
   $("cIntimate").value = c.intimate_preferences || "";
   $("cUserName").value = c.user_name || "";
   $("charSub").textContent = card ? "edit" : "new";
-  renderSecondary(); renderLocations(); renderPatches();
+  renderSecondary(); renderLocations(); renderProps(); renderPatches();
 }
 
 
@@ -3040,6 +3604,7 @@ $("jsonApplyBtn")?.addEventListener("click", () => {
   const merged = Object.assign(DEFAULT_CARD(), parsed);
   if (!Array.isArray(merged.secondary_characters)) merged.secondary_characters = [];
   if (!Array.isArray(merged.locations)) merged.locations = [];
+  if (!Array.isArray(merged.props)) merged.props = [];
   if (!Array.isArray(merged.notes)) merged.notes = parsed.notes || [];
   card = merged;
   persistCard();
@@ -3079,7 +3644,7 @@ $("saveCharBtn").addEventListener("click", () => {
   persistCard();
   if (wasNew) {
     histories = { story: [], intimate: [] };
-    stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
+    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
     pendingMilestone = { story:null, intimate:null };
     summaries = { story:null, intimate:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
@@ -3092,7 +3657,7 @@ $("clearCharBtn").addEventListener("click", () => {
   if (!confirm("清除角色卡 + 对话历史 + 等级?")) return;
   card = null;
   histories = { story: [], intimate: [] };
-  stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
+  stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
   pendingMilestone = { story:null, intimate:null };
   summaries = { story:null, intimate:null };
   idbDel("card").catch(()=>{});
@@ -3206,11 +3771,12 @@ $("fileInput").addEventListener("change", async (e) => {
     card = Object.assign(DEFAULT_CARD(), data, {
       version: SCHEMA_VERSION,
       secondary_characters: Array.isArray(data.secondary_characters) ? data.secondary_characters : [],
-      locations: Array.isArray(data.locations) ? data.locations : []
+      locations: Array.isArray(data.locations) ? data.locations : [],
+      props: Array.isArray(data.props) ? data.props : []
     });
     persistCard();
     histories = { story: [], intimate: [] };
-    stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
+    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
     pendingMilestone = { story:null, intimate:null };
     summaries = { story:null, intimate:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
@@ -3276,9 +3842,15 @@ $("fileInputAll").addEventListener("change", async (e) => {
       const p = d.stats;
       if ("story" in p || "intimate" in p){
         stats.story = Object.assign({aff:0,int:0}, p.story||{});
-        stats.intimate = Object.assign({aff:0,int:0}, p.intimate||{});
+        const pi = p.intimate || {};
+        stats.intimate = {
+          arousal:   ("arousal"   in pi) ? pi.arousal   : 0,
+          initiator: ("initiator" in pi) ? pi.initiator : "user",
+          laps:      ("laps"      in pi) ? pi.laps      : 0
+        };
       } else if ("aff" in p){
         stats.story = { aff: p.aff||0, int: p.int||0 };
+        stats.intimate = { arousal:0, initiator:"user", laps:0 };
       }
       persistStats();
     }
@@ -3385,7 +3957,7 @@ $("resetBtn").addEventListener("click", () => {
   histories[mode] = [];
   persistHistories();
   if (mode === "story") { stats.story = { aff:0, int:0 }; }
-  else { stats.intimate = { aff:0, int:0 }; }
+  else { stats.intimate = { arousal:0, initiator:"user", laps:0 }; }
   persistStats(); refreshStats();
   // Clear any pending 心动 trigger for this mode too — start fresh.
   pendingMilestone[mode] = null;
@@ -3505,9 +4077,21 @@ async function handleMsgAction(idx, kind){
     }
     if (lastUserIdx === -1){ addSystemMessage("找不到对应的用户消息", true); return; }
     // Revert stats this assistant turn awarded
-    const applied = msg.statsApplied || { aff:0, int:0 };
-    if (applied.aff) applyStatChange("aff", -applied.aff);
-    if (applied.int) applyStatChange("int", -applied.int);
+    const applied = msg.statsApplied || {};
+    if (mode === "intimate"){
+      // Arousal can't be simply -delta'd because of the orgasm reset.
+      // If we saved a pre-snapshot, restore it; otherwise live with the stale value.
+      const snap = msg.statsPre;
+      if (snap){
+        stats.intimate = Object.assign({arousal:0,initiator:"user",laps:0}, snap);
+        persistStats();
+        refreshStats();
+      }
+      // else: no snapshot (old message before this feature) — just leave stats as-is.
+    } else {
+      if (applied.aff) applyStatChange("aff", -applied.aff);
+      if (applied.int) applyStatChange("int", -applied.int);
+    }
     // Also clear any pending 心动 trigger — the regenerated reply will re-evaluate
     // from scratch and queue a fresh one if it crosses a boundary again.
     pendingMilestone[mode] = null;
@@ -3620,16 +4204,21 @@ async function _resendUserMessage(userMsg){
       // Same milestone-consume logic as send() — see comment there.
       consumePendingMilestone();
       const parsed = parseAssistantOutput(assistantText, false);
-      let totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
-      if (mode === "story" && totalStats.aff === 0 && totalStats.int === 0){
-        totalStats = inferDefaultStats(userMsg.content, assistantText);
+      let statsApplied;
+      let statsPre = null;
+      if (mode === "intimate"){
+        statsPre = Object.assign({}, getCurStats());
+        statsApplied = _applyArousalFromParsed(parsed);
+      } else {
+        const total = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+        if (total.aff) applyStatChange("aff", total.aff);
+        if (total.int) applyStatChange("int", total.int);
+        statsApplied = total;
       }
-      if (totalStats.aff) applyStatChange("aff", totalStats.aff);
-      if (totalStats.int) applyStatChange("int", totalStats.int);
       applyCardPatches(parsed.patches);
-      if (!liveBubble){ liveBubble = buildAssistantBubble(assistantText, totalStats, false); }
-      else { buildAssistantBubble(assistantText, totalStats, false, liveBubble); }
-      h.push({ role: "assistant", content: assistantText, parsed, statsApplied: totalStats });
+      if (!liveBubble){ liveBubble = buildAssistantBubble(assistantText, statsApplied, false); }
+      else { buildAssistantBubble(assistantText, statsApplied, false, liveBubble); }
+      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre });
       persistHistories();
       // Re-render so the new bubble gets data-idx + actions decorations
       renderMessages();
@@ -3843,11 +4432,19 @@ async function _loadFromIDB(){
       const aff = (p.affLevel || 0) * 100 + (p.affExp || 0);
       const intt = (p.intLevel || 0) * 100 + (p.intExp || 0);
       stats.story = { aff, int: intt };
+      stats.intimate = { arousal:0, initiator:"user", laps:0 };
     } else if ("aff" in p && !("story" in p)){
       stats.story = { aff: p.aff || 0, int: p.int || 0 };
+      stats.intimate = { arousal:0, initiator:"user", laps:0 };
     } else {
       stats.story = Object.assign({ aff:0, int:0 }, p.story || {});
-      stats.intimate = Object.assign({ aff:0, int:0 }, p.intimate || {});
+      // Intimate: migrate old {aff,int} → {arousal,initiator,laps}. New keys win when present.
+      const pi = p.intimate || {};
+      stats.intimate = {
+        arousal:   ("arousal"   in pi) ? pi.arousal   : 0,
+        initiator: ("initiator" in pi) ? pi.initiator : "user",
+        laps:      ("laps"      in pi) ? pi.laps      : 0
+      };
     }
   }
   // summaries (#15)
@@ -3924,6 +4521,9 @@ async function _migrateFromLocalStorageIfNeeded(){
   _wireMessageActions();
   _wireScenePicker();
   _wireKeyboardInset();
+  _wireBulkImport();
+  // 主动方 chip → click cycles user → char → both → user
+  $("initiatorCol")?.addEventListener("click", () => cycleInitiator());
   renderMessages();
   updateSendBtn();
   if (token) { setKeyAlert(false); loadModels(); }
