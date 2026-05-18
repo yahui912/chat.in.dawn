@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>与她一同</title>
+<title>与她一同｜本地内测版</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -499,23 +499,124 @@
 
   .hidden-file{display:none;}
 
-  /* Cumulative stat number */
-  .stat-line{
-    display:flex;align-items:center;gap:8px;
+  /* ─── Stat column layout ─── */
+  .stat-col{
+    display:flex;flex-direction:column;
+    justify-content:center;
+    gap:3px;
+    min-width:0;
   }
-  .stat-num{
-    font-family:'Inter','Noto Sans SC',sans-serif;font-size:22px;font-weight:600;
-    color:var(--primary);line-height:1;
-    transition:color 0.35s;
+  .stat-divider{
+    width:1px;
+    background:linear-gradient(to bottom, transparent, rgba(216,216,224,0.55), transparent);
+    flex-shrink:0;
+  }
+  .stat-head{
+    display:flex;align-items:center;gap:4px;
+    line-height:1;
+  }
+  .stat-label{
+    font-family:'Noto Sans SC','Inter',sans-serif;
+    font-size:9.5px;font-weight:500;
+    color:#a89eb3;
+    letter-spacing:0.14em;
+  }
+  .stat-tier{
+    margin-left:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:8.5px;font-weight:500;
+    color:#a89eb3;
+    letter-spacing:0.06em;
+    padding:1.5px 6px;
+    border-radius:99px;
+    background:rgba(168,158,179,0.12);
+    border:1px solid rgba(168,158,179,0.22);
+    transition:all 0.35s;
+  }
+  body.intimate .stat-tier{
+    color:#b67a86;
+    background:rgba(200,138,138,0.12);
+    border-color:rgba(200,138,138,0.25);
+  }
+  .stat-tier.flash{
+    color:#fff;
+    background:linear-gradient(135deg, #c98787, #a8625e);
+    border-color:transparent;
+    animation:tier-pulse 1.4s cubic-bezier(.3,1.2,.4,1) both;
+  }
+  @keyframes tier-pulse{
+    0%  { transform:scale(1); }
+    25% { transform:scale(1.12); box-shadow:0 0 14px rgba(212,140,140,0.55); }
+    100%{ transform:scale(1); box-shadow:0 0 0 rgba(0,0,0,0); }
   }
 
-  /* Level-up flash */
+  .stat-row{
+    display:flex;align-items:baseline;gap:3px;
+    line-height:1;
+  }
+  .stat-num{
+    font-family:'Inter','Noto Sans SC',sans-serif;
+    font-size:20px;font-weight:600;
+    color:var(--primary);
+    line-height:1;
+    transition:color 0.35s;
+  }
+  .stat-frac{
+    display:inline-flex;align-items:baseline;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-faint);
+    letter-spacing:0.02em;
+  }
+  .stat-frac-sep{
+    margin:0 1px;
+    opacity:0.55;
+  }
+  body.intimate .stat-frac{ color:#b59a9e; }
+
+  /* progress bar */
+  .stat-bar-track{
+    height:3px;
+    background:rgba(180,175,195,0.18);
+    border-radius:99px;
+    overflow:hidden;
+    margin-top:1px;
+  }
+  .stat-bar-fill{
+    height:100%;
+    border-radius:99px;
+    transition:width 0.6s cubic-bezier(.4,1,.4,1);
+  }
+  .stat-bar-aff{
+    background:linear-gradient(90deg, #d4a3a3, #e8c5c5);
+  }
+  .stat-bar-int{
+    background:linear-gradient(90deg, #a89eb3, #c8b8d8);
+  }
+  body.intimate .stat-bar-aff{
+    background:linear-gradient(90deg, #c98787, #d8a5a5);
+  }
+  body.intimate .stat-bar-int{
+    background:linear-gradient(90deg, #b67a86, #c89aa3);
+  }
+
+  /* Number-level flash (normal累积 — kept for completeness, currently unused) */
   @keyframes levelup-flash{
     0%{transform:scale(1);}
     40%{transform:scale(1.15);text-shadow:0 0 16px rgba(212,163,163,0.7);}
     100%{transform:scale(1);text-shadow:none;}
   }
   .stat-num.flash{animation:levelup-flash 0.9s ease-out;}
+  /* Stronger flash for the across-100 milestone (心动 trigger) */
+  @keyframes milestone-flash{
+    0%  { transform:scale(1);   color:var(--primary); text-shadow:none; }
+    25% { transform:scale(1.22); color:#c98787;       text-shadow:0 0 22px rgba(212,140,140,0.85); }
+    60% { transform:scale(1.10); color:#c98787;       text-shadow:0 0 14px rgba(212,140,140,0.5); }
+    100%{ transform:scale(1);   color:var(--primary); text-shadow:none; }
+  }
+  .stat-num.milestone-flash{
+    animation:milestone-flash 1.4s cubic-bezier(.3,1.2,.4,1) both;
+  }
 
   /* ─── Marker buttons (必选: 对白/动作/心绪) ─── */
   .marker-btn{
@@ -856,34 +957,36 @@
   <section class="px-4 mb-3 flex-shrink-0">
     <div class="flex items-stretch gap-2">
       <!-- Stats card -->
-      <div class="flex-1 glass-card rounded-2xl px-3 py-2.5 flex items-center gap-3">
+      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch gap-3">
         <!-- Affinity -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1 mb-1">
-            <i class="ph-fill ph-heart text-[#c98787] text-[11px]"></i>
-            <span class="text-[8.5px] font-medium uppercase tracking-widest text-[#a89eb3]">好感</span>
+        <div class="stat-col flex-1 min-w-0">
+          <div class="stat-head">
+            <i class="ph-fill ph-heart text-[#c98787] text-[10px]"></i>
+            <span class="stat-label">好感</span>
+            <span class="stat-tier" id="affTier">LV.1</span>
           </div>
-          <div class="stat-line">
-            <span class="stat-num" id="affNum">0</span>
+          <div class="stat-row">
+            <span class="stat-num" id="affNum">0</span><span class="stat-frac"><span id="affFracTop">0</span><span class="stat-frac-sep">/</span><span id="affFracBot">100</span></span>
           </div>
-          <div class="h-1 bg-[#ede9f0] rounded-full overflow-hidden mt-1.5">
-            <div class="h-full bg-gradient-to-r from-[#d4a3a3] to-[#e8c5c5] transition-all duration-700" id="affBar" style="width:0%"></div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill stat-bar-aff" id="affBar" style="width:0%"></div>
           </div>
         </div>
 
-        <div class="h-12 w-px bg-[#d8d8e0]/50"></div>
+        <div class="stat-divider"></div>
 
         <!-- Intimacy -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1 mb-1">
-            <i class="ph-fill ph-sparkle text-[#a89eb3] text-[11px]"></i>
-            <span class="text-[8.5px] font-medium uppercase tracking-widest text-[#a89eb3]">亲密</span>
+        <div class="stat-col flex-1 min-w-0">
+          <div class="stat-head">
+            <i class="ph-fill ph-sparkle text-[#a89eb3] text-[10px]"></i>
+            <span class="stat-label">亲密</span>
+            <span class="stat-tier" id="intTier">LV.1</span>
           </div>
-          <div class="stat-line">
-            <span class="stat-num" id="intNum">0</span>
+          <div class="stat-row">
+            <span class="stat-num" id="intNum">0</span><span class="stat-frac"><span id="intFracTop">0</span><span class="stat-frac-sep">/</span><span id="intFracBot">100</span></span>
           </div>
-          <div class="h-1 bg-[#ede9f0] rounded-full overflow-hidden mt-1.5">
-            <div class="h-full bg-gradient-to-r from-[#a89eb3] to-[#c8b8d8] transition-all duration-700" id="intBar" style="width:0%"></div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill stat-bar-int" id="intBar" style="width:0%"></div>
           </div>
         </div>
       </div>
@@ -1280,6 +1383,19 @@ let hasUnseenBelow = false;       // new content arrived while not pinned?
 //  "upTo" = index in histories[mode] up to (exclusive) which is summarized.
 let summaries = { story: null, intimate: null };
 
+// ─── New: pending 心动 milestone (心动剧情) ───
+//  When good-feeling (aff) or intimacy (int) crosses a multiple of 100,
+//  we set a flag here. The next system prompt that goes out gets a
+//  "trigger a heart-flutter moment this turn" instruction injected.
+//  Cleared only AFTER a successful assistant turn (so if the API errors,
+//  the next attempt still gets the trigger).
+//  Shape: { story: {kind:"aff"|"int"|"both", newMilestone:100|200|...} | null,
+//           intimate: ... }
+//  If two stats cross at once → kind="both" (merged into one event).
+//  If aff crosses past two thresholds in one turn (e.g. 95→220) → fire ONCE,
+//  for the lowest-crossed boundary (the next one will fire on its own later).
+let pendingMilestone = { story: null, intimate: null };
+
 // ─── New: settings (#15 #14) ───
 let summarizeThreshold = parseInt(localStorage.getItem("dzmm_sum_th") || "30");  // 0 = off
 let timeMode = localStorage.getItem("dzmm_time_mode") || "auto"; // 'auto' | 'off'
@@ -1402,6 +1518,7 @@ function persistProfile(){ _scheduleWrite("profile", profile); }
 function persistHistories(){ _scheduleWrite("histories", histories); }
 function persistStats(){ _scheduleWrite("stats", stats); }
 function persistSummaries(){ _scheduleWrite("summaries", summaries); }
+function persistPendingMilestone(){ _scheduleWrite("pendingMilestone", pendingMilestone); }
 
 // ═══════════════════════════════════════════════════════════
 // Time of day (#14)
@@ -1480,6 +1597,8 @@ function applyMode() {
 // ═══════════════════════════════════════════════════════════
 // Level system
 // ═══════════════════════════════════════════════════════════
+const MILESTONE_STEP = 100;  // every 100 累积 → fire a 心动 event
+
 function applyStatChange(kind, delta){
   // kind = "aff" or "int"; delta = integer. Mutates current-mode substats.
   const cur = getCurStats();
@@ -1488,14 +1607,54 @@ function applyStatChange(kind, delta){
   if (next < 0) next = 0;  // floor at 0
   cur[kind] = next;
 
-  const prevMile = Math.floor(prev / 50);
-  const nextMile = Math.floor(next / 50);
-  if (nextMile > prevMile && delta > 0){
-    flashMilestone(kind, next);
+  // Detect 100-crossing (only on positive growth — undo/regen rewinds shouldn't fire).
+  const prevTier = Math.floor(prev / MILESTONE_STEP);
+  const nextTier = Math.floor(next / MILESTONE_STEP);
+  if (nextTier > prevTier && delta > 0){
+    // The boundary we just crossed (the lowest of any multiple boundaries crossed
+    // in this single step — if 95→220, that's 100; the 200 boundary won't fire
+    // until aff is grown past 200 *again* in a future turn).
+    const crossedAt = (prevTier + 1) * MILESTONE_STEP;
+    _queueMilestone(kind, crossedAt);
+    flashMilestone(kind);
   }
 
   refreshStats();
   persistStats();
+}
+
+// Queue a pending heart-flutter event for the current mode.
+// If one is already pending and a *different* stat also crosses this turn,
+// merge into kind:"both" so the AI gets a single event covering both.
+function _queueMilestone(kind, crossedAt){
+  const existing = pendingMilestone[mode];
+  if (!existing){
+    pendingMilestone[mode] = { kind, newMilestone: crossedAt, at: Date.now() };
+  } else if (existing.kind !== kind){
+    // Both aff & int crossed in the same turn → merge to a single combined trigger
+    pendingMilestone[mode] = {
+      kind: "both",
+      newMilestone: Math.min(existing.newMilestone, crossedAt),
+      at: Date.now()
+    };
+  } else {
+    // Same kind already pending (multi-cross in one turn) — keep the lower boundary,
+    // we don't want to skip ahead.
+    if (crossedAt < existing.newMilestone){
+      existing.newMilestone = crossedAt;
+    }
+  }
+  persistPendingMilestone();
+}
+
+// Pull the pending milestone for current mode, then clear it.
+// Called only when an assistant turn lands successfully so failed sends don't
+// silently swallow the trigger.
+function consumePendingMilestone(){
+  const cur = pendingMilestone[mode];
+  pendingMilestone[mode] = null;
+  persistPendingMilestone();
+  return cur;
 }
 
 function refreshStats() {
@@ -1504,16 +1663,45 @@ function refreshStats() {
   const intt = cur.int || 0;
   $("affNum").textContent = aff;
   $("intNum").textContent = intt;
-  $("affBar").style.width = (aff % 100) + "%";
-  $("intBar").style.width = (intt % 100) + "%";
+
+  // Tier (LV) — every MILESTONE_STEP累积 is a level
+  const affTier = Math.floor(aff / MILESTONE_STEP) + 1;
+  const intTier = Math.floor(intt / MILESTONE_STEP) + 1;
+  const affTierEl = $("affTier"); if (affTierEl) affTierEl.textContent = "LV." + affTier;
+  const intTierEl = $("intTier"); if (intTierEl) intTierEl.textContent = "LV." + intTier;
+
+  // Fraction split into top/bot so we can style separately if needed.
+  // Top = current value within tier (0~99), bot = tier ceiling (100, 200, ...)
+  const affTop = aff % MILESTONE_STEP;
+  const intTop = intt % MILESTONE_STEP;
+  const affBot = affTier * MILESTONE_STEP;
+  const intBot = intTier * MILESTONE_STEP;
+  const setTxt = (id, val) => { const e = $(id); if (e) e.textContent = val; };
+  setTxt("affFracTop", affTop);
+  setTxt("affFracBot", affBot);
+  setTxt("intFracTop", intTop);
+  setTxt("intFracBot", intBot);
+
+  // Progress bars — 0~100% of the current tier
+  const affBar = $("affBar"); if (affBar) affBar.style.width = (affTop) + "%";
+  const intBar = $("intBar"); if (intBar) intBar.style.width = (intTop) + "%";
 }
 
-function flashMilestone(kind, newVal){
-  const el = kind === "aff" ? $("affNum") : $("intNum");
-  if (!el) return;
-  el.classList.remove("flash");
-  void el.offsetWidth;
-  el.classList.add("flash");
+function flashMilestone(kind){
+  const numEl  = kind === "aff" ? $("affNum")  : $("intNum");
+  const tierEl = kind === "aff" ? $("affTier") : $("intTier");
+  if (numEl){
+    numEl.classList.remove("flash", "milestone-flash");
+    void numEl.offsetWidth;
+    numEl.classList.add("milestone-flash");
+  }
+  if (tierEl){
+    tierEl.classList.remove("flash");
+    void tierEl.offsetWidth;
+    tierEl.classList.add("flash");
+    // strip the .flash after animation so future LV updates can re-trigger it
+    setTimeout(() => tierEl.classList.remove("flash"), 1500);
+  }
 }
 
 function currentHistory(){ return histories[mode]; }
@@ -2037,12 +2225,63 @@ async function loadModels() {
 // ═══════════════════════════════════════════════════════════
 // Prompt building
 // ═══════════════════════════════════════════════════════════
+// Build the "this turn, fire a 心动 event" instruction block.
+// Called from buildSystemPrompt() when pendingMilestone[mode] is set.
+function _buildMilestoneInstructions(pm){
+  const lines = [];
+  lines.push(`\n## ★ 本轮心动事件触发`);
+
+  // Describe what triggered it, conversationally — the model doesn't need to
+  // know the exact mechanic, just that "something has built up between us".
+  let originDesc;
+  if (pm.kind === "aff"){
+    originDesc = `你和玩家相处的好感度累积刚刚跨过 ${pm.newMilestone} 这个节点`;
+  } else if (pm.kind === "int"){
+    originDesc = `你和玩家的亲密度累积刚刚跨过 ${pm.newMilestone} 这个节点`;
+  } else {
+    // "both"
+    originDesc = `你和玩家的好感与亲密同时跨过了 ${pm.newMilestone} 这个节点（两个维度一起涨）`;
+  }
+  lines.push(`${originDesc}——这意味着两个人之间已经攒下了足够多的"共处时间 / 共享情绪"，是时候让一个"心动瞬间"自然地浮上来。`);
+
+  lines.push(`\n**本轮请你顺着当前对话的节奏，铺一个让两人之间空气微妙变化的小事件。** 不是宣告式的剧情高潮，不是突然的告白，而是一个"事后回想会记得"的瞬间。`);
+
+  lines.push(`\n参考方向（**不限于此**，挑最贴合当前场景、时段、天气、人物状态的；如果都不合适，可以自由发挥同等量级的瞬间）：`);
+  lines.push(`- **自然现象类**：突然下雨、初雪、夕阳停留得久了一点、月色、风停了一秒、樱花落、雷声、雾、雨后晴`);
+  lines.push(`- **身体性的小巧合**：递东西时指尖擦过、人多时被挤近、共撑伞、对方踉跄被扶住、靠近看东西时呼吸落在耳边、为对方拢一下头发、帮对方擦掉肩上的什么`);
+  lines.push(`- **时间性的**：突然意识到聊了多久、末班车要到了、店要打烊了、夜深了路灯一盏盏熄、只剩你们两个`);
+  lines.push(`- **信息性的**：你说出一句平时不会说的话、对方记得你某个很小的偏好、撞见对方未曾示人的一面、一个小秘密被随口讲出来`);
+  lines.push(`- **环境性的**：店里突然放起一首老歌、闻到熟悉的味道、看见某个让人怔住的画面、被陌生人误认为是某种关系`);
+
+  if (mode === "intimate"){
+    lines.push(`\n（亲密模式下，方向可以更近距离一些：呼吸的距离、手腕被握住、衣摆被牵了一下、隔着衣服感受到的体温、欲言又止的注视——但仍然要保持角色一贯的克制与人物逻辑，**不要直接跳到性场景**，除非当前对话已经走到那一步。）`);
+  }
+
+  lines.push(`\n## 心动事件的执行要点`);
+  lines.push(`- **不要打破角色一贯的语言节奏与克制感**。该用 (笑)、嗯、…… 收尾的地方还是要收。心动不等于多话。`);
+  lines.push(`- **不要直接讲出"我心动了""我对你有感觉"这种话**——让那个瞬间本身去说话。可以有一句被打断的话、一个停顿、一句"……没什么"，效果远胜直白。`);
+  lines.push(`- **顺着上一轮的场景、时段、当前在哪里**自然地铺，**不要强行换场景**。除非时间或地点真的合适，否则用现有的舞台。`);
+  lines.push(`- **不必整轮都是这件事**——可以只是一个段落、一个动作框、一句轻描淡写的对白。重点是"有这么个瞬间发生过"，而不是"整轮都在演心动戏"。`);
+  lines.push(`- **数值方面照常处理**——不要因为是心动事件就给特别夸张的数字，就当作一次自然的累积，按你一贯的尺度给 [STATS] 即可。`);
+  lines.push(`- 这个触发**只在这一轮生效**，下一轮就回到正常节奏。不要因为触发过一次就开始反复回味这个瞬间。`);
+
+  return lines.join("\n");
+}
+
 function buildSystemPrompt() {
   if (!card) return "";
   const lines = [];
 
   lines.push(`# 角色扮演设定`);
   lines.push(`你扮演「${card.name}」${card.tagline ? `,${card.tagline}` : ""}。严格保持人设、避免出戏、避免使用「作为 AI」之类的元叙述。`);
+
+  // ─── 心动事件 trigger (queued by applyStatChange when 累积值 crosses 100) ───
+  // Injected near the top so the model definitely sees it, but the character's
+  // own system_prompt (appended last with "最高优先级") still wins on voice rules.
+  const pm = pendingMilestone[mode];
+  if (pm){
+    lines.push(_buildMilestoneInstructions(pm));
+  }
 
   if (card.description){
     lines.push(`\n## 角色背景`);
@@ -2450,6 +2689,11 @@ async function send(forcedText, opts) {
     }
     removeTyping();
     if (assistantText) {
+      // The 心动 milestone (if any) was honored by this turn — clear it before
+      // applying new stats, so that any *fresh* 100-crossing from this turn's
+      // stats correctly queues a new milestone for the NEXT turn.
+      consumePendingMilestone();
+
       const parsed = parseAssistantOutput(assistantText, false);
 
       // Apply stats — AI-reported
@@ -2836,7 +3080,9 @@ $("saveCharBtn").addEventListener("click", () => {
   if (wasNew) {
     histories = { story: [], intimate: [] };
     stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
-    persistHistories(); persistStats();
+    pendingMilestone = { story:null, intimate:null };
+    summaries = { story:null, intimate:null };
+    persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
     refreshStats();
   }
   refreshTopBar(); renderMessages(); updateSendBtn();
@@ -2847,8 +3093,10 @@ $("clearCharBtn").addEventListener("click", () => {
   card = null;
   histories = { story: [], intimate: [] };
   stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
+  pendingMilestone = { story:null, intimate:null };
+  summaries = { story:null, intimate:null };
   idbDel("card").catch(()=>{});
-  persistHistories(); persistStats();
+  persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
   refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn();
   closeDrawers();
 });
@@ -2963,7 +3211,9 @@ $("fileInput").addEventListener("change", async (e) => {
     persistCard();
     histories = { story: [], intimate: [] };
     stats = { story:{aff:0,int:0}, intimate:{aff:0,int:0} };
-    persistHistories(); persistStats();
+    pendingMilestone = { story:null, intimate:null };
+    summaries = { story:null, intimate:null };
+    persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
     refreshStats(); populateCharForm(); refreshTopBar();
     renderMessages(); updateSendBtn();
     addSystemMessage(`已导入角色卡:${card.name}`);
@@ -2983,7 +3233,9 @@ $("exportAllBtn").addEventListener("click", async () => {
       card: card,
       profile: profile,
       histories: histories,
-      stats: stats
+      stats: stats,
+      summaries: summaries,
+      pendingMilestone: pendingMilestone
     }
   };
   const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
@@ -3029,6 +3281,21 @@ $("fileInputAll").addEventListener("change", async (e) => {
         stats.story = { aff: p.aff||0, int: p.int||0 };
       }
       persistStats();
+    }
+    if (d.summaries){
+      summaries = Object.assign({story:null,intimate:null}, d.summaries);
+      persistSummaries();
+    } else {
+      // older backups don't have summaries — reset to be safe
+      summaries = { story:null, intimate:null };
+      persistSummaries();
+    }
+    if (d.pendingMilestone){
+      pendingMilestone = Object.assign({story:null,intimate:null}, d.pendingMilestone);
+      persistPendingMilestone();
+    } else {
+      pendingMilestone = { story:null, intimate:null };
+      persistPendingMilestone();
     }
     await flushPending();
     refreshStats(); populateCharForm(); refreshTopBar(); renderMessages(); updateSendBtn();
@@ -3120,6 +3387,11 @@ $("resetBtn").addEventListener("click", () => {
   if (mode === "story") { stats.story = { aff:0, int:0 }; }
   else { stats.intimate = { aff:0, int:0 }; }
   persistStats(); refreshStats();
+  // Clear any pending 心动 trigger for this mode too — start fresh.
+  pendingMilestone[mode] = null;
+  persistPendingMilestone();
+  // Also drop the soft summary for this mode (it referred to the wiped history).
+  if (summaries[mode]){ summaries[mode] = null; persistSummaries(); }
   renderMessages(); closeDrawers();
 });
 
@@ -3236,6 +3508,10 @@ async function handleMsgAction(idx, kind){
     const applied = msg.statsApplied || { aff:0, int:0 };
     if (applied.aff) applyStatChange("aff", -applied.aff);
     if (applied.int) applyStatChange("int", -applied.int);
+    // Also clear any pending 心动 trigger — the regenerated reply will re-evaluate
+    // from scratch and queue a fresh one if it crosses a boundary again.
+    pendingMilestone[mode] = null;
+    persistPendingMilestone();
     // Drop assistant turn + anything after it, then pop the user msg (we'll re-push it)
     h.splice(idx);
     const lastUserMsg = h.splice(lastUserIdx, 1)[0];
@@ -3341,6 +3617,8 @@ async function _resendUserMessage(userMsg){
     }
     removeTyping();
     if (assistantText){
+      // Same milestone-consume logic as send() — see comment there.
+      consumePendingMilestone();
       const parsed = parseAssistantOutput(assistantText, false);
       let totalStats = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
       if (mode === "story" && totalStats.aff === 0 && totalStats.int === 0){
@@ -3575,6 +3853,10 @@ async function _loadFromIDB(){
   // summaries (#15)
   if (all.summaries && typeof all.summaries === "object"){
     summaries = Object.assign({ story:null, intimate:null }, all.summaries);
+  }
+  // pendingMilestone — survives reload so an interrupted turn still fires it
+  if (all.pendingMilestone && typeof all.pendingMilestone === "object"){
+    pendingMilestone = Object.assign({ story:null, intimate:null }, all.pendingMilestone);
   }
 }
 
