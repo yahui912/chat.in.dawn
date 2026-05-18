@@ -95,6 +95,34 @@
     background:rgba(255,250,250,0.55);
     border-color:rgba(255,255,255,0.6);
   }
+  /* Secondary speaker bubble — same shape & size as Ari's, just lighter rose tint */
+  .bubble-ai.secondary{
+    background:rgba(255,244,246,0.55);
+    border-color:rgba(232,210,215,0.55);
+    box-shadow:0 4px 18px rgba(201,135,135,0.08), inset 0 1px 0 rgba(255,255,255,0.55);
+  }
+  body.intimate .bubble-ai.secondary{
+    background:rgba(255,240,242,0.55);
+    border-color:rgba(232,200,206,0.55);
+  }
+  /* Secondary meta-line — slightly tinted, includes a small initial avatar */
+  .meta-line.secondary{
+    color:#b88a92;
+  }
+  .meta-line .sec-initial{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:rgba(201,135,135,0.18);
+    color:#a87782;
+    font-size:9px;
+    font-weight:600;
+    margin-right:5px;
+    vertical-align:-2px;
+  }
   .bubble-user{
     background:linear-gradient(135deg, rgba(160,150,176,0.92), rgba(148,139,161,0.92));
     color:#f8f7f9;
@@ -121,6 +149,25 @@
   /* small gap when dialogue follows a narrative box (and vice versa) */
   .narrative + .dlg{margin-top:6px;}
   .dlg + .dlg{margin-top:4px;}
+
+  /* Beat — inline tone-marker like (笑) (摇头) that lives inside dialogue.
+     Reads as a stage direction beside the spoken line: muted, smaller,
+     italic — but not its own block. */
+  .beat{
+    color:#a89eb3;
+    font-size:11.5px;
+    font-style:italic;
+    font-weight:400;
+    opacity:0.78;
+    letter-spacing:0.02em;
+    /* slight vertical nudge so the parens align with the dialogue x-height */
+    vertical-align:baseline;
+  }
+  body.intimate .beat{color:#b88a92;}
+  /* When a beat is forced to render on its own line (no preceding dialogue),
+     the .beat-only wrapper still uses .dlg base styles but stays muted. */
+  .dlg.beat-only{color:transparent;} /* parent color hidden so only .beat shows */
+  .dlg.beat-only .beat{opacity:1;}
 
   /* narrative block — unified flat look for actions / inner / scene.
      Only a thin border, no background tint, no shadow, no left accent bar. */
@@ -1323,6 +1370,8 @@
               <input type="text" class="input" id="secNick" placeholder="昵称">
             </div>
             <input type="text" class="input" id="secDesc" placeholder="一句话介绍">
+            <input type="text" class="input" id="secRelation" placeholder="与主角的关系 (例: Ari 三年的搭档娘役)">
+            <textarea class="ta" id="secVoice" rows="2" placeholder="说话方式/口吻 (例: 比 Ari 直接活泼,问句多,会笑出声,语气助词多)"></textarea>
             <button class="btn ghost" id="addSecBtn"><i class="ph ph-plus"></i>添加人物</button>
           </div>
         </div>
@@ -1504,6 +1553,16 @@
           <button class="seg" data-val="off">关闭</button>
         </div>
       </div>
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label" title="次要人物在群体场所(楽屋/稽古场/居酒屋等)出现的频率。Ari 始终是主角,他人只是让世界更真实。">他人出场频率</span>
+        </div>
+        <div class="seg-group" id="secFreqGroup">
+          <button class="seg" data-val="low">少</button>
+          <button class="seg active" data-val="medium">中</button>
+          <button class="seg" data-val="high">多</button>
+        </div>
+      </div>
       <button class="btn danger" id="resetBtn"><i class="ph ph-arrow-counter-clockwise"></i>重置当前模式对话</button>
     </div>
   </div>
@@ -1613,6 +1672,7 @@ let pendingMilestone = { story: null, intimate: null };
 // ─── New: settings (#15 #14) ───
 let summarizeThreshold = parseInt(localStorage.getItem("dzmm_sum_th") || "30");  // 0 = off
 let timeMode = localStorage.getItem("dzmm_time_mode") || "auto"; // 'auto' | 'off'
+let secFreq = localStorage.getItem("dzmm_sec_freq") || "medium"; // 'low' | 'medium' | 'high'
 let _isSummarizing = false;       // throttle re-entrant summary calls
 
 const $ = (id) => document.getElementById(id);
@@ -2013,6 +2073,23 @@ function currentHistory(){ return histories[mode]; }
 //   [STATS]好感:+3,亲密:+1[/STATS]   = stat update
 //   [CARD_PATCH]目标:角色|字段:习惯|内容:...[/CARD_PATCH]  = card update
 //
+// Special case: "beat" — a small set of pure-tone-marker words like (笑)
+// or (摇头) that appear in parens are really part of the line's voice (like
+// stage directions in a script), not full action descriptions. They render
+// inline alongside the dialogue. Anything not in the whitelist is treated as
+// a regular action segment (independent line, italic narrative styling).
+const BEAT_WHITELIST = new Set([
+  // 中文 — 1 字
+  "笑", "哭", "咳", "嗯", "唔", "啊", "哎", "嘿", "哈", "喔", "唉",
+  // 中文 — 2 字
+  "轻笑", "苦笑", "微笑", "浅笑", "干笑", "冷笑", "失笑", "莞尔",
+  "摇头", "点头", "叹气", "沉默", "抿嘴", "撇嘴", "皱眉", "挑眉", "耸肩",
+  "咳嗽", "沉吟", "顿住", "默然", "怔住", "愣住", "嗯哼",
+  // 日文
+  "笑う", "苦笑", "微笑", "ため息", "溜息", "沈黙",
+  "クス", "クスッ", "フッ", "ふっ", "ハッ", "頷く"
+]);
+
 // `partial` flag: if true, we are mid-stream — keep any unclosed trailing
 // segment as a streaming-active fragment so the UI can render it live.
 // Normalize full-width punctuation + markdown decorations that Chinese-language
@@ -2043,6 +2120,34 @@ function _extractLabeledInt(body, labels){
     if (m) return parseInt(m[1]);
   }
   return null;
+}
+
+// Salvage when the model emits the wrong tag for the current mode.
+// (Happens e.g. when model uses [STATS]好感:+2,亲密:+1[/STATS] while we're
+// in intimate mode, or [AROUSAL] while we're in story mode.) Mutates `parsed`
+// in place — if the right list is empty but the wrong list has data, convert.
+//   intimate mode: 好感 → 心理, 亲密 → 生理
+//   story mode:    心理 → 好感, 生理 → 亲密
+function _reconcileTagModeMismatch(parsed, currentMode){
+  if (!parsed) return parsed;
+  if (currentMode === "intimate"){
+    const haveArousal = parsed.arousal && parsed.arousal.length > 0;
+    const haveStats   = parsed.stats   && parsed.stats.length   > 0;
+    if (!haveArousal && haveStats){
+      parsed.arousal = parsed.stats.map(s => ({ psy: s.aff || 0, phy: s.int || 0 }));
+      parsed.stats = [];
+      console.warn("[stats-parse] mode mismatch — model emitted [STATS] in intimate mode; converted to arousal", parsed.arousal);
+    }
+  } else { // story
+    const haveStats   = parsed.stats   && parsed.stats.length   > 0;
+    const haveArousal = parsed.arousal && parsed.arousal.length > 0;
+    if (!haveStats && haveArousal){
+      parsed.stats = parsed.arousal.map(a => ({ aff: a.psy || 0, int: a.phy || 0 }));
+      parsed.arousal = [];
+      console.warn("[stats-parse] mode mismatch — model emitted [AROUSAL] in story mode; converted to stats", parsed.stats);
+    }
+  }
+  return parsed;
 }
 
 function parseAssistantOutput(text, partial){
@@ -2103,6 +2208,101 @@ function parseAssistantOutput(text, partial){
     t = t.replace(/\[CARD_PATCH\][\s\S]*$/, "");
   }
 
+  // ─── SPEAKER blocks ──────────────────────────────────────────
+  // [SPEAKER:Name] ... [/SPEAKER] tags a stretch of content as spoken by a
+  // secondary character. We strip the tags but record the speaker-span so the
+  // segment scanner can tag each emitted segment with its speaker.
+  //
+  // Mid-stream: if we see a [SPEAKER:Name] without a closing tag yet, the rest
+  // of the buffer is assumed to belong to that speaker. If we see a partial
+  // opener like "[SPEAKER" or "[SPEAKER:abc" without the closing "]", we hide
+  // the partial opener so it doesn't render as raw text.
+  const speakerSpans = []; // [{start, end, name}] in post-strip coordinates
+  {
+    let scanFrom = 0;
+    let cleanParts = [];
+    let cleanCursor = 0; // length so far in the rebuilt string
+    let openSpeaker = null; // {start, name} while inside an unmatched opener
+    const openRe = /\[SPEAKER:([^\]\n]+)\]/g;
+    const closeTag = "[/SPEAKER]";
+
+    while (scanFrom < t.length){
+      if (openSpeaker){
+        const closeIdx = t.indexOf(closeTag, scanFrom);
+        if (closeIdx !== -1){
+          // emit content between scanFrom and closeIdx, then close span
+          const chunk = t.slice(scanFrom, closeIdx);
+          cleanParts.push(chunk);
+          const spanEnd = cleanCursor + chunk.length;
+          speakerSpans.push({ start: openSpeaker.start, end: spanEnd, name: openSpeaker.name });
+          cleanCursor = spanEnd;
+          openSpeaker = null;
+          scanFrom = closeIdx + closeTag.length;
+        } else if (partial){
+          // unclosed at tail — whole rest belongs to this speaker
+          const chunk = t.slice(scanFrom);
+          cleanParts.push(chunk);
+          const spanEnd = cleanCursor + chunk.length;
+          speakerSpans.push({ start: openSpeaker.start, end: spanEnd, name: openSpeaker.name });
+          cleanCursor = spanEnd;
+          openSpeaker = null;
+          scanFrom = t.length;
+        } else {
+          // unclosed in final text — treat the rest as belonging to that speaker too
+          const chunk = t.slice(scanFrom);
+          cleanParts.push(chunk);
+          const spanEnd = cleanCursor + chunk.length;
+          speakerSpans.push({ start: openSpeaker.start, end: spanEnd, name: openSpeaker.name });
+          cleanCursor = spanEnd;
+          openSpeaker = null;
+          scanFrom = t.length;
+        }
+      } else {
+        openRe.lastIndex = scanFrom;
+        const m = openRe.exec(t);
+        if (m){
+          // emit text before the tag
+          const chunk = t.slice(scanFrom, m.index);
+          cleanParts.push(chunk);
+          cleanCursor += chunk.length;
+          openSpeaker = { start: cleanCursor, name: m[1].trim() };
+          scanFrom = m.index + m[0].length;
+        } else {
+          // No more openers. If partial and the tail looks like the start
+          // of an unfinished [SPEAKER:...] opener, hide it from the user.
+          // Only match from "[SPEAK" onward so we don't collide with other
+          // partial-typed tags like [SCENE] or [STATS].
+          if (partial){
+            const tail = t.slice(scanFrom);
+            const partialMatch = tail.match(/\[SPEAK(?:ER(?::[^\]\n]*)?)?$/);
+            if (partialMatch){
+              const partialIdx = scanFrom + partialMatch.index;
+              const chunk = t.slice(scanFrom, partialIdx);
+              cleanParts.push(chunk);
+              cleanCursor += chunk.length;
+              scanFrom = t.length; // drop the half opener
+              continue;
+            }
+          }
+          // No opener at all — emit the rest as-is
+          const chunk = t.slice(scanFrom);
+          cleanParts.push(chunk);
+          cleanCursor += chunk.length;
+          scanFrom = t.length;
+        }
+      }
+    }
+    t = cleanParts.join("");
+  }
+
+  // Helper: which speaker (if any) owns a given character index in clean text?
+  const _speakerAt = (idx) => {
+    for (const sp of speakerSpans){
+      if (idx >= sp.start && idx < sp.end) return sp.name;
+    }
+    return null;
+  };
+
   // Tokenize: SCENE, paired brackets (half-width OR full-width, match-aware),
   // *...* for inner monologue.
   // We do a single-pass scan so brackets pair correctly.
@@ -2113,24 +2313,38 @@ function parseAssistantOutput(text, partial){
   const pushPlain = (from, to) => {
     if (to <= from) return;
     const plain = t.slice(from, to).trim();
-    if (plain) segments.push({ type: "dialogue", content: plain });
+    if (!plain) return;
+    // A plain run might cross a speaker-span boundary. Split it.
+    let cursor = from;
+    while (cursor < to){
+      const curSpeaker = _speakerAt(cursor);
+      // find next boundary
+      let nextBoundary = to;
+      for (const sp of speakerSpans){
+        if (sp.start > cursor && sp.start < nextBoundary) nextBoundary = sp.start;
+        if (sp.end   > cursor && sp.end   < nextBoundary) nextBoundary = sp.end;
+      }
+      const piece = t.slice(cursor, nextBoundary).trim();
+      if (piece) segments.push({ type: "dialogue", content: piece, speaker: curSpeaker });
+      cursor = nextBoundary;
+    }
   };
 
   while (i < t.length){
     const ch = t[i];
 
-    // SCENE block
+    // SCENE block — scene narration is "universal", not tagged to a speaker
     if (t.startsWith("[SCENE]", i)){
       const end = t.indexOf("[/SCENE]", i + 7);
       if (end !== -1){
         pushPlain(lastIdx, i);
-        segments.push({ type: "scene", content: t.slice(i + 7, end).trim() });
+        segments.push({ type: "scene", content: t.slice(i + 7, end).trim(), speaker: null });
         i = end + 8;
         lastIdx = i;
         continue;
       } else if (partial){
         pushPlain(lastIdx, i);
-        streamingTail = { type: "scene", content: t.slice(i + 7).trim() };
+        streamingTail = { type: "scene", content: t.slice(i + 7).trim(), speaker: null };
         lastIdx = t.length;
         i = t.length;
         break;
@@ -2139,18 +2353,26 @@ function parseAssistantOutput(text, partial){
 
     // Action — half-width (...)  or full-width （...）
     // Pair the same kind to avoid swallowing across mixed text.
+    // Whitelisted short tone-markers like (笑) become "beat" segments
+    // (inline-rendered alongside dialogue); everything else is a full action.
     if (ch === "(" || ch === "（"){
       const closer = ch === "(" ? ")" : "）";
       const end = t.indexOf(closer, i + 1);
       if (end !== -1){
         pushPlain(lastIdx, i);
-        segments.push({ type: "action", content: t.slice(i + 1, end).trim() });
+        const inner = t.slice(i + 1, end).trim();
+        const isBeat = BEAT_WHITELIST.has(inner);
+        segments.push({
+          type: isBeat ? "beat" : "action",
+          content: inner,
+          speaker: _speakerAt(i)
+        });
         i = end + 1;
         lastIdx = i;
         continue;
       } else if (partial){
         pushPlain(lastIdx, i);
-        streamingTail = { type: "action", content: t.slice(i + 1).trim() };
+        streamingTail = { type: "action", content: t.slice(i + 1).trim(), speaker: _speakerAt(i) };
         lastIdx = t.length;
         i = t.length;
         break;
@@ -2162,13 +2384,13 @@ function parseAssistantOutput(text, partial){
       const end = t.indexOf("*", i + 1);
       if (end !== -1 && end > i + 1){
         pushPlain(lastIdx, i);
-        segments.push({ type: "inner", content: t.slice(i + 1, end).trim() });
+        segments.push({ type: "inner", content: t.slice(i + 1, end).trim(), speaker: _speakerAt(i) });
         i = end + 1;
         lastIdx = i;
         continue;
       } else if (partial){
         pushPlain(lastIdx, i);
-        streamingTail = { type: "inner", content: t.slice(i + 1).trim() };
+        streamingTail = { type: "inner", content: t.slice(i + 1).trim(), speaker: _speakerAt(i) };
         lastIdx = t.length;
         i = t.length;
         break;
@@ -2390,63 +2612,159 @@ function renderAssistantStored(msg, idx){
 // Renders an AI bubble. If `wrap` is provided, updates that wrap in place
 // (used during streaming). Otherwise creates and appends a new wrap.
 // `partial=true` keeps any unclosed trailing segment as a live-streaming fragment.
+//
+// Multi-speaker: the response may contain [SPEAKER:Name] blocks for secondary
+// characters. We group consecutive segments by speaker and render each group
+// as its own meta-line + bubble pair inside the same row wrap. The main
+// character (speaker === null) uses .bubble-ai; secondaries use .bubble-ai.secondary.
 function buildAssistantBubble(rawText, statsApplied, partial, wrap){
   const parsed = parseAssistantOutput(rawText, partial);
   const newBubble = !wrap;
   if (newBubble){
     wrap = document.createElement("div");
     wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const name = card?.name || "角色";
-    wrap.innerHTML = `
-      <span class="meta-line">${escapeHTML(name)} · ${time}</span>
-      <div class="bubble-ai max-w-[88%]">
-        <div class="seg-host"></div>
-        <div class="stat-chips" style="display:none;"></div>
-      </div>
-    `;
     chatArea.appendChild(wrap);
   }
-  const host = wrap.querySelector(".seg-host");
-  host.innerHTML = "";
+  const mainName = card?.name || "角色";
+  // Reset the wrap to a clean state and rebuild groups.
+  // Preserve any .msg-actions menu that was appended later (it's only on stored
+  // messages, added by renderAssistantStored). We'll re-append it at the end.
+  const savedActions = wrap.querySelector(":scope > .msg-actions");
+  wrap.innerHTML = "";
 
-  const buildSeg = (seg, isLive) => {
-    if (seg.type === "dialogue"){
-      const p = document.createElement("p");
-      p.className = "dlg" + (isLive ? " streaming" : "");
-      p.textContent = seg.content;
-      host.appendChild(p);
-    } else if (seg.type === "action"){
-      const d = document.createElement("div");
-      d.className = "narrative" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
-    } else if (seg.type === "inner"){
-      const d = document.createElement("div");
-      d.className = "narrative inner" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
-    } else if (seg.type === "scene"){
-      const d = document.createElement("div");
-      d.className = "narrative scene" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
+  // Build segment list (segments + optional streaming tail)
+  const allSegs = parsed.segments.slice();
+  if (partial && parsed.streamingTail && parsed.streamingTail.content){
+    allSegs.push({ ...parsed.streamingTail, _live: true });
+  }
+  // If empty (e.g. very start of stream), still show an empty main bubble so
+  // the typing/streaming caret has a home.
+  // Group by speaker, preserving order.
+  const groups = []; // [{speaker, segs:[]}]
+  let curGroup = null;
+  for (const seg of allSegs){
+    // scenes break grouping — they live in the main flow regardless
+    const speaker = (seg.type === "scene") ? null : (seg.speaker || null);
+    if (!curGroup || curGroup.speaker !== speaker){
+      curGroup = { speaker, segs: [] };
+      groups.push(curGroup);
+    }
+    curGroup.segs.push(seg);
+  }
+  if (groups.length === 0){
+    groups.push({ speaker: null, segs: [] });
+  }
+  // If the first group is a secondary (model jumped straight to a [SPEAKER]),
+  // insert an empty main group at the start so meta-line ordering reads:
+  // (no main yet) — actually, no — that's noisy. Better: just show the
+  // secondary group first; reads naturally as "红咲ハル · 14:32 [bubble]".
+
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  // Helper to build one (meta-line + bubble) pair appended to wrap.
+  let firstMainBubble = null; // where stat-chips will go
+  const buildGroup = (group, isLastGroup) => {
+    const speakerName = group.speaker;
+    const isSecondary = !!speakerName;
+    const displayName = speakerName || mainName;
+
+    // meta-line
+    const meta = document.createElement("span");
+    meta.className = "meta-line" + (isSecondary ? " secondary" : "");
+    if (isSecondary){
+      const initial = displayName.charAt(0);
+      meta.innerHTML = `<span class="sec-initial">${escapeHTML(initial)}</span>${escapeHTML(displayName)} · ${time}`;
+    } else {
+      meta.textContent = `${displayName} · ${time}`;
+    }
+    wrap.appendChild(meta);
+
+    // bubble
+    const bubble = document.createElement("div");
+    bubble.className = "bubble-ai max-w-[88%]" + (isSecondary ? " secondary" : "");
+    const host = document.createElement("div");
+    host.className = "seg-host";
+    bubble.appendChild(host);
+    if (!isSecondary && !firstMainBubble){
+      firstMainBubble = bubble;
+      const chips = document.createElement("div");
+      chips.className = "stat-chips";
+      chips.style.display = "none";
+      bubble.appendChild(chips);
+    }
+    wrap.appendChild(bubble);
+
+    // Fill segments
+    for (let si = 0; si < group.segs.length; si++){
+      const seg = group.segs[si];
+      const isLiveTail = !!seg._live;
+      // Also, if partial and this is the absolute last segment of the absolute
+      // last group, mark it streaming so the caret blinks at the tip.
+      const isAbsoluteLast = isLastGroup && si === group.segs.length - 1;
+      const showStreaming = isLiveTail || (partial && isAbsoluteLast);
+      if (seg.type === "dialogue"){
+        const p = document.createElement("p");
+        p.className = "dlg" + (showStreaming ? " streaming" : "");
+        p.textContent = seg.content;
+        host.appendChild(p);
+      } else if (seg.type === "beat"){
+        // Stage-direction-style inline marker like (笑) or (摇头).
+        // Attach to the closest dialogue we can find:
+        //  1) previous dialogue in the same group → append to its end
+        //  2) next dialogue in the same group → prepend to its start (handled
+        //     later when that dialogue renders... actually simpler: render
+        //     standalone now, but most cases hit path #1 so it's fine.)
+        // Fallback: render as its own subtle line.
+        const beatSpan = document.createElement("span");
+        beatSpan.className = "beat" + (showStreaming ? " streaming" : "");
+        beatSpan.textContent = `(${seg.content})`;
+        // Find the most recent .dlg in this host
+        const prevDlg = host.querySelector(".dlg:last-of-type");
+        if (prevDlg){
+          // Add a leading space so it doesn't fuse with the last char
+          prevDlg.appendChild(document.createTextNode(" "));
+          prevDlg.appendChild(beatSpan);
+        } else {
+          // No previous dialogue — render as its own line, but keep the
+          // muted style so it still reads as a stage-direction
+          const wrap2 = document.createElement("p");
+          wrap2.className = "dlg beat-only";
+          wrap2.appendChild(beatSpan);
+          host.appendChild(wrap2);
+        }
+      } else if (seg.type === "action"){
+        const d = document.createElement("div");
+        d.className = "narrative" + (showStreaming ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      } else if (seg.type === "inner"){
+        const d = document.createElement("div");
+        d.className = "narrative inner" + (showStreaming ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      } else if (seg.type === "scene"){
+        const d = document.createElement("div");
+        d.className = "narrative scene" + (showStreaming ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      }
     }
   };
 
-  for (const seg of parsed.segments) buildSeg(seg, false);
-  // The unclosed tail during partial render — show as live fragment
-  if (partial && parsed.streamingTail && parsed.streamingTail.content){
-    buildSeg(parsed.streamingTail, true);
-  } else if (partial && parsed.segments.length){
-    // Mark the last segment as streaming so caret is visible at the tip
-    const lastChild = host.lastElementChild;
-    if (lastChild) lastChild.classList.add("streaming");
+  groups.forEach((g, gi) => buildGroup(g, gi === groups.length - 1));
+
+  // If no main bubble appeared (response is all secondary), still need a chips
+  // host somewhere. Append a hidden chips container at the end.
+  let chipsHost = wrap.querySelector(".stat-chips");
+  if (!chipsHost){
+    chipsHost = document.createElement("div");
+    chipsHost.className = "stat-chips";
+    chipsHost.style.display = "none";
+    wrap.appendChild(chipsHost);
   }
 
   // Stat chips — only render once final
-  const chips = wrap.querySelector(".stat-chips");
-  chips.innerHTML = "";
+  chipsHost.innerHTML = "";
   let hasAnyChip = false;
   if (!partial && statsApplied){
     // Story-mode chips
@@ -2454,13 +2772,13 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap){
       const c = document.createElement("span");
       c.className = "stat-chip aff" + (statsApplied.aff < 0 ? " neg" : "");
       c.innerHTML = `<i class="ph ${statsApplied.aff>0?'ph-arrow-up':'ph-arrow-down'}"></i> 好感 ${statsApplied.aff>0?'+':''}${statsApplied.aff}`;
-      chips.appendChild(c); hasAnyChip = true;
+      chipsHost.appendChild(c); hasAnyChip = true;
     }
     if (statsApplied.int){
       const c = document.createElement("span");
       c.className = "stat-chip int" + (statsApplied.int < 0 ? " neg" : "");
       c.innerHTML = `<i class="ph ${statsApplied.int>0?'ph-arrow-up':'ph-arrow-down'}"></i> 亲密 ${statsApplied.int>0?'+':''}${statsApplied.int}`;
-      chips.appendChild(c); hasAnyChip = true;
+      chipsHost.appendChild(c); hasAnyChip = true;
     }
     // Intimate-mode arousal chip
     if (statsApplied.effective !== undefined && statsApplied.effective !== 0){
@@ -2478,10 +2796,15 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap){
         detail += `  (心${psy>0?'+':''}${psy}+生${phy>0?'+':''}${phy})`;
       }
       c.innerHTML = `<i class="ph ${eff>0?'ph-fire':'ph-arrow-down'}"></i> 快感 ${detail}`;
-      chips.appendChild(c); hasAnyChip = true;
+      chipsHost.appendChild(c); hasAnyChip = true;
     }
   }
-  chips.style.display = hasAnyChip ? "flex" : "none";
+  chipsHost.style.display = hasAnyChip ? "flex" : "none";
+
+  // Re-attach the saved action menu (only present on stored messages)
+  if (savedActions){
+    wrap.appendChild(savedActions);
+  }
 
   if (newBubble) maybeScrollToBottom();
   return wrap;
@@ -2664,12 +2987,48 @@ function buildSystemPrompt() {
 
   if (card.secondary_characters && card.secondary_characters.length){
     lines.push(`\n## 出场的次要人物`);
-    lines.push(`(以下人物可能在对话或叙述中被提及,由你自行解读、补全细节,保持一致性)`);
+    lines.push(`这些是世界里 ${card.name || "主角"} 身边的其他角色。**${card.name || "主角"} 永远是这一轮的主角**,他们只是让世界更真实,不是来抢戏的。`);
+    lines.push(`\n### 角色名单`);
     card.secondary_characters.forEach(s => {
       const nick = s.nickname ? ` (${s.nickname})` : "";
-      const desc = s.description ? ` — ${s.description}` : "";
-      lines.push(`- ${s.name}${nick}${desc}`);
+      lines.push(`\n**${s.name}${nick}**`);
+      if (s.description) lines.push(`- 介绍: ${s.description}`);
+      if (s.relation)    lines.push(`- 关系: ${s.relation}`);
+      if (s.voice)       lines.push(`- 说话方式: ${s.voice} (与 ${card.name || "主角"} 的口吻要明显区分开,不要写成同一个人)`);
     });
+
+    // ─── 出场规则 ──────────────────────────────────────────────
+    lines.push(`\n### 出场规则 (严格遵守)`);
+
+    const mainName = card.name || "主角";
+    const freqDesc = {
+      low:    `**很少出现** — 大多数场景里 ${mainName} 与玩家是独处的。只在群体场所(楽屋/稽古场/居酒屋/茶会等)且剧情真的需要时才让一个次要角色露面,通常一整段对话只闪现 0-1 次。`,
+      medium: `**适度出现** — 群体场所(楽屋/稽古场/居酒屋等)里自然让 1-2 个次要角色路过一两句。私密场所(两人独处的咖啡店、深夜居酒屋打烊后、楽屋只剩两人)就不要让任何人出现。`,
+      high:   `**积极出现** — 只要场景合理,就让相关的次要角色自然冒一下头。这是一个热闹的剧团世界,人来人往很正常。但即使如此,**仍然不要让次要角色抢戏**——他们只是擦肩而过。`
+    };
+    lines.push(`- **频率**: ${freqDesc[secFreq] || freqDesc.medium}`);
+
+    lines.push(`- **格式**: 当一个次要角色说话/做出动作时,**必须**用 \`[SPEAKER:角色名]...[/SPEAKER]\` 把 ta 的内容包起来。例如:`);
+    lines.push(`  \`\`\``);
+    lines.push(`  [SPEAKER:红咲ハル]`);
+    lines.push(`  (端着碟子凑过来) 咲ちゃん!这个给你吧?我已经吃饱啦。`);
+    lines.push(`  [/SPEAKER]`);
+    lines.push(`  \`\`\``);
+    lines.push(`  没有被 \`[SPEAKER]\` 包裹的内容默认是 ${mainName} 的。**${mainName} 自己说话的部分不要包 \`[SPEAKER]\`,保持原样**。`);
+
+    lines.push(`- **篇幅**: 每个 \`[SPEAKER]\` 块**控制在 1-3 句**(短对白 + 一两个动作),不要让次要角色独占一整段冗长独白。如果一段对话里 ${mainName} 的内容比 \`[SPEAKER]\` 块的内容还少,说明戏抢了——重写。`);
+
+    lines.push(`- **淡入淡出**: 次要角色出现时配一个**进入动作**(推门进来、走过来、端着东西凑近...),退场时配一个**退出动作**(挥挥手转身走开、回到自己的位置、被叫走了...)。**不要让 ta 们突然冒出来又突然消失**。`);
+
+    lines.push(`- **态度用神态体现**: 次要角色对玩家的看法,**只用文字里的感受性描写**反映(她笑着摇了摇头 / 她皱了一下眉 / 她的眼神有点不太一样)。**不要写数值变化,不要写好感度,不要给次要角色加任何数值标签**——好感/亲密只针对 ${mainName} ↔ 玩家。`);
+
+    lines.push(`- **口吻区分**: 严格按照每个次要角色卡里的"说话方式"来写 ta。不要让所有人都用 ${mainName} 的语调——${mainName} 克制内敛的话,次要角色不一定要这样。让读者光看说话方式就能认出谁在讲话。`);
+
+    lines.push(`- **谁是焦点**: 这一轮的情感重心**永远在 ${mainName} 身上**。次要角色出现是为了让 ${mainName} 的反应更有层次(被搭档看穿、被学姐调侃、被玩家温柔对待时室友的反应...),而不是为了让玩家跟次要角色聊起来。`);
+
+    if (mode === "intimate"){
+      lines.push(`- **亲密模式禁止出场**: 当前是亲密模式,**所有次要角色都不出现**。这一轮只有 ${mainName} 和玩家两个人。不要写任何 \`[SPEAKER]\` 块。`);
+    }
   }
 
   if (card.locations && card.locations.length){
@@ -2748,6 +3107,7 @@ function buildSystemPrompt() {
   lines.push(`3. **心理独白**: 用 *星号* 包裹。例: *他怎么会这样看着我...* —— 仅在合适的时机偶尔使用,不要每句都加。`);
   lines.push(`4. **场景切换** (可选): [SCENE]新场景描述[/SCENE] —— 仅在时间/地点切换时使用。`);
   lines.push(`\n请把动作和心绪写在独立的括号/星号内,不要把动作直接塞在对白前后没有包裹。一段回复一般包含 1-2 句对白 + 1-3 段动作/神态/心绪,长度适中,有呼吸感。`);
+  lines.push(`\n**关于 (笑) 这类小标记**: 像 \`(笑)\`、\`(摇头)\`、\`(叹气)\`、\`(轻笑)\`、\`(苦笑)\` 这种**只有一两个字、纯粹是语气/神态标记**的小括号,会被系统识别为"剧本式语气标注",自动 inline 显示在对白旁边,**不会单独占一段**。所以你可以放心用它们来给对白添节奏 —— 就像剧本里的舞台提示一样,这是你的语言风格的一部分,不是动作描写。完整的动作("她端着碟子凑过来")依然要写在独立的括号里。`);
 
   if (mode === "story"){
     lines.push(`\n## 数值变化标签 (★ 每轮必须输出 ★)`);
@@ -2763,6 +3123,7 @@ function buildSystemPrompt() {
     lines.push(`- 玩家做了真正过分的事（羞辱、伤害）：好感 -3 ~ -6, 亲密 -1 ~ -2`);
     lines.push(`\n原则：**默认就在往上走**——只有玩家明显不友善才扣分。**不要因为对话内容平淡就给 +0**（最少也要 +1）。亲密度比好感度涨得慢得多，平淡场景给亲密 +0 是合理的，但好感不能 +0。`);
     lines.push(`\n再次强调：标签必须出现在每一轮回复的末尾。**省略 [STATS] 视为格式错误。**`);
+    lines.push(`\n⚠️ 故事模式**只用** \`[STATS]\`。**禁止**输出 \`[AROUSAL]心理:...,生理:...[/AROUSAL]\`——快感是亲密模式的概念，此模式无效。`);
   } else {
     // ─── INTIMATE MODE: arousal gauge replaces aff/int ───
     const cur = getCurStats();
@@ -2793,7 +3154,8 @@ function buildSystemPrompt() {
     lines.push(`\n## 数值输出标签 (★ 每轮必须输出 ★)`);
     lines.push(`每一轮回复的末尾**必须**附上一行：`);
     lines.push(`[AROUSAL]心理:+N,生理:+M[/AROUSAL]`);
-    lines.push(`其中：`);
+    lines.push(`\n⚠️ **重要**：亲密模式**只用** \`[AROUSAL]\` 标签。**禁止**输出 \`[STATS]好感:...,亲密:...[/STATS]\`——好感/亲密度是故事模式的概念，此模式无效。这一轮如果你写了 \`[STATS]\`，玩家的快感条就不会动。`);
+    lines.push(`\n其中：`);
     lines.push(`- **心理 (psy)**：角色因为这一轮的对话内容、情绪、玩家的话/表情/反应在心理上感受到的兴奋程度。**范围 0 ~ 2**。`);
     lines.push(`- **生理 (phy)**：角色因为这一轮中**实际被玩家作用到身体**而产生的兴奋。**范围 0 ~ 10**。`);
     lines.push(`\n判断要点：`);
@@ -2818,10 +3180,58 @@ function buildSystemPrompt() {
     }
   }
 
-  lines.push(`\n## 角色卡补完 (可选)`);
-  lines.push(`如果在对话中你"发现"了一些值得长期记住的新信息(玩家的习惯、过去、秘密;或你自己角色的新设定),可以追加:`);
-  lines.push(`[CARD_PATCH]目标:玩家|字段:习惯|内容:喝咖啡不加糖[/CARD_PATCH]`);
-  lines.push(`目标可以是"角色"或"玩家"或具体人名,字段是分类名,内容是要记住的事实。下一轮对话这些信息会注入到 prompt。仅在真有新信息时使用,不要滥用。`);
+  // ─── 角色卡补完 (CARD_PATCH) ─────────────────────────────────
+  // 每 5 个 assistant 轮检查一次：这几轮里有没有出现下面白名单里的"值得长期
+  // 记住的事实"。把它过滤掉非常常见的"看不出含义的小动作/一次性情绪"，引导
+  // 模型只在真正有信号时写 CARD_PATCH。
+  const _h = currentHistory();
+  const _asstTurns = _h.filter(m => m.role === "assistant").length;
+  // 第 1 轮就要让模型知道这套规则；之后每 5 轮重点提醒。
+  // (asstTurns 还没把"即将生成的这一轮"算进来，所以从 4 开始算就对应"刚做完第5轮"。)
+  const _isCheckpoint = (_asstTurns > 0) && ((_asstTurns + 1) % 5 === 0);
+
+  lines.push(`\n## 角色卡补完 (CARD_PATCH)`);
+  lines.push(`如果对话中出现了下面这些**类别**里的新事实，就在回复末尾追加补完标签，让系统记下来：`);
+  lines.push(`格式：\`[CARD_PATCH]目标:玩家|字段:习惯|内容:喝咖啡不加糖[/CARD_PATCH]\``);
+  lines.push(`- 目标：\`玩家\` / \`角色\` / \`共同\`（"共同"用于两人共同经历、内部梗、关系内部默契）${(card.secondary_characters && card.secondary_characters.length) ? ` / 或任意次要角色名(${card.secondary_characters.map(s=>s.name).filter(Boolean).join(" / ")})` : ""}`);
+  lines.push(`- 字段：见下方白名单`);
+  lines.push(`- 内容：一句话陈述，不要带主观推测词（"可能"、"似乎"），只写事实`);
+  lines.push(`- 一次回复里可以有多个 CARD_PATCH 标签（不同事实分别写）`);
+
+  lines.push(`\n### 🟢 该记的事实（白名单）`);
+  lines.push(`**玩家（target: 玩家）：**`);
+  lines.push(`- \`身份背景\`：职业、出身地、年龄段、当前生活状态。例：\`字段:身份背景|内容:在出版社做编辑\``);
+  lines.push(`- \`关系网\`：家人、朋友、宠物、前任。例：\`字段:关系网|内容:有一只叫橘子的猫\``);
+  lines.push(`- \`习惯\`：作息、饮食、小动作、口头禅。例：\`字段:习惯|内容:不喜欢喝热饮\``);
+  lines.push(`- \`喜好厌恶\`：喜欢/讨厌/害怕的具体事物。例：\`字段:喜好厌恶|内容:怕打雷\``);
+  lines.push(`- \`过往\`：童年、重大经历、伤痛、成就。例：\`字段:过往|内容:高中时父亲去世\``);
+  lines.push(`- \`承诺约定\`：两人之间的具体约定。例：\`字段:承诺约定|内容:答应周末一起去看展\``);
+
+  lines.push(`\n**角色（target: 角色）：**`);
+  lines.push(`- \`自我披露\`：角色卡里没写、但本轮你"想起来"或主动说出的过去/秘密/设定。**一旦说出口就是固定设定，不能下次又"忘了"。** 例：\`字段:自我披露|内容:小时候学过钢琴但放弃了\``);
+  lines.push(`- \`对玩家的看法\`：角色对玩家产生的、值得长期保留的具体印象/感受。例：\`字段:对玩家的看法|内容:发现自己会不自觉看他的手\``);
+  lines.push(`- \`关系内习惯\`：角色为玩家养成的、专属于这段关系的小习惯。例：\`字段:关系内习惯|内容:会留半杯酒给他\``);
+
+  lines.push(`\n**共同（target: 共同）：**`);
+  lines.push(`- \`共同经历\`：两人一起经历的、值得回忆的具体事件。例：\`字段:共同经历|内容:一起在便利店避雨直到打烊\``);
+  lines.push(`- \`内部梗\`：两人之间形成的暗号、口头禅、专属用法。例：\`字段:内部梗|内容:"西瓜"是道歉的代号\``);
+
+  lines.push(`\n### 🔴 不要记的（反例）`);
+  lines.push(`- ❌ 一次性情绪："她有点累"、"他笑了"`);
+  lines.push(`- ❌ 当下物理状态："她在喝水"、"他坐在沙发上"`);
+  lines.push(`- ❌ 角色卡里已经有的设定（重复无意义）`);
+  lines.push(`- ❌ 主观推测："她可能喜欢他"——除非角色明确意识到了，否则不记`);
+  lines.push(`- ❌ 太琐碎的对白："她说了句嗯"`);
+  lines.push(`- ❌ 跟角色/玩家本人无关的环境描写：天气、路人`);
+
+  if (_isCheckpoint){
+    lines.push(`\n### ⚠️ 本轮是第 ${_asstTurns + 1} 轮（5 的倍数），请重点检查`);
+    lines.push(`回看最近这 5 轮对话，**逐一对照上面的白名单**：玩家有没有透露身份/关系/习惯/喜好/过往？角色有没有"想起"或披露什么新设定？两人有没有形成共同经历或内部梗？凡是命中的，都在本轮末尾追加 \`[CARD_PATCH]\`。`);
+    lines.push(`如果这 5 轮真的没有任何符合白名单的新事实（比如全是寒暄），就不写 CARD_PATCH 也没关系——**宁缺勿滥**。`);
+  } else {
+    lines.push(`\n说明：平时按需追加 CARD_PATCH 即可，每 5 轮（第 5/10/15... 轮）会有一次重点检查提示。**宁缺勿滥**——只记白名单里的事实。`);
+  }
+
 
   lines.push(`\n## 用户输入语义标记`);
   lines.push(`用户消息可能包含以下前缀:`);
@@ -2837,9 +3247,22 @@ function buildSystemPrompt() {
   }
 
   if (card.notes && card.notes.length){
-    lines.push(`\n## 累积的角色卡补完(由对话过程中产生)`);
+    lines.push(`\n## 累积的角色卡补完（来自此前对话）`);
+    lines.push(`这些是之前对话中你或玩家透露过的事实，**请记住并在后续对话中保持一致**。新增同类信息时不要重复记录已有内容。`);
+    // group by target so the model sees a cleaner list
+    const _byTarget = { "玩家": [], "角色": [], "共同": [], "其他": [] };
     card.notes.forEach(n => {
-      lines.push(`- [${n.target||"未指定"} · ${n.field}] ${n.content}`);
+      const t = (n.target || "").trim();
+      if (_byTarget[t]) _byTarget[t].push(n);
+      else _byTarget["其他"].push(n);
+    });
+    [["玩家","玩家相关"], ["角色","角色相关"], ["共同","共同/关系"], ["其他","其他"]].forEach(([key, label]) => {
+      const arr = _byTarget[key];
+      if (!arr.length) return;
+      lines.push(`\n**${label}**`);
+      arr.forEach(n => {
+        lines.push(`- [${n.field||"—"}] ${n.content}`);
+      });
     });
   }
 
@@ -3141,6 +3564,7 @@ async function send(forcedText, opts) {
       consumePendingMilestone();
 
       const parsed = parseAssistantOutput(assistantText, false);
+      _reconcileTagModeMismatch(parsed, mode);
 
       // Diagnostic — surfaced in DevTools console for debugging missed updates.
       // If you ever see stats not move, open the console and inspect this log
@@ -3346,10 +3770,17 @@ function renderSecondary(){
     const chip = document.createElement("span");
     chip.className = "chip";
     const nick = s.nickname ? `「${s.nickname}」` : "";
+    const extras = [];
+    if (s.description) extras.push(s.description);
+    if (s.relation) extras.push(s.relation);
+    if (s.voice) extras.push("声音: " + s.voice);
+    const extraHTML = extras
+      .map(x => `<span class="chip-sub">· ${escapeHTML(x)}</span>`)
+      .join("");
     chip.innerHTML = `
       <span class="chip-name">${escapeHTML(s.name)}</span>
       ${nick ? `<span class="chip-sub">${escapeHTML(nick)}</span>` : ""}
-      ${s.description ? `<span class="chip-sub">· ${escapeHTML(s.description)}</span>` : ""}
+      ${extraHTML}
       <button class="chip-x" data-i="${i}" data-kind="sec">×</button>`;
     list.appendChild(chip);
   });
@@ -3385,9 +3816,14 @@ $("addSecBtn").addEventListener("click", () => {
   if (!name) { alert("请填写名字"); return; }
   ensureCard();
   card.secondary_characters.push({
-    name, nickname: $("secNick").value.trim(), description: $("secDesc").value.trim()
+    name,
+    nickname: $("secNick").value.trim(),
+    description: $("secDesc").value.trim(),
+    relation: $("secRelation").value.trim(),
+    voice: $("secVoice").value.trim()
   });
   $("secName").value = ""; $("secNick").value = ""; $("secDesc").value = "";
+  $("secRelation").value = ""; $("secVoice").value = "";
   renderSecondary(); persistCard();
 });
 $("addLocBtn").addEventListener("click", () => {
@@ -3775,6 +4211,12 @@ function renderPatches(){
   const arr = (card && card.notes) ? card.notes : [];
   $("patchCount").textContent = arr.length;
   list.innerHTML = "";
+  // color per target for quick visual scanning
+  const _targetColor = {
+    "玩家":   "#9888b5",   // purple — matches int/intimacy chip
+    "角色":   "#c98787",   // rose   — matches aff chip
+    "共同":   "#6b9a7a",   // green  — matches lvl chip
+  };
   if (arr.length === 0){
     empty.style.display = "block";
   } else {
@@ -3784,9 +4226,12 @@ function renderPatches(){
       row.className = "chip";
       row.style.cssText = "padding:8px 10px;align-items:flex-start;gap:8px;";
       const target = n.target || "未指定";
+      const tColor = _targetColor[target] || "#a89eb3";
       row.innerHTML = `
         <div style="flex:1;min-width:0;">
-          <div style="font-size:10px;color:#a89eb3;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;margin-bottom:2px;">${escapeHTML(target)} · ${escapeHTML(n.field||"")}</div>
+          <div style="font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;margin-bottom:2px;">
+            <span style="color:${tColor};font-weight:500;">${escapeHTML(target)}</span><span style="color:#a89eb3;"> · ${escapeHTML(n.field||"")}</span>
+          </div>
           <div class="chip-name" style="white-space:normal;line-height:1.5;">${escapeHTML(n.content||"")}</div>
         </div>
         <button class="chip-x" data-i="${i}" data-kind="patch" style="margin-top:2px;">×</button>
@@ -4046,6 +4491,15 @@ function _syncNewSettingsUI(){
       refreshTimeChip();
     });
   });
+  document.querySelectorAll("#secFreqGroup .seg").forEach(b => {
+    b.classList.toggle("active", b.dataset.val === secFreq);
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#secFreqGroup .seg").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      secFreq = b.dataset.val;
+      localStorage.setItem("dzmm_sec_freq", secFreq);
+    });
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -4256,6 +4710,7 @@ async function _resendUserMessage(userMsg){
       // Same milestone-consume logic as send() — see comment there.
       consumePendingMilestone();
       const parsed = parseAssistantOutput(assistantText, false);
+      _reconcileTagModeMismatch(parsed, mode);
       try {
         const tagMatch = assistantText.match(/\[(?:STATS|STATUS|AROUSAL)\][\s\S]*?\[\/(?:STATS|STATUS|AROUSAL)\]/i);
         console.debug("[stats-parse:regen]", {
@@ -4323,8 +4778,13 @@ function _openEditor(idx){
   `;
   const ta = editWrap.querySelector("textarea");
   ta.value = raw;
-  // Replace bubble with editor
+  // Replace bubble with editor. Multi-speaker assistant messages may have
+  // multiple bubble + meta-line pairs; hide them all so the editor doesn't
+  // sit between bubbles. Cancel/save both call renderMessages() to restore.
   bubble.style.display = "none";
+  row.querySelectorAll(":scope > .bubble-ai, :scope > .meta-line").forEach(el => {
+    el.style.display = "none";
+  });
   row.classList.remove("actions-open");
   bubble.insertAdjacentElement("afterend", editWrap);
   ta.focus();
