@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>与她一同</title>
+<title>梦回 · AI 剧场</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -2015,20 +2015,34 @@ function currentHistory(){ return histories[mode]; }
 //
 // `partial` flag: if true, we are mid-stream — keep any unclosed trailing
 // segment as a streaming-active fragment so the UI can render it live.
-// Normalize full-width punctuation that Chinese-language models commonly emit
-// inside tag bodies (好感：+3，亲密：+1 etc.) so the regexes below match.
-//   ：(U+FF1A) → :     ，(U+FF0C) → ,     ｜(U+FF5C) → |
-//   ＋(U+FF0B) → +     －(U+FF0D)/–/— → -
-// (Full-width digits ０-９ also normalized for paranoia.)
+// Normalize full-width punctuation + markdown decorations that Chinese-language
+// models commonly emit inside tag bodies (好感：+3，**亲密**：+1 etc.) so the
+// regexes below can match.
 function _normalizeTagBody(s){
   if (!s) return s;
   return s
-    .replace(/[\uFF1A]/g, ":")
-    .replace(/[\uFF0C\u3001]/g, ",")
-    .replace(/[\uFF5C]/g, "|")
-    .replace(/[\uFF0B]/g, "+")
-    .replace(/[\uFF0D\u2013\u2014]/g, "-")
+    .replace(/\*\*/g, "")           // strip markdown bold (**好感**: → 好感:)
+    .replace(/__/g, "")             // strip markdown bold underscore form
+    .replace(/[\uFF1A]/g, ":")      // ：→ :
+    .replace(/[\uFF0C\u3001]/g, ",")// ，、 → ,
+    .replace(/[\uFF5C]/g, "|")      // ｜→ |
+    .replace(/[\uFF0B]/g, "+")      // ＋→ +
+    .replace(/[\uFF0D\u2013\u2014]/g, "-") // －–— → -
     .replace(/[\uFF10-\uFF19]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFF10 + 0x30));
+}
+
+// Tolerant label-extractor: tries multiple label spellings (longer first so
+// 好感度 wins over 好感 when both could match). The separator between label
+// and number is forgiving — any up-to-20 non-line-break chars between the
+// label and a signed integer counts. This handles `好感:`, `好感：`, `好感=`,
+// `好感(affection):`, plain `好感 +3`, and so on.
+function _extractLabeledInt(body, labels){
+  for (const lab of labels){
+    const re = new RegExp(lab + "(?:[^\\n\\d+\\-]{0,20})([+\\-]?\\d+)");
+    const m = body.match(re);
+    if (m) return parseInt(m[1]);
+  }
+  return null;
 }
 
 function parseAssistantOutput(text, partial){
@@ -2039,38 +2053,39 @@ function parseAssistantOutput(text, partial){
 
   let t = text;
 
-  // STATS — only consume completed tags
-  t = t.replace(/\[STATS\]([\s\S]*?)\[\/STATS\]/g, (_, body) => {
+  // STATS — only consume completed tags. Accept lowercase [stats] and the
+  // common variant [STATUS] as aliases.
+  t = t.replace(/\[(?:STATS|STATUS)\]([\s\S]*?)\[\/(?:STATS|STATUS)\]/gi, (_, body) => {
     body = _normalizeTagBody(body);
-    const affM = body.match(/好感\s*:\s*([+\-]?\d+)/);
-    const intM = body.match(/亲密\s*:\s*([+\-]?\d+)/);
+    const aff  = _extractLabeledInt(body, ["好感度", "好感"]);
+    const intt = _extractLabeledInt(body, ["亲密度", "親密度", "亲密", "親密"]);
     statsList.push({
-      aff: affM ? parseInt(affM[1]) : 0,
-      int: intM ? parseInt(intM[1]) : 0
+      aff: aff  != null ? aff  : 0,
+      int: intt != null ? intt : 0
     });
     return "";
   });
   // mid-stream STATS that hasn't closed yet — hide it from view
   if (partial){
-    t = t.replace(/\[STATS\][\s\S]*$/, "");
+    t = t.replace(/\[(?:STATS|STATUS)\][\s\S]*$/i, "");
   }
 
   // AROUSAL — intimate-mode tag: [AROUSAL]心理:+N,生理:+M[/AROUSAL]
   //  N = 心理加分 (psychological): always counted
   //  M = 生理加分 (physical): only counted when initiator allows it
   //  (rule application happens in caller — parser just extracts numbers)
-  t = t.replace(/\[AROUSAL\]([\s\S]*?)\[\/AROUSAL\]/g, (_, body) => {
+  t = t.replace(/\[AROUSAL\]([\s\S]*?)\[\/AROUSAL\]/gi, (_, body) => {
     body = _normalizeTagBody(body);
-    const psyM  = body.match(/心理\s*:\s*([+\-]?\d+)/);
-    const phyM  = body.match(/生理\s*:\s*([+\-]?\d+)/);
+    const psy = _extractLabeledInt(body, ["心理"]);
+    const phy = _extractLabeledInt(body, ["生理", "身体"]);
     arousalList.push({
-      psy: psyM ? parseInt(psyM[1]) : 0,
-      phy: phyM ? parseInt(phyM[1]) : 0
+      psy: psy != null ? psy : 0,
+      phy: phy != null ? phy : 0
     });
     return "";
   });
   if (partial){
-    t = t.replace(/\[AROUSAL\][\s\S]*$/, "");
+    t = t.replace(/\[AROUSAL\][\s\S]*$/i, "");
   }
 
   // CARD_PATCH — only consume completed tags
@@ -3126,6 +3141,19 @@ async function send(forcedText, opts) {
       consumePendingMilestone();
 
       const parsed = parseAssistantOutput(assistantText, false);
+
+      // Diagnostic — surfaced in DevTools console for debugging missed updates.
+      // If you ever see stats not move, open the console and inspect this log
+      // to see what the model actually emitted vs what was parsed.
+      try {
+        const tagMatch = assistantText.match(/\[(?:STATS|STATUS|AROUSAL)\][\s\S]*?\[\/(?:STATS|STATUS|AROUSAL)\]/i);
+        console.debug("[stats-parse]", {
+          mode,
+          rawTag: tagMatch ? tagMatch[0] : "(no STATS/AROUSAL tag in output)",
+          parsedStats: parsed.stats,
+          parsedArousal: parsed.arousal
+        });
+      } catch(_){}
 
       // Apply stats based on mode
       let statsApplied;
@@ -4228,6 +4256,15 @@ async function _resendUserMessage(userMsg){
       // Same milestone-consume logic as send() — see comment there.
       consumePendingMilestone();
       const parsed = parseAssistantOutput(assistantText, false);
+      try {
+        const tagMatch = assistantText.match(/\[(?:STATS|STATUS|AROUSAL)\][\s\S]*?\[\/(?:STATS|STATUS|AROUSAL)\]/i);
+        console.debug("[stats-parse:regen]", {
+          mode,
+          rawTag: tagMatch ? tagMatch[0] : "(no STATS/AROUSAL tag in output)",
+          parsedStats: parsed.stats,
+          parsedArousal: parsed.arousal
+        });
+      } catch(_){}
       let statsApplied;
       let statsPre = null;
       if (mode === "intimate"){
