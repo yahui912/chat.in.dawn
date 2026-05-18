@@ -2755,10 +2755,10 @@ function buildSystemPrompt() {
     lines.push(`每一轮回复的末尾**必须**附上一行：`);
     lines.push(`[AROUSAL]心理:+N,生理:+M[/AROUSAL]`);
     lines.push(`其中：`);
-    lines.push(`- **心理 (psy)**：角色因为这一轮的对话内容、情绪、玩家的话/表情/反应在心理上感受到的兴奋程度。**范围 0 ~ 5**。`);
+    lines.push(`- **心理 (psy)**：角色因为这一轮的对话内容、情绪、玩家的话/表情/反应在心理上感受到的兴奋程度。**范围 0 ~ 2**。`);
     lines.push(`- **生理 (phy)**：角色因为这一轮中**实际被玩家作用到身体**而产生的兴奋。**范围 0 ~ 10**。`);
     lines.push(`\n判断要点：`);
-    lines.push(`- "心理" 永远都该有一些，只要有任何情绪互动就给 +1 或 +2；情绪强烈、挑逗、撩拨给 +3 ~ +4；极度兴奋的言语/场景给 +5。完全没有对话/动作的轮次才给 0。`);
+    lines.push(`- "心理" 永远都该有一些，只要有任何情绪互动就给 +1 或 +2。完全没有对话/动作的轮次才给 0。`);
     lines.push(`- "生理" 只在**玩家的动作实际落在角色身上**时才有。例：玩家亲吻角色 → 生理 +5；玩家用手抚摸 → 生理 +3；玩家的指交、口活 → 生理 +8 ~ +10。`);
     lines.push(`- 如果**角色在主动作用于玩家**但**角色自己没被玩家作用到**，**生理写 0**（系统也会过滤掉）。`);
     lines.push(`- 玩家"说"想要做什么但还没做 → 算心理刺激（+1 或 +2），不算生理。`);
@@ -3109,13 +3109,9 @@ async function send(forcedText, opts) {
       if (mode === "intimate"){
         // Snapshot pre-state so regen can correctly rewind past orgasm resets.
         statsPre = Object.assign({}, getCurStats());
-        // Fallback: if AI forgot [AROUSAL], give minimum psy +1
-        if (parsed.arousal.length === 0) parsed.arousal.push({ psy: 1, phy: 0 });
         statsApplied = _applyArousalFromParsed(parsed);
       } else {
         const total = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
-        // Fallback: if AI forgot [STATS] entirely, give minimum +1 aff
-        if (parsed.stats.length === 0) { total.aff = 1; }
         if (total.aff) applyStatChange("aff", total.aff);
         if (total.int) applyStatChange("int", total.int);
         statsApplied = total;
