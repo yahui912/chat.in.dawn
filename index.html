@@ -3,31 +3,33 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>梦回 · AI 剧场</title>
+<title>恋たび</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
 <style>
   :root{
-    --bg-canvas:#f4f5f4;
-    --primary:#948ba1;
-    --primary-soft:#e5e1e9;
-    --accent:#d4a3a3;
-    --ink:#4a4952;
-    --ink-muted:#8d8c9a;
-    --ink-faint:#b0afba;
-    --glass:rgba(255,255,255,0.45);
-    --glass-strong:rgba(255,255,255,0.7);
-    --glass-border:rgba(255,255,255,0.5);
-    --shadow-soft:0 8px 30px -10px rgba(148,139,161,0.18);
-    --err:#b85555;
+    /* ── LINE palette ── */
+    --bg-canvas:#8CABD8;          /* LINE sky-blue background */
+    --primary:#06C755;            /* LINE brand green */
+    --primary-soft:#D7F4DD;
+    --accent:#06C755;
+    --ink:#000000;                /* bubble text is black */
+    --ink-muted:#6B7C93;
+    --ink-faint:#9BA8B8;
+    --glass:rgba(255,255,255,0.85);
+    --glass-strong:rgba(255,255,255,0.95);
+    --glass-border:rgba(0,0,0,0.06);
+    --shadow-soft:0 1px 2px rgba(0,0,0,0.08);
+    --err:#E14D4D;
   }
   body.intimate{
-    --bg-canvas:#efe5e4;
-    --primary:#a67a86;
-    --primary-soft:#e8d4d4;
-    --accent:#c98a8a;
-    --ink:#4a3942;
+    /* intimate mode keeps the same LINE sky-blue — no background shift */
+    --bg-canvas:#8CABD8;
+    --primary:#06C755;
+    --primary-soft:#D7F4DD;
+    --accent:#06C755;
+    --ink:#000000;
   }
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -38,86 +40,103 @@
     background:var(--bg-canvas);
     transition:background 0.8s ease;
   }
-  .serif{font-family:'Playfair Display','Noto Serif SC',serif;}
-  .cn-serif{font-family:'Noto Serif SC',serif;}
+  .serif{font-family:'Inter','Noto Sans SC',sans-serif;}
+  .cn-serif{font-family:'Noto Sans SC',sans-serif;}
   .cn{font-family:'Noto Sans SC',sans-serif;}
   .mono{font-family:'JetBrains Mono',monospace;}
 
-  /* ─── Mesh background ─── */
+  /* ─── LINE sky-blue background ─── */
   .mesh-bg{
     position:fixed;inset:0;z-index:-1;
-    background:linear-gradient(135deg, #f2ece9 0%, #e8edf0 100%);
+    background:linear-gradient(180deg, #93B3DD 0%, #8CABD8 50%, #85A4D3 100%);
     overflow:hidden;
     transition:background 0.8s ease;
   }
   body.intimate .mesh-bg{
-    background:linear-gradient(135deg, #ecdfdc 0%, #e0d4d8 100%);
+    background:linear-gradient(180deg, #93B3DD 0%, #8CABD8 50%, #85A4D3 100%);
   }
   .mesh-orb{
-    position:absolute;filter:blur(100px);opacity:0.25;border-radius:50%;
-    animation:drift 25s infinite alternate ease-in-out;
-    transition:background 1s ease;
+    /* drift orbs hidden — LINE's background is a clean flat gradient */
+    display:none;
   }
-  .orb-1{width:500px;height:500px;background:#e2d1d1;top:-150px;left:-150px;}
-  .orb-2{width:450px;height:450px;background:#cedbe0;bottom:-100px;right:-100px;animation-delay:-5s;}
-  .orb-3{width:400px;height:400px;background:#dcd7e0;top:25%;right:-150px;animation-delay:-10s;}
-  body.intimate .orb-1{background:#d4a3a3;}
-  body.intimate .orb-2{background:#c8a89c;}
-  body.intimate .orb-3{background:#b89aa3;}
   @keyframes drift{
     0%{transform:translate(0,0) scale(1);}
     100%{transform:translate(30px,40px) scale(1.05);}
   }
 
-  /* ─── Glass card ─── */
+  /* ─── Glass card (LINE: solid white surfaces) ─── */
   .glass-card{
-    background:var(--glass);
-    backdrop-filter:blur(14px) saturate(140%);
-    -webkit-backdrop-filter:blur(14px) saturate(140%);
-    border:1px solid var(--glass-border);
-    box-shadow:var(--shadow-soft);
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.05);
+    box-shadow:0 1px 2px rgba(0,0,0,0.06);
   }
 
   .no-scrollbar::-webkit-scrollbar{display:none;}
   .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none;}
 
-  /* ─── Bubbles ─── */
+  /* ─── Bubbles (LINE classic) ─── */
   .bubble-ai{
-    background:rgba(255,255,255,0.55);
-    border-radius:20px 20px 20px 6px;
-    padding:12px 15px;
-    box-shadow:0 4px 18px rgba(148,139,161,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
-    border:1px solid rgba(255,255,255,0.65);
-    backdrop-filter:blur(16px) saturate(160%);
-    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    /* other party: pure white */
+    background:#FFFFFF;
+    color:#000000;
+    border-radius:4px 18px 18px 18px;
+    padding:10px 13px;
+    box-shadow:0 1px 1px rgba(0,0,0,0.08);
+    border:none;
   }
   body.intimate .bubble-ai{
-    background:rgba(255,250,250,0.55);
-    border-color:rgba(255,255,255,0.6);
+    background:#FFFFFF;
   }
   .bubble-user{
-    background:linear-gradient(135deg, rgba(160,150,176,0.92), rgba(148,139,161,0.92));
-    color:#f8f7f9;
-    border-radius:20px 20px 6px 20px;
-    padding:11px 15px;
-    box-shadow:0 4px 14px rgba(148,139,161,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,0.25);
-    transition:background 0.5s;
+    /* me: LINE light green */
+    background:#84E582;
+    color:#000000;
+    border-radius:18px 4px 18px 18px;
+    padding:10px 13px;
+    box-shadow:0 1px 1px rgba(0,0,0,0.08);
+    border:none;
+    transition:background 0.3s;
   }
   body.intimate .bubble-user{
-    background:linear-gradient(135deg, rgba(180,130,142,0.92), rgba(166,122,134,0.92));
+    background:#84E582;
   }
 
-  /* dialogue line inside bubble */
+  /* ─── Chat mode: stacked independent bubbles (LINE multi-message look) ─── */
+  /* The "chat-bubbles-col" is a vertical column of small bubbles, one per
+     message the model emitted (separated by blank lines). Each bubble has
+     its own classic LINE white pill shape. The first bubble keeps the
+     "ear" (border-radius 4px on top-left); the rest soften to be all-round
+     (so a streak of messages from the same sender flows visually). */
+  .chat-bubbles-col{
+    display:flex;flex-direction:column;
+    gap:4px;
+    max-width:88%;
+    align-items:flex-start;
+  }
+  .chat-line-bubble{
+    /* override bubble-ai border-radius: corner softens after first bubble */
+    border-radius:18px 18px 18px 18px;
+    padding:9px 13px;
+    max-width:100%;
+  }
+  .chat-bubbles-col .chat-line-bubble:first-child{
+    border-radius:4px 18px 18px 18px;
+  }
+  .chat-line-bubble .dlg{
+    font-size:14px;
+    line-height:1.5;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+  }
+
+  /* dialogue line inside bubble — LINE: solid black on light bubble */
   .dlg{
     font-family:'Noto Sans SC',sans-serif;
-    font-size:13.5px;line-height:1.7;
-    color:#5a5562;
+    font-size:14px;line-height:1.55;
+    color:#000000;
     white-space:pre-wrap;word-wrap:break-word;
   }
-  body.intimate .dlg{color:#5a4248;}
+  body.intimate .dlg{color:#000000;}
   /* small gap when dialogue follows a narrative box (and vice versa) */
   .narrative + .dlg{margin-top:6px;}
   .dlg + .dlg{margin-top:4px;}
@@ -126,16 +145,14 @@
      Only a thin border, no background tint, no shadow, no left accent bar. */
   .narrative{
     font-family:'Noto Sans SC',sans-serif;
-    color:#9d92ad;
-    font-size:11px;font-weight:400;
+    color:#5A6878;
+    font-size:11.5px;font-weight:400;
     padding:6px 11px;
     margin-top:6px;
-    background:transparent;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    border-radius:12px;
-    line-height:1.7;
-    border:1px solid rgba(168,158,179,0.32);
+    background:rgba(0,0,0,0.03);
+    border-radius:10px;
+    line-height:1.65;
+    border:1px solid rgba(0,0,0,0.06);
     box-shadow:none;
   }
   /* second-and-onward small bubbles get a touch more breathing room */
@@ -146,8 +163,8 @@
   .narrative.inner{font-style:italic;}
   .narrative.scene{font-style:italic;}
   body.intimate .narrative{
-    color:#9c8388;
-    border-color:rgba(200,148,148,0.32);
+    color:#5A6878;
+    border-color:rgba(0,0,0,0.06);
   }
   /* streaming caret */
   .narrative.streaming::after,
@@ -173,11 +190,11 @@
     display:inline-flex;align-items:center;gap:4px;
     letter-spacing:0.04em;
   }
-  .stat-chip.aff{background:rgba(242,233,236,0.7);color:#c98787;border:1px solid rgba(240,228,232,0.7);}
-  .stat-chip.aff.neg{background:rgba(200,190,195,0.4);color:#9b8b8e;}
-  .stat-chip.int{background:rgba(232,228,240,0.7);color:#9888b5;border:1px solid rgba(230,224,240,0.7);}
-  .stat-chip.int.neg{background:rgba(200,196,205,0.4);color:#8d8c9a;}
-  .stat-chip.lvl{background:rgba(214,234,222,0.6);color:#6b9a7a;border:1px solid rgba(220,238,228,0.7);}
+  .stat-chip.aff{background:#FFE8E8;color:#D14D4D;border:1px solid #FFD7D7;}
+  .stat-chip.aff.neg{background:#EEEEEE;color:#888888;border-color:#E0E0E0;}
+  .stat-chip.int{background:#E8F0FF;color:#3A6DBE;border:1px solid #D5E2F8;}
+  .stat-chip.int.neg{background:#EEEEEE;color:#888888;border-color:#E0E0E0;}
+  .stat-chip.lvl{background:#D7F4DD;color:#06A046;border:1px solid #B6E8C2;}
 
   .stat-chip i{font-size:11px;}
 
@@ -197,47 +214,170 @@
     letter-spacing:0.02em;
   }
 
-  /* meta line above bubble */
+  /* meta line above bubble — LINE shows it as white on the blue bg */
   .meta-line{
-    font-size:8.5px;font-family:'JetBrains Mono',monospace;
-    color:var(--ink-faint);letter-spacing:0.08em;
+    font-size:10px;font-family:'JetBrains Mono',monospace;
+    color:rgba(255,255,255,0.85);letter-spacing:0.06em;
     margin:0 8px 3px;
+    text-shadow:0 1px 1px rgba(0,0,0,0.08);
   }
 
-  /* system divider */
+  /* system divider — LINE date pills are white-on-blue */
   .sys-divider{
     align-self:center;
-    font-size:8.5px;font-family:'JetBrains Mono',monospace;
-    color:var(--ink-faint);letter-spacing:0.18em;
+    font-size:10px;font-family:'JetBrains Mono',monospace;
+    color:#FFFFFF;letter-spacing:0.1em;
     padding:4px 12px;
-    background:rgba(255,255,255,0.5);
-    border:1px solid var(--glass-border);
+    background:rgba(0,0,0,0.18);
+    border:none;
     border-radius:99px;
   }
   .sys-error{
     align-self:center;font-size:11px;font-family:'Noto Sans SC',sans-serif;
-    color:var(--err);letter-spacing:0.04em;
+    color:#FFFFFF;letter-spacing:0.04em;
     padding:5px 12px;
-    background:rgba(184,85,85,0.08);
-    border:1px solid rgba(184,85,85,0.25);
+    background:rgba(225,77,77,0.85);
+    border:none;
     border-radius:99px;
   }
 
-  /* Mode pills (vertical) */
+  /* Date pill — LINE-style grey-on-blue centered chip, e.g. "今天", "昨天", "4/13 周一" */
+  .date-pill{
+    display:inline-block;
+    font-family:'Noto Sans SC','Inter',sans-serif;
+    font-size:11px;font-weight:500;
+    color:#FFFFFF;
+    padding:5px 14px;
+    background:rgba(0,0,0,0.22);
+    border-radius:99px;
+    letter-spacing:0.04em;
+  }
+
+  /* User message LINE-style side info: 已读 stacked above time on the left of the bubble */
+  .user-msg-line{
+    /* container that holds [side-info] [bubble] right-aligned */
+    width:100%;
+  }
+  .msg-side-info{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:flex-end;
+    line-height:1.15;
+    margin-bottom:2px;
+    flex-shrink:0;
+  }
+  .msg-read{
+    font-family:'Noto Sans SC',sans-serif;
+    font-size:10px;
+    color:rgba(255,255,255,0.85);
+    text-shadow:0 1px 1px rgba(0,0,0,0.08);
+    letter-spacing:0.02em;
+  }
+  .msg-time{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    color:rgba(255,255,255,0.78);
+    text-shadow:0 1px 1px rgba(0,0,0,0.08);
+    margin-top:1px;
+  }
+  /* AI side time uses the same colors (small grey on blue bg) */
+  .msg-side-info-ai{
+    align-items:flex-start;
+    flex-shrink:0;
+  }
+  /* ai-row name label — LINE shows just the name (small, on bg) above bubbles */
+  .meta-line.ai-name{
+    margin-bottom:1px;
+  }
+  .ai-msg-line{
+    /* container for [bubble-col] + [time] */
+    /* aligned to the left within ai-row which is already items-start */
+  }
+
+  /* Mode pills (vertical) — legacy, kept for compat with the popover items */
   .mode-pill{
     transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
-    color:#a1a0ac;
+    color:#9BA8B8;
   }
   .mode-pill.active{
-    background:rgba(255,255,255,0.85);
-    color:var(--primary);
-    box-shadow:0 2px 6px rgba(0,0,0,0.04);
+    background:#06C755;
+    color:#FFFFFF;
+    box-shadow:0 2px 6px rgba(6,199,85,0.3);
+  }
+
+  /* ─── Topbar popovers (mode / stats / hamburger) ─── */
+  .topbar-pop{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    min-width:180px;
+    background:#FFFFFF;
+    border-radius:14px;
+    box-shadow:0 8px 28px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.06);
+    border:1px solid rgba(0,0,0,0.06);
+    padding:6px;
+    opacity:0;
+    transform:translateY(-6px) scale(0.97);
+    transform-origin:top right;
+    pointer-events:none;
+    transition:opacity 0.15s ease, transform 0.18s cubic-bezier(.4,1.4,.4,1);
+    z-index:50;
+  }
+  .topbar-pop.open{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+  }
+  .topbar-pop-stats{
+    min-width:280px;
+    padding:4px;
+  }
+  .topbar-pop-menu{
+    min-width:200px;
+  }
+  .topbar-pop-item{
+    width:100%;
+    display:flex;align-items:center;gap:10px;
+    padding:9px 12px;
+    border-radius:9px;
+    font-family:'Noto Sans SC','Inter',sans-serif;
+    font-size:13px;
+    color:#1A2230;
+    background:transparent;border:none;
+    text-align:left;
+    cursor:pointer;
+    transition:background 0.12s;
+  }
+  .topbar-pop-item:hover{ background:#F4F6F9; }
+  .topbar-pop-item i{
+    font-size:17px;
+    color:#5A6878;
+    flex-shrink:0;
+  }
+  .topbar-pop-item span:not(.menu-alert){ flex:1; }
+  .topbar-pop-item.active{
+    background:#E7F8EC;
+    color:#06A046;
+  }
+  .topbar-pop-item.active i{ color:#06A046; }
+  .menu-alert{
+    width:6px;height:6px;
+    border-radius:50%;
+    background:#E14D4D;
+    flex-shrink:0;
+    display:none;
+  }
+  .menu-alert.on{ display:block; }
+  .topbar-pop-divider{
+    height:1px;
+    background:rgba(0,0,0,0.06);
+    margin:4px 6px;
   }
 
   /* Typing dots */
   .typing-dots{display:inline-flex;gap:4px;padding:4px 0;}
   .typing-dots span{
-    width:6px;height:6px;border-radius:50%;background:var(--ink-muted);
+    width:6px;height:6px;border-radius:50%;background:#6B7C93;
     animation:bounce 1.2s infinite;
   }
   .typing-dots span:nth-child(2){animation-delay:0.15s;}
@@ -254,40 +394,98 @@
   /* ─── Drawers / modal ─── */
   .scrim{
     position:absolute;inset:0;z-index:40;
-    background:rgba(60,55,70,0.3);
-    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    background:rgba(0,0,0,0.4);
     opacity:0;pointer-events:none;transition:opacity 0.3s;
   }
   .scrim.open{opacity:1;pointer-events:auto;}
 
   .drawer{
     position:absolute;left:0;right:0;bottom:0;z-index:41;
-    background:rgba(255,255,253,0.92);
-    backdrop-filter:blur(30px) saturate(160%);
-    -webkit-backdrop-filter:blur(30px) saturate(160%);
-    border-top:1px solid rgba(255,255,255,0.9);
-    border-radius:28px 28px 0 0;
+    background:#FFFFFF;
+    border-top:1px solid rgba(0,0,0,0.08);
+    border-radius:18px 18px 0 0;
     max-height:90%;
     transform:translateY(100%);
     transition:transform 0.4s cubic-bezier(.4,1.2,.4,1);
     display:flex;flex-direction:column;
-    box-shadow:0 -20px 60px -10px rgba(80,75,100,0.25);
+    box-shadow:0 -8px 24px rgba(0,0,0,0.15);
   }
   .drawer.open{transform:translateY(0);}
   .drawer-handle{
-    width:44px;height:4px;border-radius:99px;background:rgba(100,95,115,0.2);
+    width:44px;height:4px;border-radius:99px;background:rgba(0,0,0,0.18);
     margin:10px auto 4px;flex-shrink:0;
   }
   .drawer-head{
     padding:8px 22px 14px;
-    border-bottom:1px solid rgba(180,175,195,0.18);
+    border-bottom:1px solid rgba(0,0,0,0.06);
     flex-shrink:0;display:flex;align-items:center;gap:10px;
   }
+  /* Back button — hidden when drawer is in full mode, shown in focus mode */
+  .drawer-back-btn{
+    display:none;
+    width:32px;height:32px;
+    align-items:center;justify-content:center;
+    background:transparent;
+    color:#5A6878;
+    border:none;border-radius:50%;
+    cursor:pointer;
+    font-size:18px;
+    flex-shrink:0;
+  }
+  .drawer-back-btn:hover{ background:rgba(0,0,0,0.05); }
+  #charDrawer[data-focus] .drawer-back-btn{ display:flex; }
+  /* "Hamburger-only" sections — only shown when focused (i.e. arrived from
+     hamburger menu). The main card view (no data-focus) hides them so the
+     full card stays clean; the hamburger menu is the dedicated entry. */
+  #charDrawer:not([data-focus]) .accordion[data-acc="secondary"],
+  #charDrawer:not([data-focus]) .accordion[data-acc="locations"],
+  #charDrawer:not([data-focus]) .accordion[data-acc="terms"],
+  #charDrawer:not([data-focus]) .accordion[data-acc="props"]{ display:none; }
+  /* In focus mode, hide top tools and all accordions except the focused one */
+  #charDrawer[data-focus] .char-tools-row{ display:none; }
+  #charDrawer[data-focus] .accordion{ display:none; }
+  #charDrawer[data-focus="secondary"] .accordion[data-acc="secondary"]{ display:block; }
+  #charDrawer[data-focus="locations"] .accordion[data-acc="locations"]{ display:block; }
+  #charDrawer[data-focus="terms"] .accordion[data-acc="terms"]{ display:block; }
+  #charDrawer[data-focus="props"] .accordion[data-acc="props"]{ display:block; }
+  /* In focus mode, the lone accordion always shows its body (force-open) and
+     hides its caret + collapse behaviour, since it IS the page now */
+  #charDrawer[data-focus] .accordion .acc-head .acc-icon{ display:none; }
+  #charDrawer[data-focus] .accordion .acc-head{ cursor:default; padding-top:4px; }
+  #charDrawer[data-focus] .accordion .acc-body{ display:block !important; }
+  /* charSub (the small "new" tag on the right) is hidden in focus mode */
+  #charDrawer[data-focus] #charSub{ display:none; }
+
   .drawer-body{padding:14px 22px 28px;overflow-y:auto;flex:1;}
   .drawer-body::-webkit-scrollbar{width:0;}
 
   /* Form controls */
   .field{margin-bottom:14px;}
+  /* Avatar field in 基本信息 */
+  .avatar-row{
+    display:flex;align-items:center;gap:12px;
+  }
+  .avatar-preview{
+    width:64px;height:64px;
+    border-radius:50%;
+    background:linear-gradient(to top right, #C9BBD9, #9B8AAE);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;font-weight:500;
+    flex-shrink:0;
+    overflow:hidden;
+    border:2px solid #fff;
+    box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  }
+  .avatar-preview img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .avatar-actions{
+    display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;
+  }
+  .avatar-actions .btn{margin:0;}
   .field-label{
     display:flex;align-items:center;gap:6px;
     font-size:9.5px;color:var(--ink-muted);
@@ -300,18 +498,19 @@
 
   .input, select, .ta{
     width:100%;
-    background:rgba(255,255,255,0.7);
-    border:1px solid rgba(180,175,195,0.2);
-    color:var(--ink);
-    border-radius:12px;
+    background:#F4F6F8;
+    border:1px solid #E0E4E9;
+    color:#000000;
+    border-radius:10px;
     padding:9px 13px;
     font-family:'Noto Sans SC',sans-serif;font-size:13px;line-height:1.55;
     outline:none;transition:all 0.2s;
   }
-  .ta{font-family:'Noto Serif SC',serif;resize:vertical;min-height:64px;max-height:260px;}
+  .ta{font-family:'Noto Sans SC',sans-serif;resize:vertical;min-height:64px;max-height:260px;}
   .input:focus, .ta:focus, select:focus{
-    border-color:var(--primary);
-    box-shadow:0 0 0 3px rgba(148,139,161,0.12);
+    border-color:#06C755;
+    box-shadow:0 0 0 3px rgba(6,199,85,0.12);
+    background:#FFFFFF;
   }
   .input[type="password"]{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;}
   select{
@@ -322,30 +521,30 @@
   }
 
   .seg-group{
-    width:100%;padding:4px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px;
-    background:rgba(255,255,255,0.7);
-    border:1px solid rgba(180,175,195,0.2);
-    border-radius:12px;
+    width:100%;padding:3px;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;
+    background:#F4F6F8;
+    border:1px solid #E0E4E9;
+    border-radius:10px;
   }
   .seg{
-    background:transparent;border:none;color:var(--ink-muted);
+    background:transparent;border:none;color:#6B7C93;
     padding:7px 0;font-family:'Inter',sans-serif;font-size:12px;
     border-radius:8px;cursor:pointer;transition:all 0.2s;
   }
   .seg.active{
-    background:linear-gradient(135deg, rgba(148,139,161,0.22), rgba(212,163,163,0.16));
-    color:var(--ink);
-    box-shadow:inset 0 0 0 1px rgba(148,139,161,0.3);
+    background:#FFFFFF;
+    color:#000000;
+    box-shadow:0 1px 2px rgba(0,0,0,0.08);
   }
 
   input[type="range"]{
     -webkit-appearance:none;appearance:none;width:100%;height:4px;
-    background:rgba(180,175,195,0.25);border-radius:99px;outline:none;
+    background:#E0E4E9;border-radius:99px;outline:none;
   }
   input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance:none;appearance:none;width:16px;height:16px;
-    border-radius:50%;background:#fff;cursor:pointer;
-    box-shadow:0 0 0 3px rgba(148,139,161,0.4), 0 2px 6px rgba(80,75,100,0.25);
+    border-radius:50%;background:#06C755;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(6,199,85,0.2), 0 1px 3px rgba(0,0,0,0.2);
   }
   .range-end{display:flex;justify-content:space-between;font-size:9px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;margin-top:6px;letter-spacing:0.04em;}
 
@@ -357,68 +556,68 @@
     display:flex;align-items:center;justify-content:center;gap:8px;
   }
   .btn.primary{
-    background:linear-gradient(135deg, #a89eb3, #948ba1);color:#fff;
-    box-shadow:0 4px 14px -2px rgba(148,139,161,0.4);
+    background:#06C755;color:#FFFFFF;
+    box-shadow:0 2px 6px rgba(6,199,85,0.3);
   }
-  .btn.primary:hover{filter:brightness(1.06);}
+  .btn.primary:hover{background:#05B14B;}
   .btn.ghost{
-    background:rgba(255,255,255,0.6);
-    border-color:rgba(180,175,195,0.25);
-    color:var(--ink-muted);
+    background:#F4F6F8;
+    border-color:#E0E4E9;
+    color:#5A6878;
   }
-  .btn.ghost:hover{background:rgba(255,255,255,0.9);color:var(--ink);}
+  .btn.ghost:hover{background:#E8ECF0;color:#000000;}
   .btn.danger{
-    background:rgba(184,85,85,0.08);
-    border-color:rgba(184,85,85,0.25);
-    color:var(--err);
+    background:#FFEDED;
+    border-color:#FFD0D0;
+    color:#E14D4D;
   }
-  .btn.danger:hover{background:rgba(184,85,85,0.15);}
+  .btn.danger:hover{background:#FFDADA;}
   .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
   .btn-row .btn{margin-top:0;}
 
   .note{
-    font-size:10.5px;color:var(--ink-muted);
+    font-size:10.5px;color:#5A6878;
     font-family:'Noto Sans SC',sans-serif;line-height:1.6;margin-top:6px;
     padding:9px 12px;
-    background:rgba(212,163,163,0.1);
-    border:1px solid rgba(212,163,163,0.22);
+    background:#F0F7FF;
+    border:1px solid #DCE8F5;
     border-radius:10px;
   }
-  .note strong{color:#9c6b6b;}
-  .note.warn{background:rgba(184,85,85,0.07);border-color:rgba(184,85,85,0.2);color:#8a4a4a;}
-  .note.warn strong{color:#8a4a4a;}
+  .note strong{color:#3A6DBE;}
+  .note.warn{background:#FFF4F4;border-color:#FFD7D7;color:#8A4A4A;}
+  .note.warn strong{color:#C04848;}
 
   /* Accordion */
   .accordion{
-    background:rgba(255,255,255,0.45);
-    border:1px solid rgba(180,175,195,0.18);
-    border-radius:14px;margin-bottom:8px;overflow:hidden;
+    background:#FAFBFC;
+    border:1px solid #E8ECF0;
+    border-radius:12px;margin-bottom:8px;overflow:hidden;
   }
   .acc-head{
     padding:11px 14px;display:flex;align-items:center;gap:8px;
     cursor:pointer;user-select:none;transition:background 0.2s;
   }
-  .acc-head:hover{background:rgba(255,255,255,0.7);}
+  .acc-head:hover{background:#F0F3F6;}
   .acc-icon{
     width:18px;height:18px;display:flex;align-items:center;justify-content:center;
-    color:var(--ink-muted);transition:transform 0.3s;
+    color:#6B7C93;transition:transform 0.3s;
   }
   .accordion.open .acc-icon{transform:rotate(90deg);}
   .acc-title{
     flex:1;font-family:'Inter',sans-serif;
-    font-size:13px;font-weight:500;color:var(--ink);
+    font-size:13px;font-weight:500;color:#000000;
     display:flex;align-items:center;gap:8px;
   }
   .acc-count{
-    background:rgba(148,139,161,0.18);
-    color:var(--primary);
+    background:#D7F4DD;
+    color:#06A046;
     font-family:'JetBrains Mono',monospace;font-size:10px;
     padding:1px 7px;border-radius:99px;
   }
   .acc-lock{
     font-family:'Noto Sans SC',sans-serif;font-size:10px;
-    color:#c98787;
-    background:rgba(212,163,163,0.18);
+    color:#D14D4D;
+    background:#FFE8E8;
     padding:2px 8px;border-radius:99px;
   }
   .acc-body{padding:0 14px 14px;display:none;animation:fadeUp 0.25s ease both;}
@@ -432,29 +631,29 @@
   #locList::-webkit-scrollbar{width:4px;}
   #locList::-webkit-scrollbar-thumb{background:rgba(148,139,161,0.25);border-radius:2px;}
   .chip{
-    background:rgba(255,255,255,0.7);
-    border:1px solid rgba(180,175,195,0.22);
+    background:#F4F6F8;
+    border:1px solid #E0E4E9;
     border-radius:99px;
     padding:5px 10px 5px 12px;
-    font-family:'Noto Sans SC',sans-serif;font-size:11.5px;color:var(--ink);
+    font-family:'Noto Sans SC',sans-serif;font-size:11.5px;color:#000000;
     display:inline-flex;align-items:center;gap:5px;
     transition:all 0.15s;
   }
-  .chip:hover{background:rgba(255,255,255,0.95);border-color:rgba(148,139,161,0.4);}
+  .chip:hover{background:#FFFFFF;border-color:#06C755;}
   .chip-x{
     width:15px;height:15px;border-radius:50%;border:none;
-    background:rgba(160,150,170,0.15);
-    color:var(--ink-muted);font-size:11px;line-height:1;
+    background:rgba(0,0,0,0.08);
+    color:#6B7C93;font-size:11px;line-height:1;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;padding:0;
   }
-  .chip-x:hover{background:rgba(184,85,85,0.2);color:var(--err);}
+  .chip-x:hover{background:#FFD0D0;color:#E14D4D;}
   .chip-name{font-weight:500;}
-  .chip-sub{color:var(--ink-muted);font-size:10.5px;}
+  .chip-sub{color:#6B7C93;font-size:10.5px;}
 
   .add-form{
-    background:rgba(255,255,255,0.4);
-    border:1px dashed rgba(180,175,195,0.3);
+    background:#FAFBFC;
+    border:1px dashed #D0D6DD;
     border-radius:12px;padding:10px;
     display:flex;flex-direction:column;gap:6px;margin-top:4px;
   }
@@ -465,39 +664,38 @@
   .modal{
     position:absolute;inset:0;z-index:50;
     display:flex;align-items:center;justify-content:center;
-    background:rgba(60,55,70,0.45);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:rgba(0,0,0,0.5);
     opacity:0;pointer-events:none;transition:opacity 0.3s;
     padding:30px;
   }
   .modal.open{opacity:1;pointer-events:auto;}
   .modal-card{
-    background:rgba(255,255,253,0.96);
-    border-radius:24px;
+    background:#FFFFFF;
+    border-radius:16px;
     padding:24px 22px 18px;
     max-width:340px;width:100%;
-    box-shadow:0 30px 60px -10px rgba(60,40,60,0.4);
-    border:1px solid rgba(255,255,255,0.9);
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+    border:none;
     transform:scale(0.94);
     transition:transform 0.3s;
   }
   .modal.open .modal-card{transform:scale(1);}
   .modal-icon{
     width:48px;height:48px;border-radius:50%;
-    background:linear-gradient(135deg, #c98a8a, #a8625e);
+    background:#E14D4D;
     color:#fff;display:flex;align-items:center;justify-content:center;
     margin:0 auto 14px;
-    box-shadow:0 8px 20px -4px rgba(168,98,94,0.4);
+    box-shadow:0 4px 12px rgba(225,77,77,0.3);
   }
   .modal-title{
-    font-family:'Noto Serif SC',serif;font-size:18px;font-weight:500;
-    text-align:center;color:var(--ink);margin-bottom:8px;
+    font-family:'Noto Sans SC',sans-serif;font-size:18px;font-weight:500;
+    text-align:center;color:#000000;margin-bottom:8px;
   }
   .modal-body{
-    font-size:12px;color:var(--ink-muted);line-height:1.7;
-    background:rgba(184,85,85,0.06);
-    border:1px solid rgba(184,85,85,0.18);
-    border-radius:12px;padding:12px 14px;margin-bottom:14px;
+    font-size:12px;color:#5A6878;line-height:1.7;
+    background:#FFF4F4;
+    border:1px solid #FFD7D7;
+    border-radius:10px;padding:12px 14px;margin-bottom:14px;
   }
   .modal-body ul{margin:6px 0 0;padding-left:18px;}
   .modal-body li{margin-bottom:3px;}
@@ -513,7 +711,7 @@
   }
   .stat-divider{
     width:1px;
-    background:linear-gradient(to bottom, transparent, rgba(216,216,224,0.55), transparent);
+    background:#E8ECF0;
     flex-shrink:0;
   }
   .stat-head{
@@ -523,35 +721,35 @@
   .stat-label{
     font-family:'Noto Sans SC','Inter',sans-serif;
     font-size:9.5px;font-weight:500;
-    color:#a89eb3;
+    color:#6B7C93;
     letter-spacing:0.14em;
   }
   .stat-tier{
     margin-left:auto;
     font-family:'JetBrains Mono',monospace;
     font-size:8.5px;font-weight:500;
-    color:#a89eb3;
+    color:#06A046;
     letter-spacing:0.06em;
     padding:1.5px 6px;
     border-radius:99px;
-    background:rgba(168,158,179,0.12);
-    border:1px solid rgba(168,158,179,0.22);
+    background:#D7F4DD;
+    border:1px solid #B6E8C2;
     transition:all 0.35s;
   }
   body.intimate .stat-tier{
-    color:#b67a86;
-    background:rgba(200,138,138,0.12);
-    border-color:rgba(200,138,138,0.25);
+    color:#D14D4D;
+    background:#FFE8E8;
+    border-color:#FFD0D0;
   }
   .stat-tier.flash{
     color:#fff;
-    background:linear-gradient(135deg, #c98787, #a8625e);
+    background:#E14D4D;
     border-color:transparent;
     animation:tier-pulse 1.4s cubic-bezier(.3,1.2,.4,1) both;
   }
   @keyframes tier-pulse{
     0%  { transform:scale(1); }
-    25% { transform:scale(1.12); box-shadow:0 0 14px rgba(212,140,140,0.55); }
+    25% { transform:scale(1.12); box-shadow:0 0 14px rgba(225,77,77,0.5); }
     100%{ transform:scale(1); box-shadow:0 0 0 rgba(0,0,0,0); }
   }
 
@@ -562,22 +760,22 @@
   .stat-num{
     font-family:'Inter','Noto Sans SC',sans-serif;
     font-size:20px;font-weight:600;
-    color:var(--primary);
+    color:#000000;
     line-height:1;
     transition:color 0.35s;
   }
   .stat-frac{
     font-family:'JetBrains Mono',monospace;
     font-size:10.5px;
-    color:var(--ink-faint);
+    color:#9BA8B8;
     letter-spacing:0.02em;
   }
-  body.intimate .stat-frac{ color:#b59a9e; }
+  body.intimate .stat-frac{ color:#9BA8B8; }
 
   /* progress bar */
   .stat-bar-track{
     height:3px;
-    background:rgba(180,175,195,0.18);
+    background:#E8ECF0;
     border-radius:99px;
     overflow:hidden;
     margin-top:1px;
@@ -588,19 +786,19 @@
     transition:width 0.6s cubic-bezier(.4,1,.4,1);
   }
   .stat-bar-aff{
-    background:linear-gradient(90deg, #d4a3a3, #e8c5c5);
+    background:linear-gradient(90deg, #FF8B8B, #FFB0B0);
   }
   .stat-bar-int{
-    background:linear-gradient(90deg, #a89eb3, #c8b8d8);
+    background:linear-gradient(90deg, #5A8FE0, #8BB0F0);
   }
   body.intimate .stat-bar-aff{
-    background:linear-gradient(90deg, #c98787, #d8a5a5);
+    background:linear-gradient(90deg, #E14D4D, #F08585);
   }
   body.intimate .stat-bar-int{
-    background:linear-gradient(90deg, #b67a86, #c89aa3);
+    background:linear-gradient(90deg, #C04848, #E07878);
   }
   .stat-bar-arousal{
-    background:linear-gradient(90deg, #c98787, #d8a5b3, #b67a86);
+    background:linear-gradient(90deg, #E14D4D, #F08585, #C04848);
   }
   .stat-bar-fill.surge{
     animation:bar-surge 0.7s cubic-bezier(.4,1.5,.4,1);
@@ -615,6 +813,11 @@
   .story-stats{ display:flex !important; }
   body.intimate .story-stats{ display:none !important; }
   body.intimate .intimate-stats{ display:flex !important; }
+  /* Chat mode: which gauge shows depends on lastChatStatKind, set via body class */
+  body.chat .story-stats{ display:none !important; }
+  body.chat .intimate-stats{ display:none !important; }
+  body.chat.chat-stats-stats .story-stats{ display:flex !important; }
+  body.chat.chat-stats-arousal .intimate-stats{ display:flex !important; }
 
   /* ─── Initiator toggle ─── */
   .initiator-display{
@@ -627,12 +830,12 @@
   .initiator-label{
     font-family:'JetBrains Mono',monospace;
     font-size:9px;font-weight:500;
-    color:#b67a86;
+    color:#D14D4D;
     line-height:1;
     padding:2px 7px;
     border-radius:99px;
-    background:rgba(200,138,138,0.12);
-    border:1px solid rgba(200,138,138,0.25);
+    background:#FFE8E8;
+    border:1px solid #FFD0D0;
     transition:all 0.25s;
     letter-spacing:0.06em;
   }
@@ -642,10 +845,10 @@
 
   /* ─── Orgasm flash (arousal hits 100) ─── */
   @keyframes climax-flash{
-    0%   { transform:scale(1); color:var(--primary); text-shadow:none; }
-    20%  { transform:scale(1.4); color:#fff; text-shadow:0 0 30px rgba(212,90,90,1); }
-    50%  { transform:scale(1.2); color:#c98787; text-shadow:0 0 22px rgba(212,90,90,0.7); }
-    100% { transform:scale(1); color:var(--primary); text-shadow:none; }
+    0%   { transform:scale(1); color:#000000; text-shadow:none; }
+    20%  { transform:scale(1.4); color:#fff; text-shadow:0 0 30px rgba(225,77,77,1); }
+    50%  { transform:scale(1.2); color:#E14D4D; text-shadow:0 0 22px rgba(225,77,77,0.7); }
+    100% { transform:scale(1); color:#000000; text-shadow:none; }
   }
   .stat-num.climax-flash{
     animation:climax-flash 1.8s cubic-bezier(.3,1.4,.5,1) both;
@@ -654,16 +857,16 @@
   /* Number-level flash (normal累积 — kept for completeness, currently unused) */
   @keyframes levelup-flash{
     0%{transform:scale(1);}
-    40%{transform:scale(1.15);text-shadow:0 0 16px rgba(212,163,163,0.7);}
+    40%{transform:scale(1.15);text-shadow:0 0 16px rgba(6,199,85,0.6);}
     100%{transform:scale(1);text-shadow:none;}
   }
   .stat-num.flash{animation:levelup-flash 0.9s ease-out;}
   /* Stronger flash for the across-100 milestone (心动 trigger) */
   @keyframes milestone-flash{
-    0%  { transform:scale(1);   color:var(--primary); text-shadow:none; }
-    25% { transform:scale(1.22); color:#c98787;       text-shadow:0 0 22px rgba(212,140,140,0.85); }
-    60% { transform:scale(1.10); color:#c98787;       text-shadow:0 0 14px rgba(212,140,140,0.5); }
-    100%{ transform:scale(1);   color:var(--primary); text-shadow:none; }
+    0%  { transform:scale(1);   color:#000000;  text-shadow:none; }
+    25% { transform:scale(1.22); color:#E14D4D;  text-shadow:0 0 22px rgba(225,77,77,0.85); }
+    60% { transform:scale(1.10); color:#E14D4D;  text-shadow:0 0 14px rgba(225,77,77,0.5); }
+    100%{ transform:scale(1);   color:#000000;  text-shadow:none; }
   }
   .stat-num.milestone-flash{
     animation:milestone-flash 1.4s cubic-bezier(.3,1.2,.4,1) both;
@@ -672,8 +875,8 @@
   /* ─── Bulk-import textarea modal ─── */
   .bulk-import-pop{
     margin-top:8px;
-    background:rgba(255,255,255,0.55);
-    border:1px solid rgba(180,175,195,0.25);
+    background:#FAFBFC;
+    border:1px solid #E0E4E9;
     border-radius:10px;
     padding:10px;
     display:none;
@@ -682,19 +885,19 @@
   .bulk-import-pop textarea{
     width:100%;
     min-height:80px;
-    background:rgba(255,255,255,0.7);
-    border:1px solid rgba(180,175,195,0.22);
+    background:#FFFFFF;
+    border:1px solid #E0E4E9;
     border-radius:8px;
     padding:7px 9px;
     font-family:'Noto Sans SC',sans-serif;
     font-size:11px;
-    color:#5a5562;
+    color:#000000;
     outline:none;resize:vertical;
   }
   .bulk-import-hint{
     font-size:9.5px;
     font-family:'JetBrains Mono',monospace;
-    color:#9b9aa5;
+    color:#6B7C93;
     margin-bottom:6px;
     line-height:1.5;
   }
@@ -704,44 +907,80 @@
 
   /* ─── Prop chip (亲密模式道具) ─── */
   .prop-chip{
-    background:rgba(255,255,255,0.5);
-    border:1px solid rgba(180,175,195,0.3);
+    background:#F4F6F8;
+    border:1px solid #E0E4E9;
     cursor:pointer;
     transition:all 0.18s;
   }
   .prop-chip.enabled{
-    background:linear-gradient(135deg, rgba(201,135,135,0.18), rgba(168,158,179,0.18));
-    border-color:rgba(201,135,135,0.45);
+    background:#FFE8E8;
+    border-color:#FFB0B0;
   }
   .prop-chip:hover{
-    background:rgba(255,255,255,0.75);
+    background:#E8ECF0;
   }
   .prop-chip.enabled:hover{
-    background:linear-gradient(135deg, rgba(201,135,135,0.28), rgba(168,158,179,0.25));
+    background:#FFDADA;
   }
   .prop-target-tag{
     font-family:'JetBrains Mono',monospace;
     font-size:8.5px;
     padding:1px 5px;
     border-radius:99px;
-    background:rgba(168,158,179,0.18);
-    color:#8a7c92;
+    background:rgba(0,0,0,0.06);
+    color:#6B7C93;
     margin-right:4px;
   }
   .prop-chip.enabled .prop-target-tag{
-    background:rgba(201,135,135,0.25);
-    color:#9a5f5f;
+    background:rgba(225,77,77,0.18);
+    color:#C04848;
   }
   .prop-toggle-dot{
     width:6px;height:6px;border-radius:99px;
-    background:rgba(180,175,195,0.4);
+    background:#CDD3DA;
     margin-right:3px;
     transition:all 0.2s;
   }
   .prop-chip.enabled .prop-toggle-dot{
-    background:#c98787;
-    box-shadow:0 0 6px rgba(201,135,135,0.6);
+    background:#E14D4D;
+    box-shadow:0 0 6px rgba(225,77,77,0.5);
   }
+
+  /* ─── LINE-style input toolbar (left icons + textbox + send) ─── */
+  .input-tool-btn{
+    width:34px;height:34px;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+    color:#5A6878;
+    border:none;border-radius:50%;
+    cursor:pointer;
+    transition:background 0.15s, color 0.15s;
+  }
+  .input-tool-btn:hover{ background:rgba(0,0,0,0.05); }
+  .input-tool-btn.open{
+    background:rgba(6,199,85,0.12);
+    color:#06A046;
+  }
+  /* Input drawer: hidden by default, opens above the input row */
+  .input-drawer{
+    display:none;
+    gap:8px;
+    overflow-x:auto;
+    padding:6px 4px;
+    align-items:center;
+    justify-content:flex-start;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  .input-drawer::-webkit-scrollbar{ display:none; }
+  .input-drawer.open{ display:flex; }
+  .input-drawer > *{ flex-shrink:0; }
+
+  /* In chat mode, both drawers are conceptually meaningless;
+     hide the toggle buttons so the input row is pure LINE. */
+  body.chat .input-tool-btn{ display:none; }
+  body.chat .input-drawer{ display:none !important; }
 
   /* ─── Marker buttons (必选: 对白/动作/心绪) ─── */
   .marker-btn{
@@ -749,47 +988,45 @@
     position:relative;
   }
   .marker-btn.active{
-    background:rgba(255,255,255,0.85);
-    color:var(--primary);
-    border-color:rgba(148,139,161,0.45);
-    box-shadow:0 2px 10px rgba(148,139,161,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+    background:#FFFFFF;
+    color:#06A046;
+    border-color:#06C755;
+    box-shadow:0 1px 2px rgba(0,0,0,0.08);
   }
   .marker-btn.active .marker-dot{
-    background:var(--primary);
-    box-shadow:0 0 0 3px rgba(148,139,161,0.18);
+    background:#06C755;
+    box-shadow:0 0 0 3px rgba(6,199,85,0.18);
   }
   body.intimate .marker-btn.active{
-    color:var(--accent);
-    border-color:rgba(200,138,138,0.45);
+    color:#06A046;
+    border-color:#06C755;
   }
   body.intimate .marker-btn.active .marker-dot{
-    background:var(--accent);
-    box-shadow:0 0 0 3px rgba(200,138,138,0.18);
+    background:#06C755;
+    box-shadow:0 0 0 3px rgba(6,199,85,0.18);
   }
   .marker-dot{
     width:6px;height:6px;border-radius:50%;
-    background:#cdc8d4;
+    background:#CDD3DA;
     transition:all 0.25s;
     flex-shrink:0;
   }
 
   /* ─── Action pills (推进/承接/时跳) — distinct styling ─── */
   .action-btn{
-    background:rgba(255,255,255,0.4);
-    backdrop-filter:blur(14px) saturate(140%);
-    -webkit-backdrop-filter:blur(14px) saturate(140%);
-    border:1px solid rgba(255,255,255,0.5);
-    box-shadow:0 1px 4px rgba(148,139,161,0.06);
+    background:#FFFFFF;
+    border:1px solid #E0E4E9;
+    box-shadow:0 1px 2px rgba(0,0,0,0.04);
     transition:all 0.2s;
   }
-  .action-btn:hover{background:rgba(255,255,255,0.7);}
+  .action-btn:hover{background:#F4F6F8;}
 
   /* divider between marker group and action group */
   .input-bar-sep{
     flex-shrink:0;
     width:1px;
     margin:6px 2px;
-    background:linear-gradient(to bottom, transparent, rgba(180,175,195,0.35), transparent);
+    background:rgba(255,255,255,0.4);
   }
 
   /* ─── Toast (replaces in-chat system messages) ─── */
@@ -804,15 +1041,13 @@
     pointer-events:auto;
     max-width:340px;
     padding:10px 16px;
-    background:rgba(255,255,255,0.75);
-    backdrop-filter:blur(14px) saturate(160%);
-    -webkit-backdrop-filter:blur(14px) saturate(160%);
-    border:1px solid rgba(255,255,255,0.6);
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.06);
     border-radius:14px;
     font-family:'Noto Sans SC',sans-serif;
     font-size:12.5px;
-    color:#5a5562;
-    box-shadow:0 8px 24px rgba(148,139,161,0.18);
+    color:#000000;
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
     opacity:0;
     transform:translateY(-12px);
     transition:opacity 0.28s ease, transform 0.28s cubic-bezier(.4,1.4,.6,1);
@@ -820,9 +1055,9 @@
   .toast.toast-show{opacity:1;transform:translateY(0);}
   .toast.toast-out{opacity:0;transform:translateY(-6px);}
   .toast.toast-error{
-    background:rgba(255,238,236,0.85);
-    border-color:rgba(220,150,150,0.5);
-    color:#9a5a5a;
+    background:#FFEDED;
+    border-color:#FFD0D0;
+    color:#C04848;
   }
 
   /* ─── Message action menu (#7) ─── */
@@ -832,12 +1067,10 @@
     position:absolute;
     top:-6px;
     z-index:5;
-    background:rgba(255,255,255,0.92);
-    backdrop-filter:blur(14px) saturate(160%);
-    -webkit-backdrop-filter:blur(14px) saturate(160%);
-    border:1px solid rgba(180,175,195,0.3);
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.08);
     border-radius:99px;
-    box-shadow:0 6px 18px rgba(80,75,100,0.15);
+    box-shadow:0 4px 14px rgba(0,0,0,0.12);
     padding:3px;
     gap:1px;
   }
@@ -846,34 +1079,34 @@
   .msg-row.actions-open .msg-actions{ display:flex; }
   .msg-act-btn{
     width:28px;height:28px;border-radius:99px;border:none;
-    background:transparent;color:#7c7b88;
+    background:transparent;color:#6B7C93;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;font-size:14px;
     transition:background 0.15s;
   }
-  .msg-act-btn:hover{background:rgba(148,139,161,0.12);color:var(--ink);}
-  .msg-act-btn.danger:hover{background:rgba(184,85,85,0.12);color:var(--err);}
+  .msg-act-btn:hover{background:#F0F3F6;color:#000000;}
+  .msg-act-btn.danger:hover{background:#FFEDED;color:#E14D4D;}
   /* inline-edit textarea */
   .msg-edit-ta{
     width:100%;
     min-height:60px;max-height:200px;
-    background:rgba(255,255,255,0.85);
-    border:1px solid rgba(148,139,161,0.4);
-    border-radius:12px;
+    background:#FFFFFF;
+    border:1px solid #06C755;
+    border-radius:10px;
     padding:8px 10px;
-    font-family:'Noto Serif SC',serif;
+    font-family:'Noto Sans SC',sans-serif;
     font-size:13.5px;line-height:1.7;
-    color:#5a5562;
+    color:#000000;
     outline:none;resize:vertical;
   }
   .msg-edit-row{display:flex;gap:6px;margin-top:6px;justify-content:flex-end;}
   .msg-edit-btn{
-    font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid rgba(180,175,195,0.3);
-    background:rgba(255,255,255,0.7);color:#7c7b88;cursor:pointer;
+    font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid #E0E4E9;
+    background:#FFFFFF;color:#5A6878;cursor:pointer;
     font-family:'Inter','Noto Sans SC',sans-serif;
   }
   .msg-edit-btn.primary{
-    background:linear-gradient(135deg, #a89eb3, #948ba1);
+    background:#06C755;
     color:#fff;border-color:transparent;
   }
   .msg-edit-btn:hover{filter:brightness(1.04);}
@@ -886,16 +1119,14 @@
     left:50%;
     transform:translateX(-50%) translateY(calc(8px - var(--kb-inset)));
     z-index:20;
-    background:rgba(255,255,255,0.85);
-    backdrop-filter:blur(16px) saturate(180%);
-    -webkit-backdrop-filter:blur(16px) saturate(180%);
-    border:1px solid rgba(255,255,255,0.7);
-    box-shadow:0 8px 22px rgba(80,75,100,0.18);
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.06);
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
     border-radius:99px;
     padding:7px 14px 7px 11px;
     font-family:'Noto Sans SC',sans-serif;
     font-size:12px;
-    color:#5a5562;
+    color:#000000;
     display:flex;align-items:center;gap:6px;
     cursor:pointer;
     opacity:0;pointer-events:none;
@@ -907,8 +1138,8 @@
   }
   .scroll-pill .dot{
     width:6px;height:6px;border-radius:99px;
-    background:#c98787;
-    box-shadow:0 0 0 3px rgba(201,135,135,0.18);
+    background:#06C755;
+    box-shadow:0 0 0 3px rgba(6,199,85,0.18);
   }
   .scroll-pill.no-new .dot{display:none;}
 
@@ -917,20 +1148,18 @@
     align-self:stretch;
     margin:6px 4px 4px;
     padding:10px 14px;
-    background:rgba(255,255,255,0.38);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    border:1px dashed rgba(168,158,179,0.4);
-    border-radius:14px;
+    background:rgba(255,255,255,0.65);
+    border:1px dashed rgba(0,0,0,0.18);
+    border-radius:12px;
     cursor:pointer;
     transition:background 0.2s;
   }
-  .summary-card:hover{background:rgba(255,255,255,0.55);}
+  .summary-card:hover{background:rgba(255,255,255,0.85);}
   .summary-head{
     display:flex;align-items:center;gap:6px;
     font-family:'JetBrains Mono',monospace;
     font-size:9.5px;
-    color:#a89eb3;
+    color:#5A6878;
     letter-spacing:0.14em;
     text-transform:uppercase;
     margin-bottom:4px;
@@ -942,9 +1171,9 @@
   }
   .summary-card.open .summary-head .caret{ transform:rotate(90deg); }
   .summary-body{
-    font-family:'Noto Serif SC',serif;
+    font-family:'Noto Sans SC',sans-serif;
     font-size:12px;
-    color:#7c7283;
+    color:#000000;
     line-height:1.7;
     white-space:pre-wrap;
   }
@@ -962,12 +1191,10 @@
     left:16px;right:16px;
     z-index:38;
     max-height:48vh;
-    background:rgba(255,255,253,0.96);
-    backdrop-filter:blur(26px) saturate(160%);
-    -webkit-backdrop-filter:blur(26px) saturate(160%);
-    border:1px solid rgba(255,255,255,0.85);
-    border-radius:20px;
-    box-shadow:0 20px 50px -10px rgba(80,75,100,0.3);
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.06);
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
     opacity:0;transform:translateY(12px) scale(0.96);pointer-events:none;
     transition:opacity 0.25s ease, transform 0.25s cubic-bezier(.4,1.3,.5,1);
     display:flex;flex-direction:column;overflow:hidden;
@@ -975,15 +1202,15 @@
   .scene-pop.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
   .scene-pop-head{
     padding:12px 16px 8px;
-    border-bottom:1px solid rgba(180,175,195,0.18);
+    border-bottom:1px solid rgba(0,0,0,0.06);
     flex-shrink:0;
   }
   .scene-pop-title{
-    font-family:'Noto Serif SC',serif;font-size:14px;color:#5a5562;
+    font-family:'Noto Sans SC',sans-serif;font-size:14px;color:#000000;
     display:flex;align-items:center;gap:6px;
   }
   .scene-pop-sub{
-    font-size:10px;color:#9b9aa5;
+    font-size:10px;color:#6B7C93;
     font-family:'JetBrains Mono',monospace;
     letter-spacing:0.08em;margin-top:2px;
   }
@@ -991,8 +1218,8 @@
     width:100%;margin-top:8px;
     padding:6px 10px;
     border-radius:10px;
-    background:rgba(255,255,255,0.7);
-    border:1px solid rgba(180,175,195,0.22);
+    background:#F4F6F8;
+    border:1px solid #E0E4E9;
     font-size:12px;outline:none;
     font-family:'Noto Sans SC',sans-serif;
   }
@@ -1006,16 +1233,16 @@
     display:flex;flex-direction:column;gap:2px;
     transition:background 0.15s;
   }
-  .scene-pop-item:hover{background:rgba(148,139,161,0.1);}
-  .scene-pop-item .nm{font-size:12.5px;color:#5a5562;font-family:'Noto Sans SC',sans-serif;}
-  .scene-pop-item .ds{font-size:10.5px;color:#9b9aa5;font-family:'Noto Sans SC',sans-serif;line-height:1.5;}
-  .scene-pop-empty{padding:24px;text-align:center;font-size:11.5px;color:#9b9aa5;}
+  .scene-pop-item:hover{background:#F0F7FF;}
+  .scene-pop-item .nm{font-size:12.5px;color:#000000;font-family:'Noto Sans SC',sans-serif;}
+  .scene-pop-item .ds{font-size:10.5px;color:#6B7C93;font-family:'Noto Sans SC',sans-serif;line-height:1.5;}
+  .scene-pop-empty{padding:24px;text-align:center;font-size:11.5px;color:#6B7C93;}
 
   /* time-of-day indicator chip in header */
   .time-chip{
     font-family:'JetBrains Mono',monospace;
     font-size:9px;letter-spacing:0.1em;
-    color:#9b9aa5;
+    color:#6B7C93;
     margin-left:4px;
     opacity:0.85;
   }
@@ -1028,10 +1255,10 @@
     width:30px;height:30px;
     background:transparent;border:none;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    border-radius:8px;color:#9b9aa5;
+    border-radius:8px;color:#6B7C93;
     transition:color 0.18s, background 0.18s;
   }
-  .token-eye:hover{background:rgba(0,0,0,0.04);color:#5a5562;}
+  .token-eye:hover{background:#F0F3F6;color:#000000;}
   .token-eye i{font-size:16px;}
 </style>
 </head>
@@ -1045,107 +1272,130 @@
 
 <main class="relative w-full h-full flex flex-col mx-auto max-w-[420px]">
 
-  <!-- HEADER -->
+  <!-- HEADER (LINE-style: char name on the left, 3 icons on the right) -->
   <header class="z-30 px-4 pt-6 pb-3 flex-shrink-0">
-    <div class="glass-card rounded-[24px] p-2 flex items-center justify-between">
-      <div class="flex items-center gap-3 pl-2 cursor-pointer flex-1 min-w-0" id="openCharBtn">
+    <div class="glass-card rounded-[20px] px-2 py-2 flex items-center gap-2">
+      <!-- Left: avatar + name (click → character card) -->
+      <div class="flex items-center gap-2.5 pl-1 cursor-pointer flex-1 min-w-0" id="openCharBtn">
         <div class="relative flex-shrink-0">
-          <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-[#e3dee8] to-[#f0ebed] flex items-center justify-center border-2 border-white/60 shadow-sm" id="charAvatar">
-            <span class="cn-serif text-[#a6a0b3] font-medium text-lg" id="avatarChar">?</span>
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C9BBD9] to-[#9B8AAE] flex items-center justify-center border-2 border-white shadow-sm overflow-hidden" id="charAvatar">
+            <span class="cn-serif text-white font-medium text-[14px]" id="avatarChar">?</span>
           </div>
-          <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#cbdad2] border-2 border-white/80 rounded-full" id="statusDot"></div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#06C755] border-2 border-white rounded-full" id="statusDot"></div>
         </div>
         <div class="min-w-0 flex-1">
-          <h1 class="font-medium text-[15px] leading-tight text-[#5a5562] truncate" id="charNameDisplay">未设定角色</h1>
-          <p class="text-[10px] mono uppercase tracking-wider text-[#9b9aa5] mt-0.5 flex items-center gap-1">
-            <span id="charTagDisplay">点击新建角色卡</span>
-            <span class="time-chip" id="timeChip" title="当前时段（注入到 prompt）"></span>
-          </p>
+          <h1 class="font-medium text-[15px] leading-tight text-[#000000] truncate" id="charNameDisplay">未设定角色</h1>
         </div>
       </div>
-      <div class="flex items-center gap-0.5 pr-1 flex-shrink-0">
-        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/40 transition text-[#a1a0ac] relative" id="openKeyBtn" title="API 凭证">
-          <i class="ph ph-key text-lg"></i>
-          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#c98787] hidden" id="keyAlert"></span>
+
+      <!-- Right: 3 icons (LINE-style) -->
+      <div class="flex items-center gap-0.5 flex-shrink-0 relative">
+        <!-- 1) Mode toggle — shows current mode's icon, click cycles or opens picker -->
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition text-[#5A6878]" id="modeToggleBtn" title="切换模式">
+          <i class="ph ph-book-open text-lg" id="modeToggleIcon"></i>
         </button>
-        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/40 transition text-[#a1a0ac]" id="openProfileBtn" title="玩家档案">
-          <i class="ph ph-user-circle text-lg"></i>
+        <!-- Mode picker popover -->
+        <div class="topbar-pop" id="modePop">
+          <button class="topbar-pop-item mode-pick-item active" data-mode="story">
+            <i class="ph ph-book-open"></i><span>故事模式</span>
+          </button>
+          <button class="topbar-pop-item mode-pick-item" data-mode="intimate">
+            <i class="ph ph-heart"></i><span>亲密模式</span>
+          </button>
+          <button class="topbar-pop-item mode-pick-item" data-mode="chat">
+            <i class="ph ph-chat-circle"></i><span>聊天模式</span>
+          </button>
+        </div>
+
+        <!-- 2) Stats button — shows aff/int/arousal in a popover -->
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition text-[#5A6878] relative" id="statsToggleBtn" title="查看数值">
+          <i class="ph ph-heart text-lg" id="statsToggleIcon"></i>
         </button>
-        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/40 transition text-[#a1a0ac]" id="openSettingsBtn" title="设置">
-          <i class="ph ph-sliders text-lg"></i>
+        <!-- Stats popover (contains the actual stat columns, reused as-is) -->
+        <div class="topbar-pop topbar-pop-stats" id="statsPop">
+          <!-- Story mode: 好感 + 亲密 -->
+          <div class="px-3 py-2 flex items-stretch gap-3 story-stats">
+            <div class="stat-col flex-1 min-w-0">
+              <div class="stat-head">
+                <i class="ph ph-heart text-[#FF6B6B] text-[10px]"></i>
+                <span class="stat-label">好感</span>
+                <span class="stat-tier" id="affTier">LV.1</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-num" id="affNum">0</span><span class="stat-frac" id="affFrac">0%</span>
+              </div>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill stat-bar-aff" id="affBar" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-col flex-1 min-w-0">
+              <div class="stat-head">
+                <i class="ph-fill ph-sparkle text-[#5A8FE0] text-[10px]"></i>
+                <span class="stat-label">亲密</span>
+                <span class="stat-tier" id="intTier">LV.1</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-num" id="intNum">0</span><span class="stat-frac" id="intFrac">0%</span>
+              </div>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill stat-bar-int" id="intBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Intimate mode: 快感 -->
+          <div class="px-3 py-2 flex items-stretch intimate-stats">
+            <div class="stat-col flex-1 min-w-0">
+              <div class="stat-head">
+                <i class="ph-fill ph-fire text-[#E14D4D] text-[10px]"></i>
+                <span class="stat-label">快感</span>
+                <span class="stat-tier" id="arousalLap">×0</span>
+                <span id="initiatorCol" class="initiator-label" title="点击切换主动方">你</span>
+              </div>
+              <div class="stat-row">
+                <span class="stat-num" id="arousalNum">0</span><span class="stat-frac" id="arousalFrac">0%</span>
+              </div>
+              <div class="stat-bar-track">
+                <div class="stat-bar-fill stat-bar-arousal" id="arousalBar" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3) Hamburger menu — API / profile / settings / secondary / locations / props -->
+        <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition text-[#5A6878] relative" id="hamburgerBtn" title="菜单">
+          <i class="ph ph-list text-lg"></i>
+          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#E14D4D] hidden" id="keyAlert"></span>
         </button>
+        <!-- Hamburger menu popover -->
+        <div class="topbar-pop topbar-pop-menu" id="hamburgerPop">
+          <button class="topbar-pop-item" id="menu-api">
+            <i class="ph ph-key"></i><span>API 凭证</span>
+            <span class="menu-alert" id="menuApiAlert"></span>
+          </button>
+          <button class="topbar-pop-item" id="menu-profile">
+            <i class="ph ph-user-circle"></i><span>玩家档案</span>
+          </button>
+          <button class="topbar-pop-item" id="menu-settings">
+            <i class="ph ph-sliders"></i><span>生成设置</span>
+          </button>
+          <div class="topbar-pop-divider"></div>
+          <button class="topbar-pop-item" id="menu-secondary">
+            <i class="ph ph-users-three"></i><span>次要角色</span>
+          </button>
+          <button class="topbar-pop-item" id="menu-locations">
+            <i class="ph ph-map-pin"></i><span>场景设定</span>
+          </button>
+          <button class="topbar-pop-item" id="menu-terms">
+            <i class="ph ph-book-bookmark"></i><span>名词</span>
+          </button>
+          <button class="topbar-pop-item" id="menu-props">
+            <i class="ph ph-package"></i><span>道具</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
-
-  <!-- STATUS BAR -->
-  <section class="px-4 mb-3 flex-shrink-0">
-    <div class="flex items-stretch gap-2">
-      <!-- ─── Story mode: 好感 + 亲密 ─── -->
-      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch gap-3 story-stats">
-        <!-- Affinity -->
-        <div class="stat-col flex-1 min-w-0">
-          <div class="stat-head">
-            <i class="ph-fill ph-heart text-[#c98787] text-[10px]"></i>
-            <span class="stat-label">好感</span>
-            <span class="stat-tier" id="affTier">LV.1</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-num" id="affNum">0</span><span class="stat-frac" id="affFrac">0%</span>
-          </div>
-          <div class="stat-bar-track">
-            <div class="stat-bar-fill stat-bar-aff" id="affBar" style="width:0%"></div>
-          </div>
-        </div>
-
-        <div class="stat-divider"></div>
-
-        <!-- Intimacy -->
-        <div class="stat-col flex-1 min-w-0">
-          <div class="stat-head">
-            <i class="ph-fill ph-sparkle text-[#a89eb3] text-[10px]"></i>
-            <span class="stat-label">亲密</span>
-            <span class="stat-tier" id="intTier">LV.1</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-num" id="intNum">0</span><span class="stat-frac" id="intFrac">0%</span>
-          </div>
-          <div class="stat-bar-track">
-            <div class="stat-bar-fill stat-bar-int" id="intBar" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ─── Intimate mode: 快感 full-width ─── -->
-      <div class="flex-1 glass-card rounded-2xl px-3.5 py-2 flex items-stretch intimate-stats">
-        <!-- Arousal, full width; initiator chip lives inline in stat-head -->
-        <div class="stat-col flex-1 min-w-0">
-          <div class="stat-head">
-            <i class="ph-fill ph-fire text-[#c98787] text-[10px]"></i>
-            <span class="stat-label">快感</span>
-            <span class="stat-tier" id="arousalLap">×0</span>
-            <span id="initiatorCol" class="initiator-label" title="点击切换主动方">你</span>
-          </div>
-          <div class="stat-row">
-            <span class="stat-num" id="arousalNum">0</span><span class="stat-frac" id="arousalFrac">0%</span>
-          </div>
-          <div class="stat-bar-track">
-            <div class="stat-bar-fill stat-bar-arousal" id="arousalBar" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mode pills (vertical) -->
-      <div class="bg-white/30 backdrop-blur-md rounded-2xl p-1 flex flex-col gap-1 border border-white/40 shadow-sm">
-        <button class="mode-pill active w-8 h-8 flex items-center justify-center rounded-xl" data-mode="story" title="故事模式">
-          <i class="ph ph-book-open text-base"></i>
-        </button>
-        <button class="mode-pill w-8 h-8 flex items-center justify-center rounded-xl" data-mode="intimate" title="亲密模式">
-          <i class="ph ph-heart text-base"></i>
-        </button>
-      </div>
-    </div>
-  </section>
 
   <!-- MESSAGES -->
   <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 pb-[170px] flex flex-col gap-3" id="chatArea"></div>
@@ -1168,52 +1418,53 @@
   </div>
 
   <!-- INPUT -->
-  <footer class="absolute bottom-0 left-0 right-0 p-4 pt-2 pointer-events-none">
-    <div class="pointer-events-auto flex flex-col gap-2.5">
-      <!-- Marker pills (必选,默认对白) + action pills (推进/承接/时跳,点击即发送) -->
-      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1 items-center" id="quickActions">
-        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5 active" data-marker="dialogue" title="对白模式 — 你说出口的话">
-          <span class="marker-dot"></span>
-          <span class="cn">对白</span>
+  <footer class="absolute bottom-0 left-0 right-0 p-3 pt-2 pointer-events-none">
+    <div class="pointer-events-auto flex flex-col gap-2">
+
+      <!-- ── Marker drawer (对白/动作/心绪 — opens above input on demand) -->
+      <div class="input-drawer" id="markerDrawer">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5 active" data-marker="dialogue" title="对白 — 你说出口的话">
+          <span class="marker-dot"></span><span class="cn">对白</span>
         </button>
-        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-marker="action" title="动作模式 — 你做出的动作">
-          <span class="marker-dot"></span>
-          <span class="cn">动作</span>
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-marker="action" title="动作 — 你做出的动作">
+          <span class="marker-dot"></span><span class="cn">动作</span>
         </button>
-        <button class="marker-btn flex-shrink-0 px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-marker="inner" title="心绪模式 — 你的内心活动">
-          <span class="marker-dot"></span>
-          <span class="cn">心绪</span>
-        </button>
-        <div class="input-bar-sep self-stretch"></div>
-        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="advance" title="请角色主动推进剧情">
-          <i class="ph ph-fast-forward text-[12px]"></i>
-          <span class="cn">推进</span>
-        </button>
-        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="continue" title="承接展开当前话题">
-          <i class="ph ph-arrow-right text-[12px]"></i>
-          <span class="cn">承接</span>
-        </button>
-        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
-          <i class="ph ph-clock-clockwise text-[12px]"></i>
-          <span class="cn">时跳</span>
-        </button>
-        <button class="action-btn flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" id="scenePickerBtn" title="切换场景">
-          <i class="ph ph-map-pin text-[12px]"></i>
-          <span class="cn">场景</span>
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-marker="inner" title="心绪 — 你的内心活动">
+          <span class="marker-dot"></span><span class="cn">心绪</span>
         </button>
       </div>
 
-      <div class="glass-card rounded-[28px] p-2 flex items-end gap-2">
-        <div class="flex-1 px-3 py-1 max-h-32 overflow-y-auto no-scrollbar">
-          <textarea id="input" rows="1" class="cn w-full bg-transparent text-[13.5px] py-1 resize-none outline-none placeholder:text-[#b0afba] text-[#5a5562]" placeholder="说点什么..."></textarea>
+      <!-- ── Action drawer (推进/承接/时跳/场景 — opens above input on demand) -->
+      <div class="input-drawer" id="actionDrawer">
+        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="advance" title="请角色主动推进剧情">
+          <i class="ph ph-fast-forward text-[12px]"></i><span class="cn">推进</span>
+        </button>
+        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="continue" title="承接展开当前话题">
+          <i class="ph ph-arrow-right text-[12px]"></i><span class="cn">承接</span>
+        </button>
+        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
+          <i class="ph ph-clock-clockwise text-[12px]"></i><span class="cn">时跳</span>
+        </button>
+        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" id="scenePickerBtn" title="切换场景">
+          <i class="ph ph-map-pin text-[12px]"></i><span class="cn">场景</span>
+        </button>
+      </div>
+
+      <!-- ── LINE-style input row: [✏️] [⚡] [textbox] [send] -->
+      <div class="glass-card rounded-[24px] p-1.5 flex items-center gap-1">
+        <button class="input-tool-btn" id="toggleMarkerDrawer" title="对白 / 动作 / 心绪">
+          <i class="ph ph-pencil-simple-line text-[18px]" id="markerToolIcon"></i>
+        </button>
+        <button class="input-tool-btn" id="toggleActionDrawer" title="推进 / 承接 / 时跳 / 场景">
+          <i class="ph ph-lightning text-[18px]"></i>
+        </button>
+        <div class="flex-1 px-2 py-1 max-h-32 overflow-y-auto no-scrollbar">
+          <textarea id="input" rows="1" class="cn w-full bg-transparent text-[13.5px] py-1 resize-none outline-none placeholder:text-[#9BA8B8] text-[#000000]" placeholder="说点什么..."></textarea>
         </div>
-        <button id="sendBtn" disabled class="w-10 h-10 rounded-full bg-[#948ba1] text-white flex items-center justify-center shadow-md active:scale-95 transition-transform disabled:bg-[#cdc8d4] disabled:cursor-not-allowed flex-shrink-0">
+        <button id="sendBtn" disabled class="w-9 h-9 rounded-full bg-[#06C755] text-white flex items-center justify-center shadow-md active:scale-95 transition-transform disabled:bg-[#CDD3DA] disabled:cursor-not-allowed flex-shrink-0">
           <i class="ph ph-paper-plane-tilt text-base" id="sendIcon"></i>
         </button>
       </div>
-      <p class="text-center text-[9px] text-[#b0afba] mono tracking-tight">
-        Enter 发送 · Shift+Enter 换行 · 选择「对白 / 动作 / 心绪」决定你输入的语义
-      </p>
     </div>
   </footer>
 
@@ -1268,16 +1519,17 @@
   <div class="drawer" id="charDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-medium text-[16px] text-[#5a5562]">角色卡</h2>
+      <button class="drawer-back-btn" id="charBackBtn" title="返回完整角色卡"><i class="ph ph-caret-left"></i></button>
+      <h2 class="cn-serif font-medium text-[16px] text-[#5a5562]" id="charDrawerTitle">角色卡</h2>
       <span class="ml-auto text-[10px] mono text-[#9b9aa5] uppercase tracking-widest" id="charSub">new</span>
     </div>
     <div class="drawer-body">
 
-      <div class="btn-row" style="margin-bottom:8px;">
+      <div class="char-tools-row btn-row" style="margin-bottom:8px;">
         <button class="btn ghost" id="importBtn" title="导入单张角色卡 JSON"><i class="ph ph-upload-simple"></i>导入卡</button>
         <button class="btn ghost" id="exportBtn" title="导出当前角色卡为 JSON"><i class="ph ph-download-simple"></i>导出卡</button>
       </div>
-      <div class="btn-row" style="margin-bottom:14px;">
+      <div class="char-tools-row btn-row" style="margin-bottom:14px;">
         <button class="btn ghost" id="exportAllBtn" title="导出全部数据 (角色卡 + 历史 + 数值 + 档案)"><i class="ph ph-archive"></i>导出全部</button>
         <button class="btn ghost" id="importAllBtn" title="导入全部数据 (会覆盖现有内容!)"><i class="ph ph-database"></i>导入全部</button>
         <button class="btn ghost" id="exportChatBtn" title="只导出当前模式的对话历史"><i class="ph ph-chats"></i>导出对话</button>
@@ -1291,6 +1543,20 @@
           <div class="acc-title"><i class="ph ph-user-circle text-[14px] text-[#a89eb3]"></i>基本信息</div>
         </div>
         <div class="acc-body">
+          <div class="field avatar-field">
+            <div class="field-head"><span class="field-label">头像</span></div>
+            <div class="avatar-row">
+              <div class="avatar-preview" id="cAvatarPreview">
+                <span class="cn-serif" id="cAvatarFallback">?</span>
+              </div>
+              <div class="avatar-actions">
+                <button type="button" class="btn ghost" id="cAvatarUploadBtn"><i class="ph ph-upload-simple"></i>上传图片</button>
+                <button type="button" class="btn ghost" id="cAvatarRemoveBtn" style="display:none;"><i class="ph ph-trash"></i>移除</button>
+              </div>
+              <input type="file" id="cAvatarFile" accept="image/*" style="display:none;">
+            </div>
+            <div class="note" style="margin-top:6px;">支持 JPG/PNG/WebP,会自动缩放到 192px 见方再保存,不会撑爆角色卡 JSON。</div>
+          </div>
           <div class="field"><div class="field-head"><span class="field-label">名字 *</span></div><input type="text" class="input" id="cName" placeholder="必填,例:暁千星"></div>
           <div class="field"><div class="field-head"><span class="field-label">简介</span></div><input type="text" class="input" id="cTag" placeholder="一句话简介"></div>
           <div class="field"><div class="field-head"><span class="field-label">玩家称呼</span></div><input type="text" class="input" id="cUserName" placeholder="角色如何称呼你"></div>
@@ -1349,6 +1615,33 @@
               <div class="bulk-import-actions">
                 <button class="btn ghost" data-bulk-cancel="loc">取消</button>
                 <button class="btn primary" data-bulk-apply="loc">导入</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion" data-acc="terms">
+        <div class="acc-head">
+          <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
+          <div class="acc-title"><i class="ph ph-book-bookmark text-[14px] text-[#a89eb3]"></i>名词 <span class="acc-count" id="termCount">0</span></div>
+        </div>
+        <div class="acc-body">
+          <div class="note">专有名词、术语、设定词汇——遇到含义不明的词时,角色会按这里写的定义来理解(例:剧团内部术语、关系称呼、世界观词)。</div>
+          <div class="chip-list" id="termList"></div>
+          <div class="add-form">
+            <input type="text" class="input" id="termName" placeholder="名词 *">
+            <input type="text" class="input" id="termDesc" placeholder="一句话定义">
+            <div class="btn-row">
+              <button class="btn ghost" id="addTermBtn"><i class="ph ph-plus"></i>添加</button>
+              <button class="btn ghost" id="bulkTermBtn" title="一次粘贴多条 [名字：介绍]"><i class="ph ph-stack"></i>批量</button>
+            </div>
+            <div class="bulk-import-pop" id="bulkTermPop">
+              <div class="bulk-import-hint">每行一条，格式：<code>[名字：介绍]</code> 或 <code>名字：介绍</code></div>
+              <textarea id="bulkTermText" placeholder="[男役：宝塚里饰演男性角色的女性团员]&#10;[トップスター：每组的首席男役,海报正中那个]"></textarea>
+              <div class="bulk-import-actions">
+                <button class="btn ghost" data-bulk-cancel="term">取消</button>
+                <button class="btn primary" data-bulk-apply="term">导入</button>
               </div>
             </div>
           </div>
@@ -1486,8 +1779,8 @@
         <div class="range-end"><span>precise</span><span>creative</span></div>
       </div>
       <div class="field">
-        <div class="field-head"><span class="field-label">最大输出</span><span class="field-val" id="tokVal">1200</span></div>
-        <input type="range" id="tokRange" min="100" max="4000" step="50" value="1200">
+        <div class="field-head"><span class="field-label">最大输出</span><span class="field-val" id="tokVal">600</span></div>
+        <input type="range" id="tokRange" min="100" max="4000" step="50" value="600">
       </div>
       <div class="field">
         <div class="field-head">
@@ -1530,16 +1823,18 @@ const USER_ID = "user_" + (localStorage.getItem("dzmm_uid") || (() => {
 })());
 const CONV_STORY = "conv_story_" + Math.random().toString(36).slice(2, 8);
 const CONV_INTIMATE = "conv_intimate_" + Math.random().toString(36).slice(2, 8);
+// 聊天模式与故事模式剧情共通——共享同一会话 ID,后端把两者视作同一段对话。
+const CONV_CHAT = CONV_STORY;
 
 // ═══════════════════════════════════════════════════════════
 // State
 // ═══════════════════════════════════════════════════════════
 const DEFAULT_CARD = () => ({
   version: SCHEMA_VERSION,
-  name: "", tagline: "",
+  name: "", tagline: "", avatar: "",
   personality: "", scenario: "", description: "",
   system_prompt: "", intimate_preferences: "", user_name: "",
-  secondary_characters: [], locations: [],
+  secondary_characters: [], locations: [], terms: [],
   props: []  // [{ name, description, target: "char"|"user"|"both", enabled: bool }]
 });
 
@@ -1553,18 +1848,29 @@ let ageConfirmed = localStorage.getItem("dzmm_age_ok") === "yes";
 //     migration on first run). ───
 let card = null;
 let profile = { name:"", age:"", appearance:"", identity:"", personality:"", background:"" };
-let histories = { story: [], intimate: [] };
+let histories = { story: [], intimate: [], chat: [] };
 //  Story mode: aff = 好感, int = 亲密 (both 0..∞ with 100-tier system)
 //  Intimate mode: arousal = 快感 (0..100, resets after 100), initiator = "user"|"char"|"both",
 //                 laps = 累计高潮次数 (just a display chip, no mechanical effect)
 let stats = {
   story:    { aff: 0, int: 0 },
-  intimate: { arousal: 0, initiator: "user", laps: 0 }
+  intimate: { arousal: 0, initiator: "user", laps: 0 },
+  // Chat mode: dual-system. Most of the time it tracks 好感/亲密 (like story),
+  // but if the conversation tilts into phone-sex territory, it can also
+  // accumulate 快感 (like intimate). Which gauge is shown follows the most
+  // recent kind of tag the model emitted (see `lastChatStatKind`).
+  chat:     { aff: 0, int: 0, arousal: 0, laps: 0 }
 };
+// Which gauge to show in chat mode: "stats" (好感/亲密) | "arousal" (快感)
+let lastChatStatKind = localStorage.getItem("dzmm_chat_stat_kind") || "stats";
 function getCurStats(){
   if (mode === "intimate"){
     if (!stats.intimate) stats.intimate = { arousal: 0, initiator: "user", laps: 0 };
     return stats.intimate;
+  }
+  if (mode === "chat"){
+    if (!stats.chat) stats.chat = { aff:0, int:0, arousal:0, laps:0 };
+    return stats.chat;
   }
   if (!stats.story) stats.story = { aff:0, int:0 };
   return stats.story;
@@ -1584,7 +1890,7 @@ const INITIATOR_META = {
 let currentModel = "";
 let currentStyle = "standard";
 let currentTemp = 0.8;
-let currentMaxTokens = 1200;
+let currentMaxTokens = 600;
 let abortController = null;
 let isStreaming = false;
 
@@ -1595,7 +1901,7 @@ let hasUnseenBelow = false;       // new content arrived while not pinned?
 // ─── New: per-chat soft-summary cache (#15) ───
 //  Shape: { story: { upTo:N, text:"..." } | null, intimate: ... }
 //  "upTo" = index in histories[mode] up to (exclusive) which is summarized.
-let summaries = { story: null, intimate: null };
+let summaries = { story: null, intimate: null, chat: null };
 
 // ─── New: pending 心动 milestone (心动剧情) ───
 //  When good-feeling (aff) or intimacy (int) crosses a multiple of 100,
@@ -1608,7 +1914,7 @@ let summaries = { story: null, intimate: null };
 //  If two stats cross at once → kind="both" (merged into one event).
 //  If aff crosses past two thresholds in one turn (e.g. 95→220) → fire ONCE,
 //  for the lowest-crossed boundary (the next one will fire on its own later).
-let pendingMilestone = { story: null, intimate: null };
+let pendingMilestone = { story: null, intimate: null, chat: null };
 
 // ─── New: settings (#15 #14) ───
 let summarizeThreshold = parseInt(localStorage.getItem("dzmm_sum_th") || "30");  // 0 = off
@@ -1768,21 +2074,109 @@ function setStatus(text, online) {
   // legacy — only the dot now
   $("statusDot").style.background = online ? "#cbdad2" : "#dcd6dc";
 }
-function setKeyAlert(on){ $("keyAlert").classList.toggle("hidden", !on); }
+function setKeyAlert(on){
+  $("keyAlert").classList.toggle("hidden", !on);
+  const m = $("menuApiAlert"); if (m) m.classList.toggle("on", on);
+}
+
+// ─── Avatar helpers ────────────────────────────────────────
+// _renderTopAvatar: render either an <img> from card.avatar, or the initial.
+// _avatarFileToDataURL: read a File, downscale to a square ≤ 192px, return data URL.
+function _renderTopAvatar(){
+  const box = $("charAvatar");
+  const span = $("avatarChar");
+  if (!box || !span) return;
+  // remove any previous <img>
+  const prev = box.querySelector("img.avatar-img");
+  if (prev) prev.remove();
+  if (card && card.avatar){
+    const img = document.createElement("img");
+    img.className = "avatar-img";
+    img.src = card.avatar;
+    img.alt = "";
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
+    span.style.display = "none";
+    box.appendChild(img);
+  } else {
+    span.style.display = "";  // back to flex/inline default
+  }
+}
+
+// Downscale-and-encode any image file into a square data URL (≤ 192×192, JPEG q=0.85).
+// Returns a Promise<string>.
+function _avatarFileToDataURL(file){
+  return new Promise((resolve, reject) => {
+    if (!file){ reject(new Error("no file")); return; }
+    if (!/^image\//.test(file.type)){ reject(new Error("不是图片文件")); return; }
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error("读取失败"));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("图片解码失败"));
+      img.onload = () => {
+        const SIZE = 192;
+        const cvs = document.createElement("canvas");
+        cvs.width = SIZE; cvs.height = SIZE;
+        const ctx = cvs.getContext("2d");
+        // center-crop into a square, then draw at SIZE
+        const side = Math.min(img.width, img.height);
+        const sx = (img.width - side) / 2;
+        const sy = (img.height - side) / 2;
+        ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+        try {
+          const url = cvs.toDataURL("image/jpeg", 0.85);
+          resolve(url);
+        } catch(e){ reject(e); }
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+function _renderCardAvatarPreview(){
+  // The 角色卡 form's avatar preview (separate from the top bar)
+  const wrap = $("cAvatarPreview");
+  const fb = $("cAvatarFallback");
+  const rm = $("cAvatarRemoveBtn");
+  if (!wrap || !fb) return;
+  const prev = wrap.querySelector("img");
+  if (prev) prev.remove();
+  if (card && card.avatar){
+    fb.style.display = "none";
+    const img = document.createElement("img");
+    img.src = card.avatar;
+    img.alt = "";
+    wrap.appendChild(img);
+    if (rm) rm.style.display = "";
+  } else {
+    fb.style.display = "";
+    fb.textContent = (card && card.name) ? card.name.slice(0,1) : "?";
+    if (rm) rm.style.display = "none";
+  }
+}
 
 function refreshTopBar() {
   const ava = $("avatarChar");
+  const avaBox = $("charAvatar");
   const name = $("charNameDisplay");
-  const tag = $("charTagDisplay");
+  const tag = $("charTagDisplay");  // may be null — status text was removed
   if (card && card.name) {
     ava.textContent = card.name.slice(0, 1);
     name.textContent = card.name;
-    tag.textContent = mode === "intimate" ? "亲密模式 · 18+" : "故事模式 · 在线";
+    // Render avatar image if card has one; otherwise fall back to initial.
+    _renderTopAvatar();
+    if (tag){
+      tag.textContent = mode === "intimate" ? "亲密模式"
+                      : mode === "chat"     ? "聊天模式 · 在线"
+                      : "故事模式 · 在线";
+    }
     refreshInputPlaceholder();
   } else {
     ava.textContent = "?";
     name.textContent = "未设定角色";
-    tag.textContent = token ? "点击新建角色卡" : "点击新建角色卡";
+    _renderTopAvatar();  // clear any img
+    if (tag) tag.textContent = token ? "点击新建角色卡" : "点击新建角色卡";
     input.placeholder = "说点什么...";
   }
   refreshTimeChip();
@@ -1794,15 +2188,27 @@ function refreshInputPlaceholder(){
   const m = (typeof currentMarker !== "undefined") ? currentMarker : "dialogue";
   if (m === "action") input.placeholder = `你做出的动作（不用写括号）…`;
   else if (m === "inner") input.placeholder = `你的内心活动…`;
+  else if (mode === "chat") input.placeholder = `发消息给${baseName}…`;
   else input.placeholder = mode === "intimate" ? `靠近${baseName}…` : `和${baseName}说点什么…`;
 }
 
 function applyMode() {
   document.body.classList.toggle("intimate", mode === "intimate");
   document.body.classList.toggle("story", mode === "story");
-  document.querySelectorAll(".mode-pill").forEach(b => {
+  document.body.classList.toggle("chat", mode === "chat");
+  // chat mode also uses an extra class to decide which gauge to show in the
+  // stats popover, driven by lastChatStatKind ("stats" → aff/int, "arousal" → 快感)
+  document.body.classList.toggle("chat-stats-stats", mode === "chat" && lastChatStatKind !== "arousal");
+  document.body.classList.toggle("chat-stats-arousal", mode === "chat" && lastChatStatKind === "arousal");
+  document.querySelectorAll("[data-mode]").forEach(b => {
     b.classList.toggle("active", b.dataset.mode === mode);
   });
+  // Update the topbar mode-toggle button's icon to reflect the current mode
+  const modeIcon = $("modeToggleIcon");
+  if (modeIcon){
+    const map = { story: "ph-book-open", intimate: "ph-heart", chat: "ph-chat-circle" };
+    modeIcon.className = `ph ${map[mode] || "ph-book-open"} text-lg`;
+  }
   refreshTopBar();
   refreshStats();   // sync the visible stat-bar (story vs intimate) to current mode
   renderMessages();
@@ -1818,11 +2224,12 @@ const AROUSAL_MAX = 100;     // 亲密模式 快感 100 = orgasm 重置
 function applyStatChange(kind, delta){
   // STORY MODE: kind = "aff" or "int", delta integer, tier system with 心动 trigger.
   // INTIMATE MODE: kind = "arousal", delta integer, capped to AROUSAL_MAX, reset to random(0..20) on overflow.
-  if (mode === "intimate" && kind === "arousal"){
+  // CHAT MODE: dual-system — both aff/int (story-like) and arousal (intimate-like) can accumulate.
+  if (kind === "arousal" && (mode === "intimate" || mode === "chat")){
     _applyArousalChange(delta);
     return;
   }
-  if (mode !== "story") return;  // intimate mode ignores aff/int
+  if (mode !== "story" && mode !== "chat") return;  // intimate mode ignores aff/int
 
   const cur = getCurStats();
   const prev = cur[kind] || 0;
@@ -1883,7 +2290,9 @@ function _applyArousalFromParsed(parsed){
   let psy = 0, phy = 0;
   arr.forEach(a => { psy += (a.psy || 0); phy += (a.phy || 0); });
   const cur = getCurStats();
-  const init = cur.initiator || "user";
+  // In chat mode there's no "initiator" mechanic (it's online text, both
+  // sides are equally "acting"). Treat it as 'both' so phy isn't filtered.
+  const init = (mode === "chat") ? "both" : (cur.initiator || "user");
   let effective = psy;  // psy always counts
   if (init === "user" || init === "both"){
     effective += phy;   // phy counts when 角色 is being acted upon
@@ -2073,7 +2482,7 @@ function _reconcileTagModeMismatch(parsed, currentMode){
   return parsed;
 }
 
-function parseAssistantOutput(text, partial){
+function parseAssistantOutput(text, partial, forChat){
   const segments = [];
   const statsList = [];
   const arousalList = [];
@@ -2129,6 +2538,32 @@ function parseAssistantOutput(text, partial){
   });
   if (partial){
     t = t.replace(/\[CARD_PATCH\][\s\S]*$/, "");
+  }
+
+  // ─── CHAT MODE: bypass the normal action/inner/scene tokenizer. ───
+  //  In chat mode parens and *…* are just part of the typed message
+  //  (角色 might literally type "(笑)" as a tone marker, the way real
+  //  people text), so we keep them as raw characters. Each blank-line
+  //  break becomes its own dialogue bubble — that's how real chat looks.
+  if (forChat){
+    // Also strip any [SCENE] that the model might still emit despite the
+    // override — chat doesn't render scenes.
+    t = t.replace(/\[SCENE\]([\s\S]*?)\[\/SCENE\]/gi, "").trim();
+    if (partial){
+      t = t.replace(/\[SCENE\][\s\S]*$/i, "").trim();
+    }
+    // Split into bubbles by blank line. Also single newlines inside a
+    // bubble are preserved by replacing them with a space if they exist —
+    // most models will use \n\n as the bubble break, so single \n inside
+    // a bubble is rare; we just keep them in the content.
+    const chunks = t.split(/\n\s*\n+/).map(s => s.trim()).filter(Boolean);
+    for (const c of chunks){
+      segments.push({ type: "dialogue", content: c });
+    }
+    // For chat mode we don't have a "streaming tail" concept distinct from
+    // the last chunk — the last chunk during partial is just the in-progress
+    // bubble. Mark it as streaming via the caller (it already does that).
+    return { segments, stats: statsList, arousal: arousalList, patches, streamingTail: null };
   }
 
   // Tokenize: SCENE, paired brackets (half-width OR full-width, match-aware),
@@ -2308,6 +2743,33 @@ function renderSummaryCard(sum, idx){
   chatArea.appendChild(card);
 }
 
+// ── Date pill helpers (LINE-style centered grey pill above the first message of a new day) ──
+function _dateKey(ms){
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function _formatDatePill(ms){
+  const d = new Date(ms);
+  const now = new Date();
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const todayKey = _dateKey(now.getTime());
+  const yKey = _dateKey(now.getTime() - 86400000);
+  const k = _dateKey(ms);
+  if (k === todayKey) return "今天";
+  if (k === yKey) return "昨天";
+  const weekday = ["周日","周一","周二","周三","周四","周五","周六"][d.getDay()];
+  if (sameYear){
+    return `${d.getMonth()+1}/${d.getDate()} ${weekday}`;
+  }
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${weekday}`;
+}
+function renderDatePill(ms){
+  const div = document.createElement("div");
+  div.className = "self-center py-2 fade-up";
+  div.innerHTML = `<span class="date-pill">${_formatDatePill(ms)}</span>`;
+  chatArea.appendChild(div);
+}
+
 function renderMessages() {
   chatArea.innerHTML = "";
   // Reset smart-scroll state on any full re-render
@@ -2318,11 +2780,11 @@ function renderMessages() {
     const empty = document.createElement("div");
     empty.className = "flex flex-col items-center justify-center text-center gap-3 mt-16";
     empty.innerHTML = `
-      <div class="w-20 h-20 rounded-full glass-card flex items-center justify-center text-[#a89eb3]">
+      <div class="w-20 h-20 rounded-full glass-card flex items-center justify-center text-[#06C755]">
         <i class="ph ph-mask-happy text-3xl"></i>
       </div>
-      <div class="cn-serif text-[16px] text-[#5a5562]">还没有角色</div>
-      <div class="cn text-[12px] text-[#9b9aa5] max-w-[240px] leading-relaxed">建立一张角色卡,<br>或者导入已有的 JSON。</div>
+      <div class="cn-serif text-[16px] text-white">还没有角色</div>
+      <div class="cn text-[12px] text-white/85 max-w-[240px] leading-relaxed">建立一张角色卡,<br>或者导入已有的 JSON。</div>
       <div class="flex gap-2 mt-2">
         <button class="btn primary" style="width:auto;padding:9px 18px;margin:0;" id="emptyCreate">新建角色卡</button>
         <button class="btn ghost" style="width:auto;padding:9px 18px;margin:0;" id="emptyImport">导入</button>
@@ -2346,13 +2808,22 @@ function renderMessages() {
   // Render
   const sum = summaries[mode];
   const sumUpTo = (sum && sum.upTo) ? sum.upTo : 0;
+  let lastDateKey = null;
   for (let idx = 0; idx < h.length; idx++){
     // Insert the summary card right before the first verbatim-kept message
     if (sum && idx === sumUpTo){
       renderSummaryCard(sum, idx);
     }
     const m = h[idx];
-    if (m.role === "user") renderUserMessage(m.display || m.content, idx);
+    // ── Date pill: when this message's date differs from the previous one ──
+    if (m.at){
+      const k = _dateKey(m.at);
+      if (k !== lastDateKey){
+        renderDatePill(m.at);
+        lastDateKey = k;
+      }
+    }
+    if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at);
     else if (m.role === "assistant") renderAssistantStored(m, idx);
     else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
   }
@@ -2364,15 +2835,25 @@ function renderMessages() {
   requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
 }
 
-function renderUserMessage(content, idx){
+function renderUserMessage(content, idx, at){
   const wrap = document.createElement("div");
   wrap.className = "msg-row user-row flex flex-col items-end gap-0.5 fade-up";
   if (idx !== undefined) wrap.dataset.idx = idx;
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const timeMs = at || Date.now();
+  const time = new Date(timeMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // LINE-style layout: side-info (已读 + time) sits to the LEFT of the green
+  // bubble. In chat mode show "已读" + time; in other modes just show time.
+  // The side-info is small grey text vertically aligned to the bubble bottom.
+  const isChat = mode === "chat";
+  const sideInfo = isChat
+    ? `<span class="msg-side-info"><span class="msg-read">已读</span><span class="msg-time">${time}</span></span>`
+    : `<span class="msg-side-info"><span class="msg-time">${time}</span></span>`;
   wrap.innerHTML = `
-    <span class="meta-line">你 · ${time}</span>
-    <div class="bubble-user">
-      <div class="user-text"></div>
+    <div class="user-msg-line flex items-end justify-end gap-1.5 w-full">
+      ${sideInfo}
+      <div class="bubble-user">
+        <div class="user-text"></div>
+      </div>
     </div>
     ${idx !== undefined ? `
       <div class="msg-actions" role="menu">
@@ -2398,7 +2879,7 @@ function renderUserMessage(content, idx){
 
 function renderAssistantStored(msg, idx){
   // msg = { role, content, parsed? }
-  const wrap = buildAssistantBubble(msg.content, msg.statsApplied, false);
+  const wrap = buildAssistantBubble(msg.content, msg.statsApplied, false, undefined, msg.at);
   if (idx !== undefined){
     wrap.dataset.idx = idx;
     // Decorate with action menu — assistant gets an extra "regenerate" button
@@ -2418,58 +2899,101 @@ function renderAssistantStored(msg, idx){
 // Renders an AI bubble. If `wrap` is provided, updates that wrap in place
 // (used during streaming). Otherwise creates and appends a new wrap.
 // `partial=true` keeps any unclosed trailing segment as a live-streaming fragment.
-function buildAssistantBubble(rawText, statsApplied, partial, wrap){
-  const parsed = parseAssistantOutput(rawText, partial);
+function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
+  const parsed = parseAssistantOutput(rawText, partial, mode === "chat");
   const newBubble = !wrap;
+  const isChatMode = mode === "chat";
+
   if (newBubble){
     wrap = document.createElement("div");
     wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const timeMs = atOverride || Date.now();
+    const time = new Date(timeMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const name = card?.name || "角色";
-    wrap.innerHTML = `
-      <span class="meta-line">${escapeHTML(name)} · ${time}</span>
-      <div class="bubble-ai max-w-[88%]">
-        <div class="seg-host"></div>
+    if (isChatMode){
+      // Chat: name on top (sender label, like LINE), then a row that holds
+      // [bubbles-col] [side-time]. The time sits to the right of the bubble.
+      wrap.innerHTML = `
+        <span class="meta-line ai-name">${escapeHTML(name)}</span>
+        <div class="ai-msg-line flex items-end gap-1.5 w-full">
+          <div class="chat-bubbles-col" data-chat-host></div>
+          <span class="msg-side-info msg-side-info-ai"><span class="msg-time">${time}</span></span>
+        </div>
         <div class="stat-chips" style="display:none;"></div>
-      </div>
-    `;
+      `;
+    } else {
+      wrap.innerHTML = `
+        <span class="meta-line">${escapeHTML(name)} · ${time}</span>
+        <div class="bubble-ai max-w-[88%]">
+          <div class="seg-host"></div>
+          <div class="stat-chips" style="display:none;"></div>
+        </div>
+      `;
+    }
     chatArea.appendChild(wrap);
   }
-  const host = wrap.querySelector(".seg-host");
-  host.innerHTML = "";
 
-  const buildSeg = (seg, isLive) => {
-    if (seg.type === "dialogue"){
+  if (isChatMode){
+    // Render each dialogue segment as its own LINE-style bubble.
+    const host = wrap.querySelector("[data-chat-host]");
+    host.innerHTML = "";
+    const segs = parsed.segments.filter(s => s.type === "dialogue");
+    segs.forEach((seg, idx) => {
+      const b = document.createElement("div");
+      const isLast = idx === segs.length - 1;
+      const isLive = partial && isLast;
+      b.className = "bubble-ai chat-line-bubble" + (isLive ? " streaming" : "");
       const p = document.createElement("p");
       p.className = "dlg" + (isLive ? " streaming" : "");
       p.textContent = seg.content;
-      host.appendChild(p);
-    } else if (seg.type === "action"){
-      const d = document.createElement("div");
-      d.className = "narrative" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
-    } else if (seg.type === "inner"){
-      const d = document.createElement("div");
-      d.className = "narrative inner" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
-    } else if (seg.type === "scene"){
-      const d = document.createElement("div");
-      d.className = "narrative scene" + (isLive ? " streaming" : "");
-      d.textContent = seg.content;
-      host.appendChild(d);
+      b.appendChild(p);
+      host.appendChild(b);
+    });
+    // Empty state during streaming (no segment yet) — drop a stub bubble
+    if (partial && segs.length === 0){
+      const b = document.createElement("div");
+      b.className = "bubble-ai chat-line-bubble streaming";
+      const p = document.createElement("p");
+      p.className = "dlg streaming";
+      p.textContent = "";
+      b.appendChild(p);
+      host.appendChild(b);
     }
-  };
-
-  for (const seg of parsed.segments) buildSeg(seg, false);
-  // The unclosed tail during partial render — show as live fragment
-  if (partial && parsed.streamingTail && parsed.streamingTail.content){
-    buildSeg(parsed.streamingTail, true);
-  } else if (partial && parsed.segments.length){
-    // Mark the last segment as streaming so caret is visible at the tip
-    const lastChild = host.lastElementChild;
-    if (lastChild) lastChild.classList.add("streaming");
+  } else {
+    const host = wrap.querySelector(".seg-host");
+    host.innerHTML = "";
+    const buildSeg = (seg, isLive) => {
+      if (seg.type === "dialogue"){
+        const p = document.createElement("p");
+        p.className = "dlg" + (isLive ? " streaming" : "");
+        p.textContent = seg.content;
+        host.appendChild(p);
+      } else if (seg.type === "action"){
+        const d = document.createElement("div");
+        d.className = "narrative" + (isLive ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      } else if (seg.type === "inner"){
+        const d = document.createElement("div");
+        d.className = "narrative inner" + (isLive ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      } else if (seg.type === "scene"){
+        const d = document.createElement("div");
+        d.className = "narrative scene" + (isLive ? " streaming" : "");
+        d.textContent = seg.content;
+        host.appendChild(d);
+      }
+    };
+    for (const seg of parsed.segments) buildSeg(seg, false);
+    // The unclosed tail during partial render — show as live fragment
+    if (partial && parsed.streamingTail && parsed.streamingTail.content){
+      buildSeg(parsed.streamingTail, true);
+    } else if (partial && parsed.segments.length){
+      // Mark the last segment as streaming so caret is visible at the tip
+      const lastChild = host.lastElementChild;
+      if (lastChild) lastChild.classList.add("streaming");
+    }
   }
 
   // Stat chips — only render once final
@@ -2709,6 +3233,15 @@ function buildSystemPrompt() {
     });
   }
 
+  if (card.terms && card.terms.length){
+    lines.push(`\n## 专有名词与设定词汇`);
+    lines.push(`(对话/叙述中出现以下名词时,按这里的定义来理解和使用)`);
+    card.terms.forEach(t => {
+      const desc = t.description ? ` — ${t.description}` : "";
+      lines.push(`- ${t.name}${desc}`);
+    });
+  }
+
   // Player profile (shared across modes)
   const profileLines = [];
   if (profile.name) profileLines.push(`- 名字:${profile.name}`);
@@ -2734,6 +3267,20 @@ function buildSystemPrompt() {
     lines.push(`- 保持人设的语言节奏与性格逻辑,不要因为是亲密场景就崩人设。`);
     if (card.intimate_preferences){
       lines.push(`\n## 偏好指示`);
+      lines.push(card.intimate_preferences);
+    }
+  } else if (mode === "chat") {
+    lines.push(`\n## 模式:聊天 (在线私信)`);
+    lines.push(`这不是面对面的剧情场景,而是**你和玩家在用手机/IM 互相发消息**——就像 LINE、微信、iMessage 那种私聊。`);
+    lines.push(`这里没有"在场"、没有动作、没有旁白、没有场景描写——只有你和对方各自隔着屏幕打字。你看不到对方的表情,只能从文字本身判断对方的状态。`);
+    lines.push(`**人设完全保持**(说话方式、口头禅、语气、思考方式、对玩家的温度、阴影面与隐藏面),只是表达载体从"对面说话"变成了"打字发消息"。`);
+    lines.push(`如果话题自然走到比较暧昧、性相关的方向(俗称 phone sex / 文爱),也可以参与——这种情况下:`);
+    lines.push(`- 仍然是隔着屏幕的文字,不会有身体上的实际接触;`);
+    lines.push(`- 角色的所有克制、回避、害羞、不主动开口的特质依旧成立(尤其是 Ari 这种 "启动那一步默认交给玩家"的人设);`);
+    lines.push(`- 所有出场者均为成年人,基于自愿与同意;`);
+    lines.push(`- 不出现强迫、未成年、乱伦、动物等内容。`);
+    if (card.intimate_preferences){
+      lines.push(`\n## 亲密场合偏好(仅当话题走到那里时参考)`);
       lines.push(card.intimate_preferences);
     }
   } else {
@@ -2769,13 +3316,81 @@ function buildSystemPrompt() {
   }
 
   // ─── 输出格式与统计 ───
-  lines.push(`\n## 输出格式 (严格遵守)`);
-  lines.push(`你的每条回复都由这几种元素组成:`);
-  lines.push(`1. **对白**: 直接写出来的句子就是角色说出口的话(可以用「」包裹也可以不包裹)。`);
-  lines.push(`2. **动作/神态**: 用半角圆括号 ( ... ) 或全角圆括号(...）包裹。例: (她轻轻别开了视线)。`);
-  lines.push(`3. **心理独白**: 用 *星号* 包裹。例: *他怎么会这样看着我...* —— 仅在合适的时机偶尔使用,不要每句都加。`);
-  lines.push(`4. **场景切换** (可选): [SCENE]新场景描述[/SCENE] —— 仅在时间/地点切换时使用。`);
-  lines.push(`\n请把动作和心绪写在独立的括号/星号内,不要把动作直接塞在对白前后没有包裹。一段回复一般包含 1-2 句对白 + 1-3 段动作/神态/心绪,长度适中,有呼吸感。`);
+  if (mode === "chat") {
+    // CHAT MODE: text messages only, no actions/inner/scene.
+    lines.push(`\n## 输出格式 (聊天模式专属·严格遵守)`);
+    lines.push(`你的回复就是**你打字发出去的消息**——纯文字,没有任何叙述、动作描写、神态描写、心理独白、场景切换。`);
+    lines.push(`**绝对禁止**:`);
+    lines.push(`- ❌ 半角括号 ( ... ) 或全角括号(...）包动作/神态——聊天里没有动作,只有文字。`);
+    lines.push(`- ❌ 用 *星号* 包心理独白——对方看不到你的内心。`);
+    lines.push(`- ❌ \`[SCENE]...[/SCENE]\` 场景切换——这不是剧情,是聊天。`);
+    lines.push(`- ❌ 第三人称叙述、旁白(\"她笑了笑回了句\"、\"沉默了几秒\")——所有这种描写都不写。`);
+    lines.push(`- ❌ 把对白写在引号「」里——直接打字,不用包。`);
+    lines.push(`\n**多条消息(像真人发 LINE/微信那样)**:`);
+    lines.push(`真人发消息很少一条几百字,更常见的是**短句、连发**——脑子里冒出一个想法就发一条,接着又想到下一句,再发一条。请按这个节奏写:`);
+    lines.push(`- 用**空行(连续两个换行)** 把一段消息拆成多条独立气泡;`);
+    lines.push(`- 想发多条时,**不要**用编号(1. 2.)或破折号,就是分别打字发出去那种感觉。`);
+    // ─── 字数对齐玩家:整轮总字数 = 玩家本轮字数 ±5 ───
+    // 真人聊天里的"对称"——对方发一句话你大概也回一句话,对方写长一点你才会
+    // 多打几个字。这里把"模型整轮回复的总字数"硬绑定到玩家本轮的发送字数上,
+    // 浮动 ±5;条数可以变,但总和必须落进区间。
+    {
+      const _h = currentHistory();
+      let lastUserLen = 0;
+      for (let i = _h.length - 1; i >= 0; i--){
+        if (_h[i].role === "user"){
+          // 用 display 优先(去掉了 (...) *...* 之类玩家自己的标记前的纯文本),
+          // 没有就退回 content。中文按"字符数"算,英文按"字符数"算也够近似。
+          const raw = String(_h[i].display || _h[i].content || "");
+          // 把 (...) （...) *...* 之类玩家自己的标记去掉,只数玩家"打出来的话"。
+          const stripped = raw
+            .replace(/\([^)]*\)/g, "")
+            .replace(/（[^）]*）/g, "")
+            .replace(/\*[^*]*\*/g, "")
+            .replace(/\s+/g, "");
+          lastUserLen = [...stripped].length;
+          break;
+        }
+      }
+      if (lastUserLen > 0){
+        const lo = Math.max(1, lastUserLen - 5);
+        const hi = lastUserLen + 5;
+        lines.push(`\n**★ 本轮字数硬约束 ★**`);
+        lines.push(`玩家这一轮发的内容是 **${lastUserLen} 字**。所以你这一轮回复的**总字数(所有气泡加起来)必须落在 ${lo} ~ ${hi} 字之间**——这是硬性要求,不是参考。`);
+        lines.push(`- 字数算的是你打出去的中文字符总数(不含 [STATS]/[AROUSAL] 标签、不含空行、不含 emoji)。`);
+        lines.push(`- 在这个总额下可以拆成 1~3 条气泡,也可以就发 1 条;条数自己定,但总字数必须卡在区间里。`);
+        lines.push(`- 玩家发 2 个字你就回 1~7 字;玩家发 30 个字你就回 25~35 字。**对称**。`);
+        lines.push(`- 不要为了凑字数硬塞内容,也不要因为情绪强烈就远超上限。Ari 的克制本来就体现在"不多说一个字"上,这条规则正好契合人设。`);
+      } else {
+        // 兜底:开场或者拿不到 user 字数时,沿用旧的"短句、不超过 30 字"
+        lines.push(`- 单条 5~15 字,整轮不超过 30 字,1~3 条。少即是多。`);
+      }
+    }
+    lines.push(`\n示例(假设角色一次发了 3 条消息):`);
+    lines.push(`\`\`\``);
+    lines.push(`刚回到楽屋`);
+    lines.push(``);
+    lines.push(`今天稽古累的`);
+    lines.push(``);
+    lines.push(`你那边呢`);
+    lines.push(`\`\`\``);
+    lines.push(`\n**★ 聊天模式禁用括号语气词 ★**`);
+    lines.push(`- ❌ **绝对禁止** \`(笑)\`、\`(汗)\`、\`(苦笑)\`、\`(叹气)\`、\`（笑）\` 等任何**用括号包起来的语气标记**——这是剧情模式的写法,真人打字不会这样发。`);
+    lines.push(`- ❌ **同时禁用**"哈"、"哈哈"、"哈哈哈"、"嘿"、"嘿嘿"、"嘻嘻"、"呵呵"、"23333"、"lol"、"www" 等任何**用文字拟声的笑**——这种写法不像 Ari 的口吻,会让她显得轻浮油腻。`);
+    lines.push(`- ✅ **可以偶尔用颜文字**:\`(˃ᴗ˂)\`、\`(；ω；)\`、\`(´-﹏-\`)\`、\`(¯﹃¯)\`、\`( ˘ω˘ )\`、\`(*´﹃\`*)\`、\`(◞‸◟)\`、\`(╯°□°)╯\`、\`(´。\` ω 。\`)\` 等。但**频率要低**——Ari 是克制的人,不是颜文字爱好者。**默认整轮不用**;**几轮才用一次**,只在情绪真的需要一个出口、但又不想用文字直说的时候用。一次回复里最多出现 1 个,绝不在每条气泡都挂一个。`);
+    lines.push(`- ✅ 想表达情绪也可以用:省略号、半句话停住、句号不打、emoji(适度,不堆砌)、轻轻一个"嗯"或"诶"等单字句。`);
+    lines.push(`- ✅ 角色卡里那些"半句话停住"、"省略号"、"不打句号"等习惯保留;但**收尾词形式必须是真人打字的样子,不是括号标记,也不是文字拟声笑**。`);
+    lines.push(`- 当然更不要写"(她笑了笑)"这种第三人称动作。`);
+    lines.push(`\n**保持人设说话方式不变**:角色平时说话的节奏、用词、口头禅(去掉括号形式)、思考方式——全部保留。只是表达载体变成了打字。`);
+  } else {
+    lines.push(`\n## 输出格式 (严格遵守)`);
+    lines.push(`你的每条回复都由这几种元素组成:`);
+    lines.push(`1. **对白**: 直接写出来的句子就是角色说出口的话(可以用「」包裹也可以不包裹)。`);
+    lines.push(`2. **动作/神态**: 用半角圆括号 ( ... ) 或全角圆括号(...）包裹。例: (她轻轻别开了视线)。`);
+    lines.push(`3. **心理独白**: 用 *星号* 包裹。例: *他怎么会这样看着我...* —— 仅在合适的时机偶尔使用,不要每句都加。`);
+    lines.push(`4. **场景切换** (可选): [SCENE]新场景描述[/SCENE] —— 仅在时间/地点切换时使用。`);
+    lines.push(`\n请把动作和心绪写在独立的括号/星号内,不要把动作直接塞在对白前后没有包裹。一段回复一般包含 1-2 句对白 + 1-3 段动作/神态/心绪,长度适中,有呼吸感。`);
+  }
 
   if (mode === "story"){
     lines.push(`\n## ★★★ 数值变化标签 — 必须在回复的最开头 ★★★`);
@@ -2798,7 +3413,7 @@ function buildSystemPrompt() {
     lines.push(`\n原则：**默认就在往上走**——只有玩家明显不友善才扣分。**不要因为对话内容平淡就给 +0**（最少也要 +1）。亲密度比好感度涨得慢得多，平淡场景给亲密 +0 是合理的，但好感不能 +0。`);
     lines.push(`\n⚠️ 故事模式**只用** \`[STATS]\`。**禁止**输出 \`[AROUSAL]心理:...,生理:...[/AROUSAL]\`——快感是亲密模式的概念，此模式无效。`);
     lines.push(`\n再次强调：**回复的第一行就是 [STATS]...[/STATS]，先写完它再写其他任何内容**。`);
-  } else {
+  } else if (mode === "intimate") {
     // ─── INTIMATE MODE: arousal gauge replaces aff/int ───
     const cur = getCurStats();
     const initiator = cur.initiator || "user";
@@ -2858,6 +3473,40 @@ function buildSystemPrompt() {
       });
       lines.push(`如果玩家提到要用某个道具，或当下情境合适，自然地让它进入场景。被使用的道具会影响 [AROUSAL] 的判定（按"作用在谁身上"算）。`);
     }
+  } else {
+    // ─── CHAT MODE: dual-system. Pick one tag based on the kind of exchange. ───
+    const cs = getCurStats();
+    lines.push(`\n## ★★★ 数值变化标签 — 必须在回复的最开头 ★★★`);
+    lines.push(`聊天模式有**两种**可选标签,你**每一轮只选其中一种**,放在回复的**第一行**,写完再开始正文消息。`);
+    lines.push(`\n**1)** 普通聊天(寒暄、关心、谈心、共鸣、暧昧、心动)→ 用 \`[STATS]\`:`);
+    lines.push(`\`\`\``);
+    lines.push(`[STATS]好感:+2,亲密:+0[/STATS]`);
+    lines.push(`\`\`\``);
+    lines.push(`(然后空一行,开始发消息正文)`);
+    lines.push(`\n**2)** 话题已经走到明显的**性相关 / phone sex / 文爱**方向 → 用 \`[AROUSAL]\`:`);
+    lines.push(`\`\`\``);
+    lines.push(`[AROUSAL]心理:+1,生理:+0[/AROUSAL]`);
+    lines.push(`\`\`\``);
+    lines.push(`(然后空一行,开始发消息正文)`);
+    lines.push(`\n**这些标签会被系统从用户可见区域里剥离**,不会出现在聊天气泡里。`);
+    lines.push(`\n### 怎么判断本轮用哪个标签`);
+    lines.push(`- 大多数情况都用 \`[STATS]\`——闲聊、关心、玩笑、心动、暧昧、吵架、和好,通通是 \`[STATS]\`。`);
+    lines.push(`- 只有当对话**已经明确进入文爱内容**(玩家或角色已经开始描述性挑逗的文字、性幻想、用文字描绘想做的事、互相挑逗的限度已经过线)才切到 \`[AROUSAL]\`。`);
+    lines.push(`- 一旦切到 \`[AROUSAL]\`,后续每一轮只要还在这个语境里都继续用 \`[AROUSAL]\`;直到话题自然回到日常,再切回 \`[STATS]\`。`);
+    lines.push(`- **一轮只能写一种标签,不要同时写两个**。`);
+    lines.push(`\n### \`[STATS]\` 量级参考(聊天版,涨得比故事模式稍微慢一点,因为隔着屏幕)`);
+    lines.push(`- 平淡几句、寒暄、emoji 表情:好感 +1`);
+    lines.push(`- 聊得舒服、被理解、被关心、有共鸣:好感 +2 ~ +3`);
+    lines.push(`- 心动瞬间、被记得了一个小细节、半夜的真心话:好感 +3 ~ +5, 亲密 +1 ~ +2`);
+    lines.push(`- 玩家明显不友善:好感 -1 ~ -2 (不轻易扣大)`);
+    lines.push(`- 默认每轮**最少 +1**,不要写 +0。`);
+    lines.push(`\n### \`[AROUSAL]\` 量级参考(聊天 / phone sex 版)`);
+    lines.push(`- **心理** 0~2:文字挑逗、对方描述想做的事、暧昧到喘不过气——按强度给。`);
+    lines.push(`- **生理** 0~5:**比亲密模式低很多**,因为隔着屏幕没人实际碰到角色。**默认生理 = 0**;只有当角色被对方的文字诱导到自己开始触摸自己、或者明确正在自慰配合对方时,才有 1~5 的生理分。一般 phone sex 里 90% 的轮次生理都是 0。`);
+    lines.push(`- 当前已累计快感:**${cs.arousal || 0} / 100**,已高潮 ${cs.laps || 0} 次。`);
+    lines.push(`- 满 100 → 触发高潮 → 系统会重置到 0~20。数值不到 100 时不要主动结束。`);
+    lines.push(`\n⚠️ 不要在聊天模式输出任何**带括号的动作描写**——\`[AROUSAL]\` 累积的不是动作,是文字本身的情欲张力。角色的所有动作仍然只能通过她**打字告诉对方**才存在(比如她写 "我现在……"),而不是用 (她…) 来描写。`);
+    lines.push(`\n再次强调:**回复第一行就是标签**,选 \`[STATS]\` 或 \`[AROUSAL]\` 其一,然后空一行,开始发消息。`);
   }
 
   // ─── 角色卡补完 (CARD_PATCH) ─────────────────────────────────
@@ -2926,6 +3575,39 @@ function buildSystemPrompt() {
     lines.push(card.system_prompt);
   }
 
+  // ─── 情欲门闸 · story + chat 模式生效 ───
+  // 用户反馈:即使角色卡已经写了"对方明确暗示前不主动",实际表现里角色还是太
+  // 容易往色情方向滑——把"含糊的紧张/心跳/靠近"当成"明确暗示"就顺势开撩,
+  // 显得油腻。这一段重新校准"明确暗示"的判定门槛,默认锚点偏冷,把开关交还给玩家。
+  // 亲密模式跳过(那个模式本来就是干这个的)。
+  if (mode !== "intimate"){
+    lines.push(`\n## ★ 情欲表达 · 默认门闸(覆盖一切暧昧惯性)`);
+    lines.push(`角色卡里写了"对方明确暗示之前绝不主动讲任何色情内容"——这条**比你以为的更严格**。下面是判定标准:`);
+    lines.push(`\n**什么是"明确暗示"**(满足任一即可算):`);
+    lines.push(`- 玩家**用文字直接**表达性意图(描述身体接触、说想做什么、提性器官/性行为词、明确发起文爱)。`);
+    lines.push(`- 玩家**直接、不含糊地**说自己想要、想被怎样、有欲望。`);
+    lines.push(`- 玩家在亲密模式里发起场景。`);
+    lines.push(`\n**什么不算**(以下都**不构成**明确暗示,角色一律按日常处理):`);
+    lines.push(`- 紧张、心跳、脸红、靠近、对视、沉默、深夜独处、酒后微醺、肢体偶然碰到。`);
+    lines.push(`- 玩家说"喜欢你"、"想你了"、"想见你"——这是情感不是性。`);
+    lines.push(`- 玩家描写自己当下的身体感觉(累、热、困)——这是状态不是邀请。`);
+    lines.push(`- 玩家穿得少、刚洗完澡、躺床上——场景不是信号。`);
+    lines.push(`- 任何"氛围到了"但玩家没用语言点破的瞬间——氛围**不是**明确暗示。`);
+    lines.push(`\n**Ari 的默认应对**(在"明确暗示"出现之前):`);
+    lines.push(`- **看见**张力,但**不接**张力。可以让某个停顿多停半秒、让目光别开、让话题轻轻转一下——但**不主动加温**。`);
+    lines.push(`- **绝不**主动讲任何带性意味的话、双关、撩人台词、肢体描写带性张力(腰、腿、唇、锁骨之类的特写镜头不写)。`);
+    lines.push(`- **绝不**用"暧昧的回避"当撩拨——比如"才不告诉你呢(笑)"这种装糊涂式回避,其实是在挑逗,这种写法**禁止**。真正的回避是把话题岔开、是淡淡带过,不是用回避做钓饵。`);
+    lines.push(`- **绝不**主动触发身体接触剧情、绝不主动让场景往"两人独处+某种危险距离"发展。如果玩家在推这个方向,Ari 会本能地**多留半步距离**,而不是配合。`);
+    lines.push(`\n**油腻警戒线**(出现这些写法 = 翻车):`);
+    lines.push(`- ❌ 角色主动用"......"、半句话的停顿暗示"我有别的想法"。`);
+    lines.push(`- ❌ 角色对玩家的普通话语回以带性暗示的解读("你是说......那种?(笑)")。`);
+    lines.push(`- ❌ 任何"姐姐式的撩拨"——拍头、摸脸、咬耳朵这种作为暧昧暗示的小动作,**Ari 不做**。她对后辈的温柔是干燥的、是递水递伞这种,不带身体亲密度。`);
+    lines.push(`- ❌ "我也想......你也是吗?"这种半句话钓鱼。`);
+    lines.push(`- ❌ 故事模式里,稍微擦边的场景就让角色"呼吸变了"、"心跳乱了"、"眼神变深"——这些都是**油腻信号**,Ari 真正的反应是更平、更收、更让自己"什么都没发生"地继续。`);
+    lines.push(`\n**当玩家明确暗示之后**:门闸开,Ari 可以循序渐进回应,按角色卡的【亲密相关】规则走——但"开始"那一步仍然由玩家迈出,Ari 的回应有热度但**仍然带克制**,不会突然变成另一个人。`);
+    lines.push(`\n**总结**:Ari 的性张力来自"她明明感觉到了却选择不接"的那个空白,不是来自"她比玩家先一步把暧昧讲出来"。**让空白存在**,不要去填它。`);
+  }
+
   if (card.notes && card.notes.length){
     lines.push(`\n## 累积的角色卡补完（来自此前对话）`);
     lines.push(`这些是之前对话中你或玩家透露过的事实，**请记住并在后续对话中保持一致**。新增同类信息时不要重复记录已有内容。`);
@@ -2944,6 +3626,37 @@ function buildSystemPrompt() {
         lines.push(`- [${n.field||"—"}] ${n.content}`);
       });
     });
+  }
+
+  // ─── CHAT MODE: final format override (highest priority) ───
+  // The character card's system_prompt usually defines a full output protocol
+  // (dialogue raw, action in parens, inner in *, [SCENE] for cuts, [STATS]/
+  // [AROUSAL] at the head). For chat mode we must override that protocol —
+  // chat is pure typed messages and most of those primitives don't apply.
+  // We append this AFTER the card's "highest priority" block so it wins.
+  if (mode === "chat"){
+    lines.push(`\n═══════════════════════════════════════════════════════════`);
+    lines.push(`【★★★ 聊天模式格式覆写 · 最终最高优先级 ★★★】`);
+    lines.push(`═══════════════════════════════════════════════════════════`);
+    lines.push(`\n上面角色专属指令里规定的输出协议是为剧情场景准备的。**本次对话是聊天模式,以下规则覆盖角色卡里的所有格式相关规定**:`);
+    lines.push(`\n1. **完全禁止**:`);
+    lines.push(`   - 不要用 \`(...)\` 或 \`（...）\` 包动作/神态/环境/场景。`);
+    lines.push(`   - 不要用 \`*...*\` 包心理独白。`);
+    lines.push(`   - 不要用 \`[SCENE]...[/SCENE]\`。`);
+    lines.push(`   - 不要写第三人称叙述、不要用「」包对白。`);
+    lines.push(`   - 不要按"对白+动作+心绪"的剧情格式组织一条回复。`);
+    lines.push(`\n2. **要做的**:`);
+    lines.push(`   - 直接打字,就像在 LINE/微信/iMessage 上一样。`);
+    lines.push(`   - 想发多条就用**空行**(两个换行)分开,每段是独立的消息气泡。`);
+    lines.push(`   - **整轮总字数 = 玩家本轮字数 ±5**(详见上面"本轮字数硬约束"段)。条数 1~3 自定,但总字数必须卡进区间。**对称**是核心。`);
+    lines.push(`   - 角色平时说话的口头禅、收尾词、语气、思考方式、人设阴影面、所有人格细节——**全部保留**,只是改成打字的形式。`);
+    lines.push(`   - 角色卡里要求的"半句话停住"、"省略号"、"不打句号"、思考的折返等表达习惯,在聊天里依然完全有效。但**不要用 \`(笑)\` \`(汗)\` 这种括号包语气词,也不要用"哈哈""嘿嘿""呵呵""23333"等文字拟声的笑**——改用省略号、emoji、半句话停住等真人打字会用的形式。颜文字(如 \`(˃ᴗ˂)\` \`(；ω；)\` )可以偶尔用,但**频率要低**,几轮才用一次,默认整轮不用。`);
+    lines.push(`\n3. **数值标签依然必写**:`);
+    lines.push(`   - 回复**第一行**还是要写 \`[STATS]\` 或 \`[AROUSAL]\`(参考上面的判断规则,二选一),然后空一行再开始发消息。`);
+    lines.push(`   - \`[CARD_PATCH]\` 如果命中白名单,继续在末尾追加,规则不变。`);
+    lines.push(`\n4. **人设核心不动**:`);
+    lines.push(`   - 这只是表达**载体**的切换(从面对面 → 打字),角色的灵魂没有变。Ari 还是 Ari:温柔克制、有保护欲、回避主动、把热度留给别人——这些在聊天里通过"发什么、不发什么、停在哪里、隔多久才回"自然体现。`);
+    lines.push(`   - 仍然遵守角色卡里所有的**人格、价值观、关系处理、隐藏面、亲密相关边界**——这些规则**不**被覆盖,只有"输出格式"被覆盖。`);
   }
 
   return lines.join("\n");
@@ -3150,7 +3863,7 @@ async function send(forcedText, opts) {
   }
 
   const h = currentHistory();
-  h.push({ role: "user", content: sentText, display: displayText });
+  h.push({ role: "user", content: sentText, display: displayText, at: Date.now() });
   renderUserMessage(displayText, h.length - 1);
   if (forcedText === undefined){ input.value = ""; input.style.height = "auto"; }
   addTyping();
@@ -3168,7 +3881,7 @@ async function send(forcedText, opts) {
     style: currentStyle,
     user_name: card.user_name || "玩家",
     user_id: USER_ID,
-    conversation_id: mode === "intimate" ? CONV_INTIMATE : CONV_STORY,
+    conversation_id: mode === "intimate" ? CONV_INTIMATE : (mode === "chat" ? CONV_CHAT : CONV_STORY),
     request_id: `req_${Date.now()}`,
     card: {
       name: card.name,
@@ -3243,7 +3956,7 @@ async function send(forcedText, opts) {
       // stats correctly queues a new milestone for the NEXT turn.
       consumePendingMilestone();
 
-      const parsed = parseAssistantOutput(assistantText, false);
+      const parsed = parseAssistantOutput(assistantText, false, mode === "chat");
       _reconcileTagModeMismatch(parsed, mode);
 
       // Diagnostic — surfaced in DevTools console for debugging missed updates.
@@ -3266,6 +3979,31 @@ async function send(forcedText, opts) {
         // Snapshot pre-state so regen can correctly rewind past orgasm resets.
         statsPre = Object.assign({}, getCurStats());
         statsApplied = _applyArousalFromParsed(parsed);
+      } else if (mode === "chat") {
+        // Chat mode: dual-system. Look at what the model actually emitted —
+        // [STATS] (好感/亲密) or [AROUSAL] (快感) — and apply the matching path.
+        // Also remember which one was last used so the stats popover shows
+        // the right gauge.
+        const hasArousal = (parsed.arousal || []).length > 0;
+        const hasStats = (parsed.stats || []).length > 0;
+        if (hasArousal){
+          lastChatStatKind = "arousal";
+          localStorage.setItem("dzmm_chat_stat_kind", "arousal");
+          statsPre = Object.assign({}, getCurStats());
+          statsApplied = _applyArousalFromParsed(parsed);
+        } else {
+          // Default to stats path (also catches the case where the model
+          // emitted nothing — applyStatChange of 0 is a no-op).
+          lastChatStatKind = "stats";
+          localStorage.setItem("dzmm_chat_stat_kind", "stats");
+          const total = (hasStats ? parsed.stats : []).reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+          if (total.aff) applyStatChange("aff", total.aff);
+          if (total.int) applyStatChange("int", total.int);
+          statsApplied = total;
+        }
+        // Update body class so the stats popover swaps the visible gauge
+        document.body.classList.toggle("chat-stats-stats", lastChatStatKind !== "arousal");
+        document.body.classList.toggle("chat-stats-arousal", lastChatStatKind === "arousal");
       } else {
         const total = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
         if (total.aff) applyStatChange("aff", total.aff);
@@ -3282,7 +4020,7 @@ async function send(forcedText, opts) {
       }
 
       // Persist
-      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre });
+      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre, at: Date.now() });
       persistHistories();
       // Re-render the bubble we just streamed so it gets data-idx + actions menu
       // (the live bubble is the same DOM node, but had no idx during streaming).
@@ -3350,17 +4088,32 @@ sendBtn.addEventListener("click", () => send());
 // continue / timeskip) still fire send() with a forced prompt.
 let currentMarker = "dialogue";
 
-document.querySelectorAll("#quickActions button").forEach(b => {
+document.querySelectorAll("[data-marker], [data-action]").forEach(b => {
+  // Skip mode-pick items inside the topbar popover — those use [data-mode]
+  // and are handled separately, but also have a marker/action sibling here.
+  if (b.dataset.mode) return;
   b.addEventListener("click", () => {
     const marker = b.dataset.marker;
     const action = b.dataset.action;
     if (marker){
       currentMarker = marker;
-      document.querySelectorAll("#quickActions .marker-btn").forEach(x => {
+      document.querySelectorAll("[data-marker]").forEach(x => {
         x.classList.toggle("active", x.dataset.marker === marker);
       });
       refreshInputPlaceholder();
+      // Update the marker tool button icon to reflect the chosen marker
+      const ic = $("markerToolIcon");
+      if (ic){
+        const map = { dialogue: "ph-pencil-simple-line", action: "ph-person-arms-spread", inner: "ph-brain" };
+        ic.className = `ph ${map[marker] || map.dialogue} text-[18px]`;
+      }
       input.focus();
+      // Auto-close the drawer after picking
+      const d = $("markerDrawer");
+      if (d){
+        d.classList.remove("open");
+        $("toggleMarkerDrawer")?.classList.remove("open");
+      }
       return;
     }
     if (action){
@@ -3370,9 +4123,103 @@ document.querySelectorAll("#quickActions button").forEach(b => {
         timeskip: "（时间悄悄流逝。请基于一段时间过去后的状态，重新铺陈氛围和场景。）"
       };
       send(map[action]);
+      // Auto-close action drawer
+      const d = $("actionDrawer");
+      if (d){
+        d.classList.remove("open");
+        $("toggleActionDrawer")?.classList.remove("open");
+      }
     }
   });
 });
+
+// Toggle marker/action drawers (LINE-style: click the icon to expand)
+function _wireInputDrawers(){
+  const mDrawer = $("markerDrawer");
+  const aDrawer = $("actionDrawer");
+  const mBtn = $("toggleMarkerDrawer");
+  const aBtn = $("toggleActionDrawer");
+  if (!mDrawer || !aDrawer || !mBtn || !aBtn) return;
+  const close = () => {
+    mDrawer.classList.remove("open"); mBtn.classList.remove("open");
+    aDrawer.classList.remove("open"); aBtn.classList.remove("open");
+  };
+  mBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = mDrawer.classList.contains("open");
+    close();
+    if (!isOpen){ mDrawer.classList.add("open"); mBtn.classList.add("open"); }
+  });
+  aBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = aDrawer.classList.contains("open");
+    close();
+    if (!isOpen){ aDrawer.classList.add("open"); aBtn.classList.add("open"); }
+  });
+  // Click outside (but not on the input row) closes drawers
+  document.addEventListener("click", (e) => {
+    if (mDrawer.contains(e.target) || aDrawer.contains(e.target)) return;
+    if (mBtn.contains(e.target) || aBtn.contains(e.target)) return;
+    // Don't close when typing in the textarea
+    if (e.target.id === "input") return;
+    close();
+  });
+}
+
+// ─── Topbar popovers (mode picker / stats / hamburger) ────────────
+function _closeAllTopbarPops(){
+  ["modePop", "statsPop", "hamburgerPop"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("open");
+  });
+}
+function _wireTopbarPops(){
+  const pairs = [
+    ["modeToggleBtn",  "modePop"],
+    ["statsToggleBtn", "statsPop"],
+    ["hamburgerBtn",   "hamburgerPop"]
+  ];
+  pairs.forEach(([btnId, popId]) => {
+    const btn = document.getElementById(btnId);
+    const pop = document.getElementById(popId);
+    if (!btn || !pop) return;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const wasOpen = pop.classList.contains("open");
+      _closeAllTopbarPops();
+      if (!wasOpen) pop.classList.add("open");
+    });
+    // Prevent popover internal clicks from closing it
+    pop.addEventListener("click", (e) => { e.stopPropagation(); });
+  });
+  // Click anywhere else → close all
+  document.addEventListener("click", () => { _closeAllTopbarPops(); });
+}
+
+// Switch the character drawer into a "focus" view that shows only one
+// section as if it were a dedicated panel. Pass null/undefined to clear
+// focus and show the full character card.
+function _focusCharSection(accName){
+  const drawer = $("charDrawer");
+  const title = $("charDrawerTitle");
+  if (!drawer) return;
+  if (accName){
+    drawer.dataset.focus = accName;
+    const titles = { secondary: "次要人物", locations: "场景设定", terms: "名词", props: "道具" };
+    if (title) title.textContent = titles[accName] || "角色卡";
+    // Ensure the focused accordion's body is open
+    const acc = drawer.querySelector(`.accordion[data-acc="${accName}"]`);
+    if (acc) acc.classList.add("open");
+    // Scroll back to top of body
+    const body = drawer.querySelector(".drawer-body");
+    if (body) body.scrollTop = 0;
+  } else {
+    delete drawer.dataset.focus;
+    if (title) title.textContent = "角色卡";
+  }
+}
+// Back button — clears focus, returns to full card view
+document.addEventListener("DOMContentLoaded", () => {});  // no-op, leaves a hook
 
 // ═══════════════════════════════════════════════════════════
 // Drawers
@@ -3392,11 +4239,22 @@ function closeDrawers() {
   keyDrawer.classList.remove("open");
   profileDrawer.classList.remove("open");
   scrim.classList.remove("open");
+  // Reset focus mode on charDrawer so it re-opens clean next time
+  _focusCharSection(null);
 }
-$("openCharBtn").addEventListener("click", () => openDrawer(charDrawer));
-$("openSettingsBtn").addEventListener("click", () => openDrawer(setDrawer));
-$("openKeyBtn").addEventListener("click", () => { $("tokenInput").value = token; openDrawer(keyDrawer); });
-$("openProfileBtn").addEventListener("click", () => { populateProfileForm(); openDrawer(profileDrawer); });
+$("openCharBtn").addEventListener("click", () => { _focusCharSection(null); openDrawer(charDrawer); });
+// Back button inside charDrawer focus mode
+$("charBackBtn").addEventListener("click", () => { _focusCharSection(null); });
+// Hamburger menu items
+$("menu-api").addEventListener("click", () => { _closeAllTopbarPops(); $("tokenInput").value = token; openDrawer(keyDrawer); });
+$("menu-profile").addEventListener("click", () => { _closeAllTopbarPops(); populateProfileForm(); openDrawer(profileDrawer); });
+$("menu-settings").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(setDrawer); });
+// "Secondary / locations / props" all live inside charDrawer's accordions —
+// opening charDrawer is enough; the user can scroll to the relevant section.
+$("menu-secondary").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("secondary"); });
+$("menu-locations").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("locations"); });
+$("menu-terms").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("terms"); });
+$("menu-props").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("props"); });
 scrim.addEventListener("click", closeDrawers);
 [charDrawer, setDrawer, keyDrawer, profileDrawer].forEach(d => {
   let startY = null;
@@ -3414,14 +4272,21 @@ document.querySelectorAll(".accordion .acc-head").forEach(head => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// Mode switching
-// ═══════════════════════════════════════════════════════════
+// Mode switching — wires both legacy .mode-pill and the new .mode-pick-item
 const ageModal = $("ageModal");
-document.querySelectorAll(".mode-pill").forEach(b => {
+// Track which mode the user wanted when they triggered the age gate, so
+// confirming jumps to the right destination (intimate or chat).
+let _pendingAgeTarget = null;
+document.querySelectorAll("[data-mode]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.mode;
+    _closeAllTopbarPops();
     if (target === mode) return;
-    if (target === "intimate" && !ageConfirmed) { ageModal.classList.add("open"); return; }
+    if (target === "intimate" && !ageConfirmed) {
+      _pendingAgeTarget = target;
+      ageModal.classList.add("open");
+      return;
+    }
     setMode(target);
   });
 });
@@ -3434,9 +4299,13 @@ $("ageOkBtn").addEventListener("click", () => {
   ageConfirmed = true;
   localStorage.setItem("dzmm_age_ok", "yes");
   ageModal.classList.remove("open");
-  setMode("intimate");
+  setMode(_pendingAgeTarget || "intimate");
+  _pendingAgeTarget = null;
 });
-$("ageCancelBtn").addEventListener("click", () => ageModal.classList.remove("open"));
+$("ageCancelBtn").addEventListener("click", () => {
+  ageModal.classList.remove("open");
+  _pendingAgeTarget = null;
+});
 
 // ═══════════════════════════════════════════════════════════
 // Character: secondary & locations chips
@@ -3472,6 +4341,22 @@ function renderLocations(){
     list.appendChild(chip);
   });
 }
+function renderTerms(){
+  const list = $("termList"); const arr = card?.terms || [];
+  const countEl = $("termCount");
+  if (countEl) countEl.textContent = arr.length;
+  if (!list) return;
+  list.innerHTML = "";
+  arr.forEach((t, i) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `
+      <span class="chip-name">${escapeHTML(t.name)}</span>
+      ${t.description ? `<span class="chip-sub">· ${escapeHTML(t.description)}</span>` : ""}
+      <button class="chip-x" data-i="${i}" data-kind="term">×</button>`;
+    list.appendChild(chip);
+  });
+}
 document.addEventListener("click", (e) => {
   if (e.target.matches(".chip-x")) {
     const i = parseInt(e.target.dataset.i);
@@ -3479,6 +4364,7 @@ document.addEventListener("click", (e) => {
     if (!card) return;
     if (kind === "sec") { card.secondary_characters.splice(i, 1); renderSecondary(); }
     else if (kind === "loc") { card.locations.splice(i, 1); renderLocations(); }
+    else if (kind === "term") { (card.terms||[]).splice(i, 1); renderTerms(); }
     else if (kind === "prop") { (card.props||[]).splice(i, 1); renderProps(); }
     else if (kind === "patch") { (card.notes||[]).splice(i, 1); renderPatches(); }
     persistCard();
@@ -3501,6 +4387,16 @@ $("addLocBtn").addEventListener("click", () => {
   card.locations.push({ name, description: $("locDesc").value.trim() });
   $("locName").value = ""; $("locDesc").value = "";
   renderLocations(); persistCard();
+});
+
+$("addTermBtn")?.addEventListener("click", () => {
+  const name = $("termName").value.trim();
+  if (!name) { alert("请填写名词"); return; }
+  ensureCard();
+  if (!Array.isArray(card.terms)) card.terms = [];
+  card.terms.push({ name, description: $("termDesc").value.trim() });
+  $("termName").value = ""; $("termDesc").value = "";
+  renderTerms(); persistCard();
 });
 
 // Load the 160 built-in locations into this card (merges, no duplicates by name)
@@ -3625,19 +4521,27 @@ function _parseBulkImport(text){
   return out;
 }
 
-// Wire up the bulk-import open / cancel / apply buttons for both loc and prop.
+// Wire up the bulk-import open / cancel / apply buttons for loc / term / prop.
 function _wireBulkImport(){
+  // map kind → { popId, textId, btnId }
+  const _meta = {
+    loc:  { pop: "bulkLocPop",  text: "bulkLocText",  btn: "bulkLocBtn"  },
+    term: { pop: "bulkTermPop", text: "bulkTermText", btn: "bulkTermBtn" },
+    prop: { pop: "bulkPropPop", text: "bulkPropText", btn: "bulkPropBtn" },
+  };
   const open = (kind) => {
-    const pop = $(kind === "loc" ? "bulkLocPop" : "bulkPropPop");
-    if (!pop) return;
+    const m = _meta[kind]; if (!m) return;
+    const pop = $(m.pop); if (!pop) return;
     pop.classList.add("open");
-    setTimeout(() => $(kind === "loc" ? "bulkLocText" : "bulkPropText")?.focus(), 60);
+    setTimeout(() => $(m.text)?.focus(), 60);
   };
   const close = (kind) => {
-    const pop = $(kind === "loc" ? "bulkLocPop" : "bulkPropPop");
+    const m = _meta[kind]; if (!m) return;
+    const pop = $(m.pop);
     if (pop) pop.classList.remove("open");
   };
   $("bulkLocBtn")?.addEventListener("click", () => open("loc"));
+  $("bulkTermBtn")?.addEventListener("click", () => open("term"));
   $("bulkPropBtn")?.addEventListener("click", () => open("prop"));
   // delegated cancel / apply via data-attr
   document.addEventListener("click", (e) => {
@@ -3663,6 +4567,24 @@ function _wireBulkImport(){
       close("loc");
       renderLocations(); persistCard();
       const btn = $("bulkLocBtn");
+      if (btn){ const o = btn.innerHTML; btn.innerHTML = `<i class="ph ph-check"></i>+${added}`; setTimeout(() => btn.innerHTML = o, 1500); }
+    } else if (kind === "term"){
+      const txt = $("bulkTermText").value;
+      const items = _parseBulkImport(txt);
+      if (!items.length){ alert("没有解析到任何条目"); return; }
+      ensureCard();
+      if (!Array.isArray(card.terms)) card.terms = [];
+      const have = new Set(card.terms.map(t => t.name));
+      let added = 0;
+      for (const it of items){
+        if (have.has(it.name)) continue;
+        card.terms.push(it);
+        have.add(it.name); added++;
+      }
+      $("bulkTermText").value = "";
+      close("term");
+      renderTerms(); persistCard();
+      const btn = $("bulkTermBtn");
       if (btn){ const o = btn.innerHTML; btn.innerHTML = `<i class="ph ph-check"></i>+${added}`; setTimeout(() => btn.innerHTML = o, 1500); }
     } else if (kind === "prop"){
       const txt = $("bulkPropText").value;
@@ -3705,7 +4627,8 @@ function populateCharForm() {
   $("cIntimate").value = c.intimate_preferences || "";
   $("cUserName").value = c.user_name || "";
   $("charSub").textContent = card ? "edit" : "new";
-  renderSecondary(); renderLocations(); renderProps(); renderPatches();
+  renderSecondary(); renderLocations(); renderTerms(); renderProps(); renderPatches();
+  _renderCardAvatarPreview();
 }
 
 
@@ -3760,6 +4683,7 @@ $("jsonApplyBtn")?.addEventListener("click", () => {
   const merged = Object.assign(DEFAULT_CARD(), parsed);
   if (!Array.isArray(merged.secondary_characters)) merged.secondary_characters = [];
   if (!Array.isArray(merged.locations)) merged.locations = [];
+  if (!Array.isArray(merged.terms)) merged.terms = [];
   if (!Array.isArray(merged.props)) merged.props = [];
   if (!Array.isArray(merged.notes)) merged.notes = parsed.notes || [];
   card = merged;
@@ -3783,6 +4707,32 @@ function syncFormToCard(){
   card.intimate_preferences = $("cIntimate").value;
 }
 
+// ─── Avatar upload/remove buttons (card form) ───
+$("cAvatarUploadBtn")?.addEventListener("click", () => $("cAvatarFile").click());
+$("cAvatarFile")?.addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";  // reset so same file can be picked again later
+  if (!file) return;
+  try {
+    const url = await _avatarFileToDataURL(file);
+    ensureCard();
+    card.avatar = url;
+    persistCard();
+    _renderCardAvatarPreview();
+    _renderTopAvatar();
+  } catch(err){
+    console.error(err);
+    alert("处理头像失败:" + (err.message || err));
+  }
+});
+$("cAvatarRemoveBtn")?.addEventListener("click", () => {
+  if (!card) return;
+  card.avatar = "";
+  persistCard();
+  _renderCardAvatarPreview();
+  _renderTopAvatar();
+});
+
 $("saveCharBtn").addEventListener("click", () => {
   const name = $("cName").value.trim();
   if (!name) { alert("请至少填一个名字"); return; }
@@ -3799,10 +4749,10 @@ $("saveCharBtn").addEventListener("click", () => {
   card.user_name = $("cUserName").value.trim() || "玩家";
   persistCard();
   if (wasNew) {
-    histories = { story: [], intimate: [] };
-    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
-    pendingMilestone = { story:null, intimate:null };
-    summaries = { story:null, intimate:null };
+    histories = { story: [], intimate: [], chat: [] };
+    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0}, chat:{aff:0,int:0,arousal:0,laps:0} };
+    pendingMilestone = { story:null, intimate:null, chat:null };
+    summaries = { story:null, intimate:null, chat:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
     refreshStats();
   }
@@ -3812,10 +4762,10 @@ $("saveCharBtn").addEventListener("click", () => {
 $("clearCharBtn").addEventListener("click", () => {
   if (!confirm("清除角色卡 + 对话历史 + 等级?")) return;
   card = null;
-  histories = { story: [], intimate: [] };
-  stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
-  pendingMilestone = { story:null, intimate:null };
-  summaries = { story:null, intimate:null };
+  histories = { story: [], intimate: [], chat: [] };
+  stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0}, chat:{aff:0,int:0,arousal:0,laps:0} };
+  pendingMilestone = { story:null, intimate:null, chat:null };
+  summaries = { story:null, intimate:null, chat:null };
   idbDel("card").catch(()=>{});
   persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
   refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn();
@@ -3937,13 +4887,14 @@ $("fileInput").addEventListener("change", async (e) => {
       version: SCHEMA_VERSION,
       secondary_characters: Array.isArray(data.secondary_characters) ? data.secondary_characters : [],
       locations: Array.isArray(data.locations) ? data.locations : [],
+      terms: Array.isArray(data.terms) ? data.terms : [],
       props: Array.isArray(data.props) ? data.props : []
     });
     persistCard();
-    histories = { story: [], intimate: [] };
-    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0} };
-    pendingMilestone = { story:null, intimate:null };
-    summaries = { story:null, intimate:null };
+    histories = { story: [], intimate: [], chat: [] };
+    stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0}, chat:{aff:0,int:0,arousal:0,laps:0} };
+    pendingMilestone = { story:null, intimate:null, chat:null };
+    summaries = { story:null, intimate:null, chat:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
     refreshStats(); populateCharForm(); refreshTopBar();
     renderMessages(); updateSendBtn();
@@ -4024,14 +4975,14 @@ $("fileInputAll").addEventListener("change", async (e) => {
       persistSummaries();
     } else {
       // older backups don't have summaries — reset to be safe
-      summaries = { story:null, intimate:null };
+      summaries = { story:null, intimate:null, chat:null };
       persistSummaries();
     }
     if (d.pendingMilestone){
       pendingMilestone = Object.assign({story:null,intimate:null}, d.pendingMilestone);
       persistPendingMilestone();
     } else {
-      pendingMilestone = { story:null, intimate:null };
+      pendingMilestone = { story:null, intimate:null, chat:null };
       persistPendingMilestone();
     }
     await flushPending();
@@ -4302,7 +5253,7 @@ async function _resendUserMessage(userMsg){
     model: currentModel, style: currentStyle,
     user_name: card.user_name || "玩家",
     user_id: USER_ID,
-    conversation_id: mode === "intimate" ? CONV_INTIMATE : CONV_STORY,
+    conversation_id: mode === "intimate" ? CONV_INTIMATE : (mode === "chat" ? CONV_CHAT : CONV_STORY),
     request_id: `req_${Date.now()}`,
     card: {
       name: card.name,
@@ -4368,7 +5319,7 @@ async function _resendUserMessage(userMsg){
     if (assistantText){
       // Same milestone-consume logic as send() — see comment there.
       consumePendingMilestone();
-      const parsed = parseAssistantOutput(assistantText, false);
+      const parsed = parseAssistantOutput(assistantText, false, mode === "chat");
       _reconcileTagModeMismatch(parsed, mode);
       try {
         const tagMatch = assistantText.match(/\[(?:STATS|STATUS|AROUSAL)\][\s\S]*?\[\/(?:STATS|STATUS|AROUSAL)\]/i);
@@ -4384,6 +5335,24 @@ async function _resendUserMessage(userMsg){
       if (mode === "intimate"){
         statsPre = Object.assign({}, getCurStats());
         statsApplied = _applyArousalFromParsed(parsed);
+      } else if (mode === "chat") {
+        const hasArousal = (parsed.arousal || []).length > 0;
+        const hasStats = (parsed.stats || []).length > 0;
+        if (hasArousal){
+          lastChatStatKind = "arousal";
+          localStorage.setItem("dzmm_chat_stat_kind", "arousal");
+          statsPre = Object.assign({}, getCurStats());
+          statsApplied = _applyArousalFromParsed(parsed);
+        } else {
+          lastChatStatKind = "stats";
+          localStorage.setItem("dzmm_chat_stat_kind", "stats");
+          const total = (hasStats ? parsed.stats : []).reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
+          if (total.aff) applyStatChange("aff", total.aff);
+          if (total.int) applyStatChange("int", total.int);
+          statsApplied = total;
+        }
+        document.body.classList.toggle("chat-stats-stats", lastChatStatKind !== "arousal");
+        document.body.classList.toggle("chat-stats-arousal", lastChatStatKind === "arousal");
       } else {
         const total = parsed.stats.reduce((a,c) => ({ aff: a.aff + c.aff, int: a.int + c.int }), { aff:0, int:0 });
         if (total.aff) applyStatChange("aff", total.aff);
@@ -4393,7 +5362,7 @@ async function _resendUserMessage(userMsg){
       applyCardPatches(parsed.patches);
       if (!liveBubble){ liveBubble = buildAssistantBubble(assistantText, statsApplied, false); }
       else { buildAssistantBubble(assistantText, statsApplied, false, liveBubble); }
-      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre });
+      h.push({ role: "assistant", content: assistantText, parsed, statsApplied, statsPre, at: Date.now() });
       persistHistories();
       // Re-render so the new bubble gets data-idx + actions decorations
       renderMessages();
@@ -4469,7 +5438,7 @@ function _openEditor(idx){
       } else {
         msg.content = v;
         // Re-parse so future renders are consistent
-        msg.parsed = parseAssistantOutput(v, false);
+        msg.parsed = parseAssistantOutput(v, false, mode === "chat");
       }
       persistHistories();
       renderMessages();
@@ -4598,7 +5567,7 @@ async function _loadFromIDB(){
   }
   // histories
   if (all.histories && typeof all.histories === "object"){
-    histories = Object.assign({ story:[], intimate:[] }, all.histories);
+    histories = Object.assign({ story:[], intimate:[], chat:[] }, all.histories);
   }
   // stats — apply same migration logic as before, in case data was stored old-shape
   if (all.stats && typeof all.stats === "object"){
@@ -4620,15 +5589,17 @@ async function _loadFromIDB(){
         initiator: ("initiator" in pi) ? pi.initiator : "user",
         laps:      ("laps"      in pi) ? pi.laps      : 0
       };
+      // Chat: combines story-shape stats AND arousal-shape — both can accumulate.
+      stats.chat = Object.assign({ aff:0, int:0, arousal:0, laps:0 }, p.chat || {});
     }
   }
   // summaries (#15)
   if (all.summaries && typeof all.summaries === "object"){
-    summaries = Object.assign({ story:null, intimate:null }, all.summaries);
+    summaries = Object.assign({ story:null, intimate:null, chat:null }, all.summaries);
   }
   // pendingMilestone — survives reload so an interrupted turn still fires it
   if (all.pendingMilestone && typeof all.pendingMilestone === "object"){
-    pendingMilestone = Object.assign({ story:null, intimate:null }, all.pendingMilestone);
+    pendingMilestone = Object.assign({ story:null, intimate:null, chat:null }, all.pendingMilestone);
   }
 }
 
@@ -4697,6 +5668,8 @@ async function _migrateFromLocalStorageIfNeeded(){
   _wireScenePicker();
   _wireKeyboardInset();
   _wireBulkImport();
+  _wireInputDrawers();
+  _wireTopbarPops();
   // 主动方 chip → click cycles user → char → both → user
   $("initiatorCol")?.addEventListener("click", () => cycleInitiator());
   renderMessages();
