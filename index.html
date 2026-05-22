@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>恋たび、まる</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <style>
   :root{
     /* ── LINE palette ── */
@@ -1378,6 +1379,245 @@
   }
   .token-eye:hover{background:#F0F3F6;color:#000000;}
   .token-eye i{font-size:16px;}
+
+  /* ═══════════════════════════════════════════════════════════
+     Chat list drawer (LINE-style chat home)
+     ═══════════════════════════════════════════════════════════ */
+  .chat-list-item{
+    display:flex;align-items:center;gap:11px;
+    padding:11px 14px;
+    cursor:pointer;
+    border-radius:12px;
+    transition:background 0.15s;
+    position:relative;
+  }
+  .chat-list-item:hover,.chat-list-item:active{background:#F0F3F6;}
+  .chat-list-item.active{background:#E8F5EE;}
+  .chat-list-item.active::before{
+    content:"";
+    position:absolute;left:4px;top:50%;transform:translateY(-50%);
+    width:3px;height:24px;border-radius:2px;background:#06C755;
+  }
+  .chat-list-avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#C9BBD9,#9B8AAE);
+    color:#FFFFFF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:500;
+    flex-shrink:0;overflow:hidden;
+    border:1px solid rgba(0,0,0,0.06);
+  }
+  .chat-list-avatar img{width:100%;height:100%;object-fit:cover;}
+  .chat-list-avatar.is-group{
+    background:linear-gradient(135deg,#84E582,#06C755);
+  }
+  .chat-list-avatar.is-main{
+    background:linear-gradient(135deg,#A8C5F0,#5A8FE0);
+  }
+  .chat-list-info{
+    flex:1;min-width:0;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .chat-list-title-row{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+  }
+  .chat-list-title{
+    font-size:14.5px;font-weight:500;color:#000000;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .chat-list-time{
+    font-size:10.5px;color:#9BA8B8;flex-shrink:0;
+  }
+  .chat-list-preview{
+    font-size:12px;color:#6B7C93;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .chat-list-badge{
+    display:inline-block;
+    background:#06C755;color:#FFFFFF;
+    font-size:10px;font-weight:500;
+    padding:1px 7px;border-radius:99px;
+    margin-left:6px;
+  }
+  .chat-list-section-title{
+    font-size:11px;font-weight:500;color:#9BA8B8;
+    text-transform:uppercase;letter-spacing:0.5px;
+    padding:14px 14px 6px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .chat-list-section-title .add-btn{
+    background:transparent;border:none;cursor:pointer;
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#5A6878;
+  }
+  .chat-list-section-title .add-btn:hover{background:#F0F3F6;color:#06C755;}
+  .chat-list-empty{
+    padding:10px 14px;font-size:12px;color:#9BA8B8;font-style:italic;
+  }
+
+  /* Secondary-char card editor */
+  .sec-char-card{
+    background:#FFFFFF;
+    border:1px solid #E8ECF0;border-radius:12px;
+    margin-bottom:8px;overflow:hidden;
+  }
+  .sec-char-head{
+    padding:10px 12px;
+    display:flex;align-items:center;gap:10px;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .sec-char-head:hover{background:#FAFBFC;}
+  .sec-char-head .sec-char-ava{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,#C9BBD9,#9B8AAE);
+    color:#FFFFFF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:500;
+    flex-shrink:0;overflow:hidden;
+    border:1px solid rgba(0,0,0,0.06);
+  }
+  .sec-char-head .sec-char-ava img{width:100%;height:100%;object-fit:cover;}
+  .sec-char-head .sec-char-name-block{flex:1;min-width:0;}
+  .sec-char-head .sec-char-name{
+    font-size:13.5px;font-weight:500;color:#000000;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .sec-char-head .sec-char-sub{
+    font-size:11px;color:#6B7C93;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .sec-char-head .sec-char-caret{
+    color:#9BA8B8;font-size:12px;transition:transform 0.2s;
+  }
+  .sec-char-card.open .sec-char-caret{transform:rotate(90deg);}
+  .sec-char-body{
+    display:none;
+    padding:4px 12px 12px;border-top:1px solid #F0F3F6;
+  }
+  .sec-char-card.open .sec-char-body{display:block;}
+  .sec-char-body .field{margin-bottom:10px;}
+  .sec-char-body .field-head{margin-bottom:4px;}
+  .sec-char-body .field-label{font-size:11.5px;}
+  .sec-char-actions{
+    display:flex;gap:6px;margin-top:8px;
+  }
+  .sec-char-actions .btn{margin-top:0;padding:7px 10px;font-size:11.5px;}
+
+  /* Group chat bubble — uses sender name + sender avatar */
+  .group-msg-row{
+    display:flex;gap:8px;align-items:flex-start;
+    margin-bottom:4px;
+  }
+  .group-msg-row.user-row{flex-direction:row-reverse;}
+  .group-msg-row .group-msg-ava{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,#C9BBD9,#9B8AAE);
+    color:#FFFFFF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:500;
+    flex-shrink:0;overflow:hidden;
+    border:1px solid rgba(0,0,0,0.06);
+    margin-top:18px;
+  }
+  .group-msg-row .group-msg-ava img{width:100%;height:100%;object-fit:cover;}
+  .group-msg-row .group-msg-col{
+    display:flex;flex-direction:column;gap:2px;
+    min-width:0;flex:1;
+    align-items:flex-start;
+  }
+  .group-msg-row.user-row .group-msg-col{align-items:flex-end;}
+  .group-msg-row .group-msg-name{
+    font-size:11px;color:#5A6878;
+    padding:0 4px;
+    white-space:nowrap;
+  }
+  .group-msg-row .group-msg-bubble-row{
+    display:flex;align-items:flex-end;gap:6px;
+  }
+  .group-msg-row.user-row .group-msg-bubble-row{flex-direction:row-reverse;}
+  .group-msg-row .group-msg-time{
+    font-size:9.5px;color:#9BA8B8;flex-shrink:0;
+  }
+  /* Mention pill in group chat */
+  .mention-pill{
+    display:inline-block;
+    background:#E8F5EE;color:#06A046;
+    font-weight:500;padding:1px 6px;border-radius:6px;
+    font-size:12px;
+    margin-right:2px;
+  }
+  /* @ picker popover */
+  .mention-pop{
+    position:absolute;
+    bottom:100%;left:8px;right:8px;
+    margin-bottom:6px;
+    background:#FFFFFF;
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:14px;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.12);
+    max-height:200px;overflow-y:auto;
+    z-index:30;
+    display:none;
+  }
+  .mention-pop.open{display:block;}
+  .mention-item{
+    display:flex;align-items:center;gap:9px;
+    padding:9px 12px;cursor:pointer;
+    transition:background 0.12s;
+  }
+  .mention-item:hover,.mention-item.active{background:#F0F7FF;}
+  .mention-item-ava{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,#C9BBD9,#9B8AAE);
+    color:#FFFFFF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:500;
+    flex-shrink:0;overflow:hidden;
+  }
+  .mention-item-ava img{width:100%;height:100%;object-fit:cover;}
+  .mention-item-name{font-size:13px;color:#000000;}
+  .mention-item-sub{font-size:11px;color:#9BA8B8;margin-left:auto;}
+
+  /* Member selector for group chat creation */
+  .member-pick-list{
+    display:flex;flex-direction:column;gap:4px;
+    max-height:300px;overflow-y:auto;
+    padding:4px 0;
+  }
+  .member-pick-item{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 12px;border-radius:10px;
+    cursor:pointer;
+    transition:background 0.15s;
+  }
+  .member-pick-item:hover{background:#F0F3F6;}
+  .member-pick-item input[type="checkbox"]{
+    width:18px;height:18px;accent-color:#06C755;cursor:pointer;
+  }
+  .member-pick-ava{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,#C9BBD9,#9B8AAE);
+    color:#FFFFFF;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:500;
+    flex-shrink:0;overflow:hidden;
+  }
+  .member-pick-ava img{width:100%;height:100%;object-fit:cover;}
+  .member-pick-name{font-size:13px;color:#000000;flex:1;}
+
+  /* ─── Aux chat (sec / group): hide UI that doesn't apply ─── */
+  body.aux-chat #statsToggleBtn{ display:none !important; }
+  body.aux-chat #modeToggleBtn{ display:none !important; }
+  body.aux-chat #toggleMarkerDrawer{ display:none !important; }
+  body.aux-chat #toggleActionDrawer{ display:none !important; }
+  body.aux-chat #markerDrawer{ display:none !important; }
+  body.aux-chat #actionDrawer{ display:none !important; }
+  /* In aux chat, also force chat-mode bubble style (already set by body.chat,
+     but we make sure stats popover children stay hidden no matter what) */
+  body.aux-chat .story-stats,
+  body.aux-chat .intimate-stats{ display:none !important; }
 </style>
 </head>
 <body class="story">
@@ -1393,8 +1633,12 @@
   <!-- HEADER (LINE-style: char name on the left, 3 icons on the right) -->
   <header class="z-30 px-4 pt-6 pb-3 flex-shrink-0">
     <div class="glass-card rounded-[20px] px-2 py-2 flex items-center gap-2">
+      <!-- Chat list button (LINE-style home) -->
+      <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 transition text-[#5A6878] flex-shrink-0" id="chatListBtn" title="聊天列表">
+        <i class="ph ph-chats-circle text-lg"></i>
+      </button>
       <!-- Left: avatar + name (click → character card) -->
-      <div class="flex items-center gap-2.5 pl-1 cursor-pointer flex-1 min-w-0" id="openCharBtn">
+      <div class="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0" id="openCharBtn">
         <div class="relative flex-shrink-0">
           <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#C9BBD9] to-[#9B8AAE] flex items-center justify-center border-2 border-white shadow-sm overflow-hidden" id="charAvatar">
             <span class="cn-serif text-white font-medium text-[14px]" id="avatarChar">?</span>
@@ -1403,6 +1647,7 @@
         </div>
         <div class="min-w-0 flex-1">
           <h1 class="font-medium text-[15px] leading-tight text-[#000000] truncate" id="charNameDisplay">未设定角色</h1>
+          <div class="text-[10.5px] text-[#6B7C93] leading-tight truncate hidden" id="charSubDisplay"></div>
         </div>
       </div>
 
@@ -1427,7 +1672,7 @@
 
         <!-- 2) Stats button — shows aff/int/arousal in a popover -->
         <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-black/5 transition text-[#5A6878] relative" id="statsToggleBtn" title="查看数值">
-          <i class="ph ph-heart text-lg" id="statsToggleIcon"></i>
+          <i class="ph ph-star-four text-lg" id="statsToggleIcon"></i>
         </button>
         <!-- Stats popover (contains the actual stat columns, reused as-is) -->
         <div class="topbar-pop topbar-pop-stats" id="statsPop">
@@ -1435,7 +1680,7 @@
           <div class="px-3 py-2 flex items-stretch gap-3 story-stats">
             <div class="stat-col flex-1 min-w-0">
               <div class="stat-head">
-                <i class="ph ph-heart text-[#FF6B6B] text-[10px]"></i>
+                <i class="ph ph-star-four text-[#FFB84D] text-[10px]"></i>
                 <span class="stat-label">好感</span>
                 <span class="stat-tier" id="affTier">LV.1</span>
               </div>
@@ -1501,6 +1746,9 @@
           <button class="topbar-pop-item" id="menu-secondary">
             <i class="ph ph-users-three"></i><span>次要角色</span>
           </button>
+          <button class="topbar-pop-item" id="menu-groups">
+            <i class="ph ph-users-four"></i><span>群聊管理</span>
+          </button>
           <button class="topbar-pop-item" id="menu-locations">
             <i class="ph ph-map-pin"></i><span>场景设定</span>
           </button>
@@ -1537,7 +1785,7 @@
 
   <!-- INPUT -->
   <footer class="absolute bottom-0 left-0 right-0 p-3 pt-2 pointer-events-none">
-    <div class="pointer-events-auto flex flex-col gap-2">
+    <div class="pointer-events-auto flex flex-col gap-2" style="position:relative;">
 
       <!-- ── Marker drawer (对白/动作/心绪 — opens above input on demand) -->
       <div class="input-drawer" id="markerDrawer">
@@ -1571,6 +1819,9 @@
       <!-- ── Quote draft (shown above input when user is replying to a message) -->
       <div id="quoteDraftHost" style="display:none;"></div>
 
+      <!-- ── @ mention popover (for group chats) -->
+      <div class="mention-pop" id="mentionPop"></div>
+
       <!-- ── LINE-style input row: [✏️] [⚡] [textbox] [send] -->
       <div class="glass-card rounded-[24px] p-1.5 flex items-center gap-1">
         <button class="input-tool-btn" id="toggleMarkerDrawer" title="对白 / 动作 / 心绪">
@@ -1579,8 +1830,8 @@
         <button class="input-tool-btn" id="toggleActionDrawer" title="推进 / 承接 / 时跳 / 场景">
           <i class="ph ph-lightning text-[18px]"></i>
         </button>
-        <div class="flex-1 px-2 py-1 max-h-32 overflow-y-auto no-scrollbar">
-          <textarea id="input" rows="1" class="cn w-full bg-transparent text-[13.5px] py-1 resize-none outline-none placeholder:text-[#9BA8B8] text-[#000000]" placeholder="说点什么..."></textarea>
+        <div class="flex-1 px-2 max-h-32 overflow-y-auto no-scrollbar flex items-center" style="min-height:34px;">
+          <textarea id="input" rows="1" class="cn w-full bg-transparent text-[13.5px] leading-[20px] resize-none outline-none placeholder:text-[#9BA8B8] text-[#000000]" style="padding:0;display:block;" placeholder="说点什么..."></textarea>
         </div>
         <button id="sendBtn" disabled class="w-9 h-9 rounded-full bg-[#06C755] text-white flex items-center justify-center shadow-md active:scale-95 transition-transform disabled:bg-[#CDD3DA] disabled:cursor-not-allowed flex-shrink-0">
           <i class="ph ph-paper-plane-tilt text-base" id="sendIcon"></i>
@@ -1611,6 +1862,58 @@
       <div class="btn-row">
         <button class="btn ghost" id="ageCancelBtn">取消</button>
         <button class="btn primary" id="ageOkBtn">我确认并进入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT LIST DRAWER (LINE-style chat home) -->
+  <div class="drawer" id="chatListDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-head">
+      <h2 class="cn-serif font-medium text-[16px] text-[#5a5562]">聊天</h2>
+      <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 text-[#5A6878] ml-auto" id="newGroupQuickBtn" title="新建群聊">
+        <i class="ph ph-plus-circle text-lg"></i>
+      </button>
+    </div>
+    <div class="drawer-body" style="padding:8px 8px 28px;">
+      <div class="chat-list-section-title">
+        <span>会话</span>
+      </div>
+      <div id="chatListBody"></div>
+    </div>
+  </div>
+
+  <!-- GROUP MANAGE DRAWER -->
+  <div class="drawer" id="groupDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-head">
+      <button class="drawer-back-btn" id="groupBackBtn" title="返回列表" style="display:none;"><i class="ph ph-caret-left"></i></button>
+      <h2 class="cn-serif font-medium text-[16px] text-[#5a5562]" id="groupDrawerTitle">群聊</h2>
+      <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 text-[#5A6878] ml-auto" id="newGroupBtn" title="新建群聊">
+        <i class="ph ph-plus text-lg"></i>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <!-- List view -->
+      <div id="groupListView">
+        <div class="note">默认大群「<strong>全员</strong>」自动包含主角和所有次要角色。也可以自建群聊,自由组合成员。</div>
+        <div id="groupListBody" style="margin-top:10px;"></div>
+      </div>
+
+      <!-- Edit view (create / edit group) -->
+      <div id="groupEditView" style="display:none;">
+        <div class="field">
+          <div class="field-head"><span class="field-label">群名</span></div>
+          <input type="text" class="input" id="groupNameInput" placeholder="例:剧团组、深夜小酒馆…">
+        </div>
+        <div class="field">
+          <div class="field-head"><span class="field-label">成员</span></div>
+          <div class="note" style="margin-bottom:8px;">玩家默认在群里。勾选要加入的角色:</div>
+          <div class="member-pick-list" id="memberPickList"></div>
+        </div>
+        <button class="btn primary" id="saveGroupBtn"><i class="ph ph-check"></i>保存群聊</button>
+        <button class="btn ghost" id="clearGroupChatBtn" style="display:none;"><i class="ph ph-eraser"></i>清空聊天记录</button>
+        <button class="btn danger" id="deleteGroupBtn" style="display:none;"><i class="ph ph-trash"></i>删除群聊</button>
       </div>
     </div>
   </div>
@@ -1703,14 +2006,25 @@
           <div class="acc-title"><i class="ph ph-users-three text-[14px] text-[#a89eb3]"></i>次要人物 <span class="acc-count" id="secCount">0</span></div>
         </div>
         <div class="acc-body">
-          <div class="chip-list" id="secList"></div>
-          <div class="add-form">
+          <div class="note">次要角色都有自己的角色卡——可以单独导入/导出 JSON,可以单独私聊,也会出现在群聊里。<strong>不</strong>计算好感/亲密数值,主要用于氛围、配角和群体互动。</div>
+          <div class="btn-row" style="margin:8px 0;">
+            <button class="btn ghost" id="importSecBtn" title="导入次要角色 JSON (支持单张或数组)"><i class="ph ph-upload-simple"></i>导入</button>
+            <button class="btn ghost" id="exportAllSecBtn" title="导出全部次要角色为 JSON 数组"><i class="ph ph-download-simple"></i>导出全部</button>
+          </div>
+          <input type="file" id="fileInputSec" class="hidden-file" accept=".json,application/json">
+
+          <!-- List of secondary character cards -->
+          <div id="secCardList"></div>
+
+          <!-- Add new (mini form) -->
+          <div class="add-form" style="margin-top:14px;border-top:1px dashed #E0E4E9;padding-top:14px;">
+            <div class="note" style="margin-bottom:8px;">快速添加新角色 (后续可展开编辑完整字段)</div>
             <div class="row">
               <input type="text" class="input" id="secName" placeholder="名字 *">
               <input type="text" class="input" id="secNick" placeholder="昵称">
             </div>
             <input type="text" class="input" id="secDesc" placeholder="一句话介绍">
-            <button class="btn ghost" id="addSecBtn"><i class="ph ph-plus"></i>添加人物</button>
+            <button class="btn ghost" id="addSecBtn"><i class="ph ph-plus"></i>添加角色</button>
           </div>
         </div>
       </div>
@@ -1959,6 +2273,75 @@ const DEFAULT_CARD = () => ({
   props: []  // [{ name, description, target: "char"|"user"|"both", enabled: bool }]
 });
 
+// Secondary char schema — created on the fly from old simple records,
+// or used as-is for newly-added cards.
+const DEFAULT_SEC = () => ({
+  id: "sec_" + Math.random().toString(36).slice(2, 10),
+  name: "", nickname: "", description: "",
+  personality: "", background: "", avatar: "",
+  system_prompt: ""
+});
+
+// ─── Chat system ───
+// Chats are the per-conversation containers. Each chat has its own history,
+// independent of card/profile/etc. Three types:
+//   "main"  — the main character. Re-uses the existing mode-split history
+//             (story/intimate/chat) by reading from `histories` instead of
+//             chat.history. id = "main".
+//   "sec"   — a private chat with one secondary character. id = "sec_<secId>".
+//             history is plain chat-mode style (no stats).
+//   "group" — a group chat with the player + N members. id = "group_<uuid>".
+//             history is group-style (each msg has `sender` field).
+//             A default group with id "group_default" auto-includes everyone.
+let chats = {};                  // id → { id, type, title, memberIds, history, lastAt }
+let currentChatId = "main";      // which chat is currently visible
+
+function _makeChat(id, type, title, memberIds){
+  return { id, type, title: title || "", memberIds: memberIds || [], history: [], lastAt: 0 };
+}
+function ensureChats(){
+  if (!chats || typeof chats !== "object") chats = {};
+  // Main chat — always present, history routed through `histories`
+  if (!chats.main){
+    chats.main = _makeChat("main", "main", "主角", []);
+  }
+  // Default group — always present, includes main + all secondary
+  if (!chats.group_default){
+    chats.group_default = _makeChat("group_default", "group", "全员", ["__main__"]);
+  }
+  // Refresh default group members from current secondary list (auto-sync)
+  if (card){
+    const allSecIds = (card.secondary_characters || []).map(s => s.id).filter(Boolean);
+    const def = chats.group_default;
+    // Keep main + ensure all current sec ids are there; user-curated extras unchanged
+    const mainIn = def.memberIds.includes("__main__");
+    const merged = new Set(def.memberIds);
+    if (!mainIn) merged.add("__main__");
+    allSecIds.forEach(id => merged.add(id));
+    // Remove orphan sec ids that no longer exist
+    const validSec = new Set(allSecIds);
+    def.memberIds = Array.from(merged).filter(id => id === "__main__" || validSec.has(id));
+  }
+}
+function getCurrentChat(){ return chats[currentChatId] || chats.main; }
+function isMainChat(){ return currentChatId === "main"; }
+function isGroupChat(){
+  const c = chats[currentChatId];
+  return !!c && c.type === "group";
+}
+function isSecChat(){
+  const c = chats[currentChatId];
+  return !!c && c.type === "sec";
+}
+function getSecById(id){
+  if (!card || !card.secondary_characters) return null;
+  return card.secondary_characters.find(s => s.id === id) || null;
+}
+function persistChats(){ _scheduleWrite("chats", chats); }
+function persistCurrentChatId(){
+  try { localStorage.setItem("dzmm_curchat", currentChatId); } catch(e){}
+}
+
 // ─── Tiny synchronous values stay in localStorage (needed at boot, small) ───
 let token = localStorage.getItem("dzmm_token") || "";
 let mode = localStorage.getItem("dzmm_mode") || "story";
@@ -2156,7 +2539,17 @@ window.addEventListener("beforeunload", () => {
 
 function persistCard(){ if(card) _scheduleWrite("card", card); }
 function persistProfile(){ _scheduleWrite("profile", profile); }
-function persistHistories(){ _scheduleWrite("histories", histories); }
+function persistHistories(){
+  _scheduleWrite("histories", histories);
+  // For non-main chats, the live history lives on chats[id].history, so we
+  // also need to persist chats. Updating lastAt for the current chat as a
+  // side-effect is reasonable here since this is called after appending msgs.
+  if (chats && !isMainChat()){
+    const c = chats[currentChatId];
+    if (c) c.lastAt = Date.now();
+  }
+  if (chats) _scheduleWrite("chats", chats);
+}
 function persistStats(){ _scheduleWrite("stats", stats); }
 function persistSummaries(){ _scheduleWrite("summaries", summaries); }
 function persistPendingMilestone(){ _scheduleWrite("pendingMilestone", pendingMilestone); }
@@ -2281,10 +2674,44 @@ function refreshTopBar() {
   const ava = $("avatarChar");
   const avaBox = $("charAvatar");
   const name = $("charNameDisplay");
+  const sub = $("charSubDisplay");
   const tag = $("charTagDisplay");  // may be null — status text was removed
+  // ─── Sec / group chat: top bar shows that chat's identity, not main card ───
+  if (typeof currentChatId !== "undefined" && currentChatId !== "main" && chats && chats[currentChatId]){
+    const chat = chats[currentChatId];
+    if (chat.type === "sec"){
+      const sec = getSecById(chat.id.replace(/^sec_/, ""));
+      if (sec){
+        ava.textContent = (sec.name || "?").slice(0, 1);
+        _renderTopAvatarFor(sec.avatar);
+        name.textContent = sec.name || "未命名";
+        if (sub){ sub.textContent = sec.nickname || sec.description || "私聊"; sub.classList.remove("hidden"); }
+        if (tag) tag.textContent = "私聊";
+      }
+    } else if (chat.type === "group"){
+      const members = _groupMembers(chat);
+      ava.textContent = "群";
+      _renderTopAvatarFor(null);
+      avaBox.style.background = "linear-gradient(135deg,#84E582,#06C755)";
+      name.textContent = chat.title || "群聊";
+      if (sub){
+        const namesPreview = members.map(m => m.name).slice(0, 4).join("、") + (members.length > 4 ? ` 等 ${members.length} 人` : "");
+        sub.textContent = namesPreview || "(无成员)";
+        sub.classList.remove("hidden");
+      }
+      if (tag) tag.textContent = "群聊";
+    }
+    refreshInputPlaceholder();
+    refreshTimeChip();
+    return;
+  }
+  // ─── Main chat top bar (original behavior) ───
+  if (sub){ sub.textContent = ""; sub.classList.add("hidden"); }
   if (card && card.name) {
     ava.textContent = card.name.slice(0, 1);
     name.textContent = card.name;
+    // Reset bg to default avatar gradient since group view may have set green
+    if (avaBox) avaBox.style.background = "";
     // Render avatar image if card has one; otherwise fall back to initial.
     _renderTopAvatar();
     if (tag){
@@ -2302,8 +2729,35 @@ function refreshTopBar() {
   }
   refreshTimeChip();
 }
+function _renderTopAvatarFor(avatarDataUrl){
+  const box = $("charAvatar"); if (!box) return;
+  const prev = box.querySelector("img"); if (prev) prev.remove();
+  const span = box.querySelector("span");
+  if (avatarDataUrl){
+    if (span) span.style.display = "none";
+    const img = document.createElement("img");
+    img.src = avatarDataUrl;
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;";
+    box.appendChild(img);
+  } else {
+    if (span) span.style.display = "";
+  }
+}
 
 function refreshInputPlaceholder(){
+  // Chat-context-aware placeholder
+  if (typeof currentChatId !== "undefined" && currentChatId !== "main" && chats && chats[currentChatId]){
+    const chat = chats[currentChatId];
+    if (chat.type === "sec"){
+      const sec = getSecById(chat.id.replace(/^sec_/, ""));
+      input.placeholder = `发消息给${(sec && sec.name) || "..."}…`;
+      return;
+    }
+    if (chat.type === "group"){
+      input.placeholder = `在「${chat.title || "群"}」里说话 (输入 @ 提及)…`;
+      return;
+    }
+  }
   if (!card){ input.placeholder = "说点什么..."; return; }
   const baseName = card.name;
   const m = (typeof currentMarker !== "undefined") ? currentMarker : "dialogue";
@@ -2314,13 +2768,22 @@ function refreshInputPlaceholder(){
 }
 
 function applyMode() {
-  document.body.classList.toggle("intimate", mode === "intimate");
-  document.body.classList.toggle("story", mode === "story");
-  document.body.classList.toggle("chat", mode === "chat");
+  // For sec / group chats, force chat-style UI (LINE bubbles, no stats columns)
+  // regardless of `mode`. The `mode` variable still tracks the user's last
+  // main-chat mode so it returns to it when they tap the main chat.
+  const isAux = (typeof currentChatId !== "undefined") && currentChatId !== "main";
+  const effectiveMode = isAux ? "chat" : mode;
+
+  document.body.classList.toggle("intimate", effectiveMode === "intimate");
+  document.body.classList.toggle("story", effectiveMode === "story");
+  document.body.classList.toggle("chat", effectiveMode === "chat");
   // chat mode also uses an extra class to decide which gauge to show in the
   // stats popover, driven by lastChatStatKind ("stats" → aff/int, "arousal" → 快感)
-  document.body.classList.toggle("chat-stats-stats", mode === "chat" && lastChatStatKind !== "arousal");
-  document.body.classList.toggle("chat-stats-arousal", mode === "chat" && lastChatStatKind === "arousal");
+  document.body.classList.toggle("chat-stats-stats", effectiveMode === "chat" && lastChatStatKind !== "arousal");
+  document.body.classList.toggle("chat-stats-arousal", effectiveMode === "chat" && lastChatStatKind === "arousal");
+  // Aux-chat flag: hide stats button etc.
+  document.body.classList.toggle("aux-chat", isAux);
+  // Mode-pick popover should still show the mode the user last chose for main
   document.querySelectorAll("[data-mode]").forEach(b => {
     b.classList.toggle("active", b.dataset.mode === mode);
   });
@@ -2334,6 +2797,8 @@ function applyMode() {
   refreshStats();   // sync the visible stat-bar (story vs intimate) to current mode
   renderMessages();
   updateSendBtn();
+  // Refresh chat list (active highlight) if drawer is open
+  if ($("chatListDrawer")?.classList.contains("open")){ renderChatList(); }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2530,7 +2995,16 @@ function flashClimax(){
   }
 }
 
-function currentHistory(){ return histories[mode]; }
+function currentHistory(){
+  // Main chat routes to the per-mode `histories` for backward compatibility
+  // (story/intimate/chat all live there). Sec chats and group chats keep
+  // their own history on chat.history.
+  if (isMainChat()) return histories[mode];
+  const c = getCurrentChat();
+  if (!c) return histories[mode];
+  if (!Array.isArray(c.history)) c.history = [];
+  return c.history;
+}
 
 // ═══════════════════════════════════════════════════════════
 // Tag parser
@@ -2673,6 +3147,16 @@ function parseAssistantOutput(text, partial, forChat){
     if (partial){
       t = t.replace(/\[SCENE\][\s\S]*$/i, "").trim();
     }
+    // ── Defensive cleanup for history that was originally generated in
+    // story / intimate mode but is now being rendered in chat mode (e.g.
+    // user switched modes, or earlier code wrote to histories.chat by
+    // mistake). Chat bubbles must be pure typed text — strip narrative
+    // *inner monologue*, (action parens), and orphan "快感 +1" status
+    // lines that aren't wrapped in [STATS]/[AROUSAL].
+    t = t.replace(/\*[^\n*]+\*/g, " ");
+    t = t.replace(/[（(][^（()）\n]{1,80}[)）]/g, " ");
+    t = t.replace(/^[ \t]*(?:好感|亲密|親密|快感|心理|生理)[\s　：:]*[+\-±]?\s*\d+.*$/gmi, "");
+    t = t.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
     // Split into bubbles by blank line. Also single newlines inside a
     // bubble are preserved by replacing them with a space if they exist —
     // most models will use \n\n as the bubble break, so single \n inside
@@ -2916,12 +3400,87 @@ function renderMessages() {
     $("emptyImport").addEventListener("click", () => $("fileInput").click());
     return;
   }
+
+  // ─── Sec chat (private with a secondary character) ───
+  if (isSecChat()){
+    const c = getCurrentChat();
+    const sec = getSecById(c.id.replace(/^sec_/, ""));
+    if (!sec){
+      const div = document.createElement("div");
+      div.className = "self-center py-2 fade-up";
+      div.innerHTML = `<span class="sys-divider">角色不存在</span>`;
+      chatArea.appendChild(div); return;
+    }
+    const h = currentHistory();
+    if (h.length === 0){
+      const div = document.createElement("div");
+      div.className = "self-center py-2 fade-up";
+      div.innerHTML = `<span class="sys-divider">和 ${escapeHTML(sec.name)} 的聊天 · 由你先开口</span>`;
+      chatArea.appendChild(div); return;
+    }
+    let lastDateKey = null;
+    for (let idx = 0; idx < h.length; idx++){
+      const m = h[idx];
+      if (m.at){
+        const k = _dateKey(m.at);
+        if (k !== lastDateKey){ renderDatePill(m.at); lastDateKey = k; }
+      }
+      if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at);
+      else if (m.role === "assistant") buildSecChatBubble(sec, m.content, false, undefined, m.at);
+      else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
+    }
+    requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
+    return;
+  }
+
+  // ─── Group chat ───
+  if (isGroupChat()){
+    const chat = getCurrentChat();
+    const members = _groupMembers(chat);
+    const h = currentHistory();
+    if (h.length === 0){
+      const div = document.createElement("div");
+      div.className = "self-center py-2 fade-up";
+      const namesPreview = members.map(m => m.name).slice(0, 5).join("、") + (members.length > 5 ? " 等" : "");
+      div.innerHTML = `<span class="sys-divider">${escapeHTML(chat.title || "群聊")} · ${escapeHTML(namesPreview)}${members.length ? " 在线" : "(无成员)"}</span>`;
+      chatArea.appendChild(div); return;
+    }
+    let lastDateKey = null;
+    for (let idx = 0; idx < h.length; idx++){
+      const m = h[idx];
+      if (m.at){
+        const k = _dateKey(m.at);
+        if (k !== lastDateKey){ renderDatePill(m.at); lastDateKey = k; }
+      }
+      if (m.role === "user"){
+        renderGroupUserMessage(m.display || m.content, idx, m.at);
+      } else if (m.role === "assistant_group"){
+        const segs = m.segments || [];
+        segs.forEach(seg => {
+          const mem = _findMemberByName(members, seg.speakerName) || { name: seg.speakerName, kind:"sec" };
+          chatArea.appendChild(_buildGroupAssistantRow(mem, seg.text, false, m.at));
+        });
+      } else if (m.role === "assistant"){
+        // legacy fallback
+        const mem = members[0] || { name:"?", kind:"sec" };
+        chatArea.appendChild(_buildGroupAssistantRow(mem, m.content, false, m.at));
+      } else if (m.role === "system_ui"){
+        renderSystemDivider(m.content, m.error);
+      }
+    }
+    requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
+    return;
+  }
+
+  // ─── Main chat: original story / intimate / chat modes ───
   const h = currentHistory();
   if (h.length === 0){
     const div = document.createElement("div");
     div.className = "self-center py-2 fade-up";
     div.innerHTML = `<span class="sys-divider">${
-      mode === "intimate" ? "亲密对话 · 由你先说话" : "故事对话 · 由你先说话"
+      mode === "intimate" ? "亲密对话 · 由你先说话"
+      : mode === "chat" ? "聊天对话 · 由你先开口"
+      : "故事对话 · 由你先说话"
     }</span>`;
     chatArea.appendChild(div);
     return;
@@ -2965,7 +3524,7 @@ function renderUserMessage(content, idx, at, quote){
   // LINE-style layout: side-info (已读 + time) sits to the LEFT of the green
   // bubble. In chat mode show "已读" + time; in other modes just show time.
   // The side-info is small grey text vertically aligned to the bubble bottom.
-  const isChat = mode === "chat";
+  const isChat = mode === "chat" || (typeof currentChatId !== "undefined" && currentChatId !== "main");
   const sideInfo = isChat
     ? `<span class="msg-side-info"><span class="msg-read">已读</span><span class="msg-time">${time}</span></span>`
     : `<span class="msg-side-info"><span class="msg-time">${time}</span></span>`;
@@ -4003,6 +4562,14 @@ async function send(forcedText, opts) {
   if (!token) { addSystemMessage("请先在顶部填入 API token", true); return; }
   if (!currentModel) { addSystemMessage("没有可用模型", true); return; }
 
+  // ─── Route to chat-type-specific handlers ───
+  if (isSecChat()){
+    return sendToSecChat(rawText, forcedText !== undefined);
+  }
+  if (isGroupChat()){
+    return sendToGroupChat(rawText, forcedText !== undefined);
+  }
+
   // Marker packaging — user's input intent is encoded but not shown in input
   // `forcedText` (推进/承接/时跳/initial) bypasses marker wrapping.
   let displayText, sentText;
@@ -4249,6 +4816,631 @@ async function send(forcedText, opts) {
 //  prompt 已经把规则写到必须每轮输出的程度，没有 fallback。)
 
 // ═══════════════════════════════════════════════════════════
+// Secondary chat (private with a non-main character) — chat-style only,
+// no stats, no milestones, much simpler.
+// ═══════════════════════════════════════════════════════════
+function buildSystemPromptSec(sec){
+  const lines = [];
+  const userName = (card && card.user_name) || (profile && profile.name) || "玩家";
+  lines.push(`# 角色扮演设定 (聊天模式)`);
+  lines.push(`你扮演「${sec.name}」${sec.nickname ? `(${sec.nickname})` : ""}。严格保持人设、避免出戏、避免使用「作为 AI」之类的元叙述。`);
+  if (sec.description){
+    lines.push(`\n## 简介`);
+    lines.push(sec.description);
+  }
+  if (sec.personality){
+    lines.push(`\n## 性格与说话方式`);
+    lines.push(sec.personality);
+  }
+  if (sec.background){
+    lines.push(`\n## 背景`);
+    lines.push(sec.background);
+  }
+
+  // Shared world
+  if (card && card.name){
+    lines.push(`\n## 这个世界里还有谁`);
+    lines.push(`- 主角:${card.name}${card.tagline ? ` (${card.tagline})` : ""}${card.description ? ` — ${card.description.slice(0,80)}` : ""}`);
+    const others = (card.secondary_characters || []).filter(s => s.id !== sec.id);
+    others.forEach(s => {
+      const nick = s.nickname ? ` (${s.nickname})` : "";
+      const desc = s.description ? ` — ${s.description}` : "";
+      lines.push(`- ${s.name}${nick}${desc}`);
+    });
+    lines.push(`你和这些人共存于同一个世界。如果对话提到他们,你可以基于他们的设定自然反应。`);
+  }
+  if (card && card.locations && card.locations.length){
+    lines.push(`\n## 可用地点`);
+    card.locations.slice(0, 30).forEach(l => {
+      lines.push(`- ${l.name}${l.description ? ` — ${l.description}` : ""}`);
+    });
+  }
+  if (card && card.terms && card.terms.length){
+    lines.push(`\n## 专有名词`);
+    card.terms.forEach(t => {
+      lines.push(`- ${t.name}${t.description ? ` — ${t.description}` : ""}`);
+    });
+  }
+
+  // Player profile (shared)
+  const profileLines = [];
+  if (profile.name) profileLines.push(`- 名字:${profile.name}`);
+  if (profile.age) profileLines.push(`- 年龄:${profile.age}`);
+  if (profile.appearance) profileLines.push(`- 外型:${profile.appearance}`);
+  if (profile.identity) profileLines.push(`- 身份/职业:${profile.identity}`);
+  if (profile.personality) profileLines.push(`- 性格/习惯:${profile.personality}`);
+  if (profile.background) profileLines.push(`- 背景:${profile.background}`);
+  if (profileLines.length){
+    lines.push(`\n## 玩家设定 (对方是谁)`);
+    lines.push(...profileLines);
+    lines.push(`你称呼对方为「${userName}」。`);
+  } else {
+    lines.push(`\n你称呼对方为「${userName}」。`);
+  }
+
+  lines.push(`\n## 模式:聊天 (在线私信)`);
+  lines.push(`这是你和${userName}通过手机/IM(类似 LINE / 微信 / iMessage)的一对一私聊。`);
+  lines.push(`- 没有"在场"、没有动作描写、没有旁白、没有场景描写——只有打字。`);
+  lines.push(`- 看不到对方的表情,只能从文字本身判断对方的状态。`);
+  lines.push(`- 这是普通聊天,不计算好感/亲密度等数值。`);
+  lines.push(`- 一条消息可以分成 1~3 条短气泡发出来,每条独立的一行就是一个气泡。`);
+  lines.push(`- 默认保持简短自然(1-3 短句一条气泡),不要长段落、不要列表、不要写小说叙述。`);
+  lines.push(`- 不要使用任何 \`[XXX]...[/XXX]\` 标签。直接打字。`);
+  lines.push(`- 不要用括号包语气词(如 "(笑)"),改用省略号、emoji 或半句话停住等真人打字的形式。`);
+
+  if (sec.system_prompt){
+    lines.push(`\n## 角色专属指令 (最高优先级)`);
+    lines.push(sec.system_prompt);
+  }
+  return lines.join("\n");
+}
+
+async function sendToSecChat(rawText, isForced){
+  const c = getCurrentChat();
+  const sec = getSecById(c.id.replace(/^sec_/, ""));
+  if (!sec){ addSystemMessage("角色不存在", true); return; }
+
+  const displayText = rawText;
+  const sentText = rawText;
+  const h = currentHistory();
+  const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now() };
+  h.push(newMsg);
+  renderUserMessage(displayText, h.length - 1, newMsg.at);
+  if (!isForced){ input.value = ""; input.style.height = "auto"; }
+  addTyping();
+  setStreamingUI(true);
+  abortController = new AbortController();
+
+  const fullSystem = buildSystemPromptSec(sec);
+  const apiMessages = h.map(m => ({ role: m.role, content: m.content }));
+  const body = {
+    model: currentModel,
+    style: currentStyle,
+    user_name: (card && card.user_name) || "玩家",
+    user_id: USER_ID,
+    conversation_id: "conv_" + c.id,
+    request_id: `req_${Date.now()}`,
+    card: {
+      name: sec.name,
+      description: sec.description || "",
+      personality: sec.personality || "",
+      scenario: "",
+      first_message: "",
+      system_prompt: fullSystem
+    },
+    context: [],
+    messages: apiMessages,
+    max_tokens: currentMaxTokens,
+    temperature: currentTemp,
+    stream: true
+  };
+
+  let assistantText = "";
+  let liveBubble = null;
+  let scheduledRender = false;
+  const scheduleRender = () => {
+    if (scheduledRender) return;
+    scheduledRender = true;
+    requestAnimationFrame(() => {
+      scheduledRender = false;
+      if (!liveBubble){
+        removeTyping();
+        liveBubble = buildSecChatBubble(sec, assistantText, true);
+      } else {
+        buildSecChatBubble(sec, assistantText, true, liveBubble);
+      }
+      maybeScrollToBottom();
+    });
+  };
+
+  try {
+    const r = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+      signal: abortController.signal
+    });
+    if (!r.ok || !r.body) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream:true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const raw of lines){
+        const line = raw.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload);
+          const delta = ev.choices?.[0]?.delta?.content;
+          if (delta){ assistantText += delta; scheduleRender(); }
+        } catch(_){}
+      }
+    }
+    removeTyping();
+    if (assistantText){
+      if (!liveBubble){
+        liveBubble = buildSecChatBubble(sec, assistantText, false);
+      } else {
+        buildSecChatBubble(sec, assistantText, false, liveBubble);
+      }
+      h.push({ role:"assistant", content: assistantText, at: Date.now() });
+      persistHistories();
+    } else {
+      addSystemMessage("(收到空回复)", true);
+    }
+  } catch(err){
+    removeTyping();
+    if (err.name === "AbortError"){ addSystemMessage("已停止"); }
+    else {
+      console.error(err);
+      addSystemMessage("请求失败: " + String(err.message || err).slice(0, 120), true);
+    }
+  } finally {
+    abortController = null;
+    setStreamingUI(false);
+  }
+}
+
+// Render an assistant bubble for sec chat — chat-style, multiple line bubbles
+// based on newline splits (similar to chat-mode rendering, but no [STATS] parsing).
+function buildSecChatBubble(sec, rawText, partial, wrap, atOverride){
+  const newBubble = !wrap;
+  if (newBubble){
+    wrap = document.createElement("div");
+    wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
+    const timeMs = atOverride || Date.now();
+    const time = new Date(timeMs).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    wrap.innerHTML = `
+      <span class="meta-line ai-name">${escapeHTML(sec.name)}</span>
+      <div class="ai-msg-line flex items-end gap-1.5 w-full">
+        <div class="chat-bubbles-col" data-chat-host></div>
+        <span class="msg-side-info msg-side-info-ai"><span class="msg-time">${time}</span></span>
+      </div>
+    `;
+    chatArea.appendChild(wrap);
+  }
+  const host = wrap.querySelector("[data-chat-host]");
+  host.innerHTML = "";
+  // Split by newlines into separate line-bubbles (LINE-style)
+  const parts = String(rawText || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0 && partial){
+    const b = document.createElement("div");
+    b.className = "bubble-ai chat-line-bubble streaming";
+    const p = document.createElement("p");
+    p.className = "dlg streaming";
+    p.textContent = "";
+    b.appendChild(p); host.appendChild(b);
+  } else {
+    parts.forEach((line, idx) => {
+      const b = document.createElement("div");
+      const isLast = idx === parts.length - 1;
+      const isLive = partial && isLast;
+      b.className = "bubble-ai chat-line-bubble" + (isLive ? " streaming" : "");
+      const p = document.createElement("p");
+      p.className = "dlg" + (isLive ? " streaming" : "");
+      p.textContent = line;
+      b.appendChild(p); host.appendChild(b);
+    });
+  }
+  if (newBubble) maybeScrollToBottom();
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Group chat — multiple members can reply, AI picks the speaker(s),
+// player can @mention to force-pick.
+// ═══════════════════════════════════════════════════════════
+function _groupMembers(chat){
+  // Returns array of { id, kind: "main"|"sec", name, sec? }
+  const out = [];
+  (chat.memberIds || []).forEach(id => {
+    if (id === "__main__"){
+      if (card && card.name) out.push({ id:"__main__", kind:"main", name: card.name });
+    } else {
+      const sec = getSecById(id);
+      if (sec) out.push({ id: sec.id, kind:"sec", name: sec.name, sec });
+    }
+  });
+  return out;
+}
+
+function buildSystemPromptGroup(chat, forcedSpeakers){
+  const lines = [];
+  const members = _groupMembers(chat);
+  const userName = (card && card.user_name) || (profile && profile.name) || "玩家";
+
+  lines.push(`# 多人群聊模式`);
+  lines.push(`这是一个名为「${chat.title || "群聊"}」的群聊。成员有玩家(${userName})、以及下面这些角色:`);
+  members.forEach(m => {
+    if (m.kind === "main" && card){
+      lines.push(`\n## 角色:${card.name}${card.tagline ? ` — ${card.tagline}` : ""}`);
+      if (card.personality) lines.push(`性格:${card.personality}`);
+      if (card.description) lines.push(`背景:${card.description.slice(0, 240)}`);
+    } else if (m.kind === "sec"){
+      const s = m.sec;
+      lines.push(`\n## 角色:${s.name}${s.nickname ? ` (${s.nickname})` : ""}${s.description ? ` — ${s.description}` : ""}`);
+      if (s.personality) lines.push(`性格:${s.personality}`);
+      if (s.background) lines.push(`背景:${s.background.slice(0, 240)}`);
+    }
+  });
+
+  // World
+  if (card && card.locations && card.locations.length){
+    lines.push(`\n## 可用地点`);
+    card.locations.slice(0, 20).forEach(l => {
+      lines.push(`- ${l.name}${l.description ? ` — ${l.description}` : ""}`);
+    });
+  }
+  if (card && card.terms && card.terms.length){
+    lines.push(`\n## 专有名词`);
+    card.terms.forEach(t => {
+      lines.push(`- ${t.name}${t.description ? ` — ${t.description}` : ""}`);
+    });
+  }
+
+  // Player profile
+  const profileLines = [];
+  if (profile.name) profileLines.push(`- 名字:${profile.name}`);
+  if (profile.age) profileLines.push(`- 年龄:${profile.age}`);
+  if (profile.appearance) profileLines.push(`- 外型:${profile.appearance}`);
+  if (profile.identity) profileLines.push(`- 身份/职业:${profile.identity}`);
+  if (profile.personality) profileLines.push(`- 性格/习惯:${profile.personality}`);
+  if (profile.background) profileLines.push(`- 背景:${profile.background}`);
+  if (profileLines.length){
+    lines.push(`\n## 玩家设定`);
+    lines.push(...profileLines);
+  }
+
+  lines.push(`\n## 群聊输出格式 (必须严格遵守)`);
+  lines.push(`你需要扮演**全部上述角色**(玩家由真人扮演,你不扮演玩家)。`);
+  lines.push(`每条发言必须以严格的格式输出,**每条独立一行**,以方括号包住发言人名字开始:`);
+  lines.push(`\`\`\``);
+  lines.push(`[发言人名字] 这一条消息的内容`);
+  lines.push(`[另一个发言人] ta 的话`);
+  lines.push(`[发言人名字] 同一个人可以连发多条`);
+  lines.push(`\`\`\``);
+  lines.push(`要点:`);
+  lines.push(`- 发言人名字必须**完全匹配**上面列出的角色名(区分大小写,不能用别名)。`);
+  lines.push(`- 每行只放一条消息,**不要**在一行里塞多个 \`[名字]\` 标签。`);
+  lines.push(`- **不要**输出旁白、动作描写、场景描写、内心独白——这是群聊,只有打字。`);
+  lines.push(`- **不要**使用 \`[STATS]\`、\`[CARD_PATCH]\` 等其他标签。`);
+  lines.push(`- 每条消息保持简短自然(1-3 短句),像真人在群里发言的样子。`);
+  lines.push(`- 不同角色用各自的人设、语气、说话习惯,**不要让所有人讲同一种话**。`);
+  lines.push(`- 角色之间可以互相回应、调侃、抬杠、@提到对方——这是有活力的群聊。`);
+  lines.push(`- 不要每个角色都强行发言。沉默/不发言也是一种合理选择。**每轮发言总数控制在 1~5 条之间**,如果话题只适合一个人接,就只让那一个人发就行。`);
+  lines.push(`- 玩家发言会以 \`[${userName}] ...\` 的形式出现在历史里。你**不要**替玩家发言。`);
+
+  if (forcedSpeakers && forcedSpeakers.length){
+    lines.push(`\n## 本轮必须发言的角色`);
+    lines.push(`玩家明确点名了下列角色,他们**必须**在本轮回应(可以连带其他角色的反应,但点名的人必须出现):`);
+    forcedSpeakers.forEach(name => lines.push(`- ${name}`));
+  } else {
+    lines.push(`\n## 本轮发言选择`);
+    lines.push(`根据上下文和角色性格,自然决定本轮谁开口、谁沉默。不要为了平均而轮流——让最该回应的人回应。`);
+  }
+  return lines.join("\n");
+}
+
+function _formatGroupHistoryForApi(chat){
+  // The model is the "GM" voicing all chars; we send the player's lines as
+  // user role, and all NPC lines as assistant role formatted as [Name] ....
+  const out = [];
+  for (const m of (chat.history || [])){
+    if (m.role === "user"){
+      const userName = (card && card.user_name) || "玩家";
+      // Re-prefix so the model sees consistent "[name] ..." format
+      out.push({ role:"user", content: `[${userName}] ${m.content}` });
+    } else if (m.role === "assistant_group"){
+      // group format: { role, segments: [{ speakerName, text }] }
+      const lines = (m.segments || []).map(s => `[${s.speakerName}] ${s.text}`);
+      out.push({ role:"assistant", content: lines.join("\n") });
+    } else if (m.role === "assistant"){
+      // legacy plain assistant (shouldn't happen for groups, but handle gracefully)
+      out.push({ role:"assistant", content: m.content });
+    }
+  }
+  return out;
+}
+
+function _parseGroupOutput(text, validNames){
+  // Parse "[Name] text" lines. Tolerant of extra whitespace, of full-width
+  // brackets, of speaker reuse. Returns array of { speakerName, text }.
+  const out = [];
+  if (!text) return out;
+  const lines = String(text).split(/\r?\n/);
+  // Match [name] or 【name】 at start of line
+  const re = /^[\[【]\s*([^\]】\n]{1,40})\s*[\]】]\s*(.*)$/;
+  let cur = null;
+  for (const raw of lines){
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(re);
+    if (m){
+      const name = m[1].trim();
+      const txt = m[2].trim();
+      // Match name against valid (case-sensitive but tolerant of extra spaces)
+      const matched = validNames.find(n => n === name)
+                   || validNames.find(n => n.toLowerCase() === name.toLowerCase());
+      if (matched){
+        if (cur) out.push(cur);
+        cur = { speakerName: matched, text: txt };
+      } else {
+        // unknown speaker — treat as continuation of previous, or skip
+        if (cur) cur.text += (cur.text ? "\n" : "") + line;
+      }
+    } else {
+      // continuation of previous
+      if (cur) cur.text += (cur.text ? "\n" : "") + line;
+    }
+  }
+  if (cur) out.push(cur);
+  // Drop empty texts
+  return out.filter(s => s.text);
+}
+
+function _extractForcedSpeakersFromText(rawText, members){
+  // Find @name at the start (or anywhere) of user input, map to member names.
+  // Returns { forcedSpeakers: [name,...], stripped: text (with @ kept for display) }
+  const memberNames = members.filter(m => m.kind === "sec" || m.kind === "main").map(m => m.name);
+  const found = [];
+  // Match @name where name is any of the member names (longest first)
+  const sorted = memberNames.slice().sort((a,b) => b.length - a.length);
+  for (const n of sorted){
+    // Word-boundary-ish: @<name> followed by space/punct/end
+    const re = new RegExp("@" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\u4e00-\\u9fa5A-Za-z0-9])");
+    if (re.test(rawText) && !found.includes(n)) found.push(n);
+  }
+  return { forcedSpeakers: found, stripped: rawText };
+}
+
+async function sendToGroupChat(rawText, isForced){
+  const chat = getCurrentChat();
+  const members = _groupMembers(chat);
+  if (members.length === 0){
+    addSystemMessage("群里还没有角色成员", true); return;
+  }
+
+  // Extract @mentions
+  const { forcedSpeakers } = _extractForcedSpeakersFromText(rawText, members);
+
+  const displayText = rawText;
+  const sentText = rawText;
+  const h = currentHistory();
+  const newMsg = { role:"user", content: sentText, display: displayText, at: Date.now() };
+  h.push(newMsg);
+  renderGroupUserMessage(displayText, h.length - 1, newMsg.at);
+  if (!isForced){ input.value = ""; input.style.height = "auto"; }
+  addTyping();
+  setStreamingUI(true);
+  abortController = new AbortController();
+
+  const fullSystem = buildSystemPromptGroup(chat, forcedSpeakers);
+  const apiMessages = _formatGroupHistoryForApi(chat);
+  const validNames = members.map(m => m.name);
+  const body = {
+    model: currentModel,
+    style: currentStyle,
+    user_name: (card && card.user_name) || "玩家",
+    user_id: USER_ID,
+    conversation_id: "conv_" + chat.id,
+    request_id: `req_${Date.now()}`,
+    card: {
+      name: chat.title || "群聊",
+      description: "",
+      personality: "",
+      scenario: "",
+      first_message: "",
+      system_prompt: fullSystem
+    },
+    context: [],
+    messages: apiMessages,
+    max_tokens: Math.max(currentMaxTokens, 800),
+    temperature: currentTemp,
+    stream: true
+  };
+
+  let assistantText = "";
+  let liveWrap = null;
+  let scheduledRender = false;
+  const scheduleRender = () => {
+    if (scheduledRender) return;
+    scheduledRender = true;
+    requestAnimationFrame(() => {
+      scheduledRender = false;
+      const segs = _parseGroupOutput(assistantText, validNames);
+      if (!liveWrap){ removeTyping(); }
+      liveWrap = renderGroupAssistantStreaming(segs, members, liveWrap);
+      maybeScrollToBottom();
+    });
+  };
+
+  try {
+    const r = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "Content-Type":"application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+      signal: abortController.signal
+    });
+    if (!r.ok || !r.body) throw new Error(`${r.status} ${(await r.text()).slice(0, 120)}`);
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true){
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream:true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const raw of lines){
+        const line = raw.trim();
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload);
+          const delta = ev.choices?.[0]?.delta?.content;
+          if (delta){ assistantText += delta; scheduleRender(); }
+        } catch(_){}
+      }
+    }
+    removeTyping();
+    const segs = _parseGroupOutput(assistantText, validNames);
+    if (segs.length){
+      // Render final (no streaming indicator)
+      if (liveWrap) liveWrap.remove();
+      const finalWrap = renderGroupAssistantFinal(segs, members);
+      h.push({ role:"assistant_group", segments: segs, at: Date.now() });
+      persistHistories();
+    } else if (assistantText.trim()){
+      // Couldn't parse — fall back to a single anonymous bubble
+      if (liveWrap) liveWrap.remove();
+      const fallback = renderGroupAssistantFinal(
+        [{ speakerName: members[0]?.name || "?", text: assistantText.trim() }],
+        members
+      );
+      h.push({ role:"assistant_group", segments: [{ speakerName: members[0]?.name || "?", text: assistantText.trim() }], at: Date.now() });
+      persistHistories();
+    } else {
+      addSystemMessage("(收到空回复)", true);
+    }
+  } catch(err){
+    removeTyping();
+    if (err.name === "AbortError"){ addSystemMessage("已停止"); }
+    else {
+      console.error(err);
+      addSystemMessage("请求失败: " + String(err.message || err).slice(0, 120), true);
+    }
+  } finally {
+    abortController = null;
+    setStreamingUI(false);
+  }
+}
+
+// ─── Group chat rendering ───
+function _avatarHTMLForMember(m){
+  if (m.kind === "main" && card && card.avatar){
+    return `<img src="${card.avatar}" alt="">`;
+  }
+  if (m.kind === "sec" && m.sec && m.sec.avatar){
+    return `<img src="${m.sec.avatar}" alt="">`;
+  }
+  const init = (m.name || "?").slice(0, 1);
+  return `<span>${escapeHTML(init)}</span>`;
+}
+function _findMemberByName(members, name){
+  return members.find(m => m.name === name) || members.find(m => m.name.toLowerCase() === (name||"").toLowerCase());
+}
+
+function renderGroupUserMessage(content, idx, at){
+  const wrap = document.createElement("div");
+  wrap.className = "group-msg-row user-row fade-up";
+  if (idx !== undefined) wrap.dataset.idx = idx;
+  const timeMs = at || Date.now();
+  const time = new Date(timeMs).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  const userName = (card && card.user_name) || (profile && profile.name) || "你";
+  // Highlight @mentions in the displayed content
+  const chat = getCurrentChat();
+  const members = _groupMembers(chat);
+  const memberNames = members.map(m => m.name);
+  let html = escapeHTML(content);
+  memberNames.forEach(n => {
+    const re = new RegExp("@" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
+    html = html.replace(re, `<span class="mention-pill">@${escapeHTML(n)}</span>`);
+  });
+  wrap.innerHTML = `
+    <div class="group-msg-ava" style="background:linear-gradient(135deg,#A8C5F0,#5A8FE0);">${escapeHTML(userName.slice(0,1))}</div>
+    <div class="group-msg-col">
+      <span class="group-msg-name">${escapeHTML(userName)}</span>
+      <div class="group-msg-bubble-row">
+        <div class="bubble-user"><div class="user-text">${html}</div></div>
+        <span class="group-msg-time">${time}</span>
+      </div>
+    </div>
+  `;
+  chatArea.appendChild(wrap);
+  maybeScrollToBottom();
+}
+
+function renderGroupAssistantStreaming(segs, members, prevWrap){
+  // For streaming: we build a container that holds one row per parsed segment
+  // and updates in-place. Simplest: rebuild each frame (segs are usually few).
+  if (prevWrap) prevWrap.remove();
+  const container = document.createElement("div");
+  container.className = "group-stream-wrap fade-up";
+  segs.forEach(seg => {
+    const m = _findMemberByName(members, seg.speakerName) || { name: seg.speakerName, kind:"sec" };
+    container.appendChild(_buildGroupAssistantRow(m, seg.text, true));
+  });
+  chatArea.appendChild(container);
+  return container;
+}
+
+function renderGroupAssistantFinal(segs, members, atOverride){
+  const container = document.createElement("div");
+  container.className = "group-final-wrap";
+  segs.forEach(seg => {
+    const m = _findMemberByName(members, seg.speakerName) || { name: seg.speakerName, kind:"sec" };
+    container.appendChild(_buildGroupAssistantRow(m, seg.text, false, atOverride));
+  });
+  chatArea.appendChild(container);
+  maybeScrollToBottom();
+  return container;
+}
+
+function _buildGroupAssistantRow(member, text, isLive, atOverride){
+  const wrap = document.createElement("div");
+  wrap.className = "group-msg-row ai-row fade-up";
+  const timeMs = atOverride || Date.now();
+  const time = new Date(timeMs).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  // Split text into separate line bubbles by newlines (multi-bubble per speaker)
+  const lines = String(text || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const bubblesHTML = (lines.length ? lines : [text || ""])
+    .map((ln, i, arr) => {
+      const liveCls = (isLive && i === arr.length - 1) ? " streaming" : "";
+      return `<div class="bubble-ai chat-line-bubble${liveCls}"><p class="dlg${liveCls}">${escapeHTML(ln)}</p></div>`;
+    }).join("");
+  wrap.innerHTML = `
+    <div class="group-msg-ava">${_avatarHTMLForMember(member)}</div>
+    <div class="group-msg-col">
+      <span class="group-msg-name">${escapeHTML(member.name)}</span>
+      <div class="group-msg-bubble-row" style="flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start;">
+          ${bubblesHTML}
+        </div>
+        <span class="group-msg-time">${time}</span>
+      </div>
+    </div>
+  `;
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════════
 // Input
 // ═══════════════════════════════════════════════════════════
 const autoGrow = () => {
@@ -4409,9 +5601,13 @@ const charDrawer = $("charDrawer");
 const setDrawer = $("setDrawer");
 const keyDrawer = $("keyDrawer");
 const profileDrawer = $("profileDrawer");
+const chatListDrawer = $("chatListDrawer");
+const groupDrawer = $("groupDrawer");
 function openDrawer(d) {
   closeDrawers();
   if (d === charDrawer) populateCharForm();
+  if (d === chatListDrawer) renderChatList();
+  if (d === groupDrawer) showGroupListView();
   d.classList.add("open"); scrim.classList.add("open");
 }
 function closeDrawers() {
@@ -4419,11 +5615,36 @@ function closeDrawers() {
   setDrawer.classList.remove("open");
   keyDrawer.classList.remove("open");
   profileDrawer.classList.remove("open");
+  chatListDrawer.classList.remove("open");
+  groupDrawer.classList.remove("open");
   scrim.classList.remove("open");
   // Reset focus mode on charDrawer so it re-opens clean next time
   _focusCharSection(null);
 }
-$("openCharBtn").addEventListener("click", () => { _focusCharSection(null); openDrawer(charDrawer); });
+$("openCharBtn").addEventListener("click", () => {
+  // In sec chat, open the sec character card; in group chat, open group editor;
+  // otherwise the main char card.
+  if (isSecChat()){
+    const sec = getSecById(currentChatId.replace(/^sec_/, ""));
+    if (sec){
+      _focusCharSection("secondary"); openDrawer(charDrawer);
+      // Auto-open that specific sec card
+      setTimeout(() => {
+        const card_ = $("secCardList")?.querySelector(`.sec-char-card[data-idx="${card.secondary_characters.indexOf(sec)}"]`);
+        if (card_) card_.classList.add("open");
+      }, 50);
+      return;
+    }
+  }
+  if (isGroupChat()){
+    const chat = getCurrentChat();
+    openGroupEditor(chat.id);
+    openDrawer(groupDrawer);
+    return;
+  }
+  _focusCharSection(null); openDrawer(charDrawer);
+});
+$("chatListBtn")?.addEventListener("click", () => { openDrawer(chatListDrawer); });
 // Back button inside charDrawer focus mode
 $("charBackBtn").addEventListener("click", () => { _focusCharSection(null); });
 // Hamburger menu items
@@ -4433,11 +5654,12 @@ $("menu-settings").addEventListener("click", () => { _closeAllTopbarPops(); open
 // "Secondary / locations / props" all live inside charDrawer's accordions —
 // opening charDrawer is enough; the user can scroll to the relevant section.
 $("menu-secondary").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("secondary"); });
+$("menu-groups")?.addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(groupDrawer); });
 $("menu-locations").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("locations"); });
 $("menu-terms").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("terms"); });
 $("menu-props").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("props"); });
 scrim.addEventListener("click", closeDrawers);
-[charDrawer, setDrawer, keyDrawer, profileDrawer].forEach(d => {
+[charDrawer, setDrawer, keyDrawer, profileDrawer, chatListDrawer, groupDrawer].forEach(d => {
   let startY = null;
   d.addEventListener("touchstart", e => { startY = e.touches[0].clientY; });
   d.addEventListener("touchmove", e => {
@@ -4462,6 +5684,19 @@ document.querySelectorAll("[data-mode]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.mode;
     _closeAllTopbarPops();
+    // Mode switching only makes sense on the main chat. If user is in a sec/group
+    // chat and picks a mode, switch them back to the main chat in that mode.
+    if (!isMainChat()){
+      if (target === "intimate" && !ageConfirmed) {
+        _pendingAgeTarget = target;
+        ageModal.classList.add("open");
+        return;
+      }
+      mode = target;
+      localStorage.setItem("dzmm_mode", mode);
+      switchToChat("main");
+      return;
+    }
     if (target === mode) return;
     if (target === "intimate" && !ageConfirmed) {
       _pendingAgeTarget = target;
@@ -4483,7 +5718,13 @@ $("ageOkBtn").addEventListener("click", () => {
   ageConfirmed = true;
   localStorage.setItem("dzmm_age_ok", "yes");
   ageModal.classList.remove("open");
-  setMode(_pendingAgeTarget || "intimate");
+  if (!isMainChat()){
+    mode = _pendingAgeTarget || "intimate";
+    localStorage.setItem("dzmm_mode", mode);
+    switchToChat("main");
+  } else {
+    setMode(_pendingAgeTarget || "intimate");
+  }
   _pendingAgeTarget = null;
 });
 $("ageCancelBtn").addEventListener("click", () => {
@@ -4492,25 +5733,470 @@ $("ageCancelBtn").addEventListener("click", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// Chat list / chat switching
+// ═══════════════════════════════════════════════════════════
+function switchToChat(chatId){
+  if (!chats[chatId]) return;
+  currentChatId = chatId;
+  persistCurrentChatId();
+  // Close mention picker if open
+  const pop = $("mentionPop");
+  if (pop) { pop.classList.remove("open"); pop.innerHTML = ""; }
+  if (typeof _mentionState !== "undefined"){
+    _mentionState.open = false; _mentionState.anchorAt = -1; _mentionState.candidates = [];
+  }
+  // Clear input so prior chat's draft doesn't leak
+  if (input.value){ input.value = ""; input.style.height = "auto"; }
+  // Quote draft is main-chat only
+  if (typeof clearQuoteDraft === "function") clearQuoteDraft();
+  // Re-apply UI mode (since stats panels and input placeholder depend on it)
+  applyMode();
+}
+
+function _previewOfChat(chat){
+  if (!chat) return "";
+  let h;
+  if (chat.id === "main") h = histories[mode] || [];
+  else h = chat.history || [];
+  if (!h.length) return "(还没有消息)";
+  const last = h[h.length - 1];
+  if (last.role === "user") return "你:" + String(last.display || last.content || "").slice(0, 30);
+  if (last.role === "assistant_group"){
+    const seg = (last.segments && last.segments[0]) || null;
+    if (!seg) return "...";
+    return `${seg.speakerName}:${seg.text.slice(0, 24)}`;
+  }
+  if (last.role === "assistant") return String(last.content || "").replace(/\[.*?\][\s\S]*?\[\/.*?\]/g, "").trim().slice(0, 30);
+  return "";
+}
+function _timeOfChat(chat){
+  if (!chat) return "";
+  let last = chat.lastAt || 0;
+  if (chat.id === "main"){
+    const h = histories[mode] || [];
+    if (h.length){ last = Math.max(last, h[h.length - 1].at || 0); }
+  } else {
+    const h = chat.history || [];
+    if (h.length){ last = Math.max(last, h[h.length - 1].at || 0); }
+  }
+  if (!last) return "";
+  const d = new Date(last);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()){
+    return d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+  }
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function renderChatList(){
+  const host = $("chatListBody");
+  if (!host) return;
+  ensureChats();
+  host.innerHTML = "";
+  // Sort: pinned ones (main first, then default group), then others by lastAt desc
+  const items = [];
+  // Main chat
+  items.push({ chat: chats.main, pinned: 1 });
+  // Default group
+  if (chats.group_default) items.push({ chat: chats.group_default, pinned: 2 });
+  // Other chats
+  Object.values(chats).forEach(c => {
+    if (c.id === "main" || c.id === "group_default") return;
+    items.push({ chat: c, pinned: 0 });
+  });
+  items.sort((a,b) => {
+    if (a.pinned !== b.pinned) return a.pinned - b.pinned;
+    const tA = (a.chat.lastAt || 0);
+    const tB = (b.chat.lastAt || 0);
+    return tB - tA;
+  });
+  items.forEach(({ chat }) => {
+    const item = document.createElement("div");
+    item.className = "chat-list-item" + (chat.id === currentChatId ? " active" : "");
+    let title, avaHTML, avaCls = "";
+    if (chat.id === "main"){
+      title = (card && card.name) ? card.name : "主角";
+      avaCls = "is-main";
+      avaHTML = (card && card.avatar)
+        ? `<img src="${card.avatar}" alt="">`
+        : `<span>${escapeHTML(((card && card.name) || "?").slice(0,1))}</span>`;
+    } else if (chat.type === "group"){
+      title = chat.title || "群聊";
+      avaCls = "is-group";
+      avaHTML = `<i class="ph ph-users-three" style="font-size:18px;"></i>`;
+    } else {
+      // sec
+      const sec = getSecById(chat.id.replace(/^sec_/, ""));
+      title = (sec && sec.name) || chat.title || "?";
+      avaHTML = (sec && sec.avatar)
+        ? `<img src="${sec.avatar}" alt="">`
+        : `<span>${escapeHTML(title.slice(0,1))}</span>`;
+    }
+    const preview = _previewOfChat(chat);
+    const time = _timeOfChat(chat);
+    item.innerHTML = `
+      <div class="chat-list-avatar ${avaCls}">${avaHTML}</div>
+      <div class="chat-list-info">
+        <div class="chat-list-title-row">
+          <span class="chat-list-title">${escapeHTML(title)}</span>
+          <span class="chat-list-time">${escapeHTML(time)}</span>
+        </div>
+        <span class="chat-list-preview">${escapeHTML(preview)}</span>
+      </div>
+    `;
+    item.addEventListener("click", () => {
+      switchToChat(chat.id);
+      closeDrawers();
+    });
+    host.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Group manage drawer
+// ═══════════════════════════════════════════════════════════
+let _editingGroupId = null;  // null = creating a new one
+
+function showGroupListView(){
+  $("groupListView").style.display = "";
+  $("groupEditView").style.display = "none";
+  $("groupDrawerTitle").textContent = "群聊";
+  $("groupBackBtn").style.display = "none";
+  renderGroupList();
+}
+function showGroupEditView(){
+  $("groupListView").style.display = "none";
+  $("groupEditView").style.display = "";
+  $("groupBackBtn").style.display = "flex";
+}
+function renderGroupList(){
+  ensureChats();
+  const host = $("groupListBody");
+  host.innerHTML = "";
+  const groups = Object.values(chats).filter(c => c.type === "group");
+  if (groups.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "chat-list-empty";
+    empty.textContent = "还没有群聊。点右上角 + 新建。";
+    host.appendChild(empty);
+    return;
+  }
+  groups.forEach(g => {
+    const item = document.createElement("div");
+    item.className = "chat-list-item";
+    const memberCount = (g.memberIds || []).length;
+    const isDefault = g.id === "group_default";
+    item.innerHTML = `
+      <div class="chat-list-avatar is-group"><i class="ph ph-users-three" style="font-size:18px;"></i></div>
+      <div class="chat-list-info">
+        <div class="chat-list-title-row">
+          <span class="chat-list-title">${escapeHTML(g.title || "未命名群")}${isDefault ? ' <span style="font-size:9px;color:#06A046;background:#D7F4DD;padding:1px 5px;border-radius:99px;margin-left:4px;">默认</span>' : ""}</span>
+          <span class="chat-list-time">${memberCount} 人</span>
+        </div>
+        <span class="chat-list-preview">${_previewOfChat(g)}</span>
+      </div>
+    `;
+    item.addEventListener("click", () => {
+      switchToChat(g.id);
+      closeDrawers();
+    });
+    // Long-press / edit
+    const editBtn = document.createElement("button");
+    editBtn.style.cssText = "background:transparent;border:none;cursor:pointer;color:#5A6878;padding:4px 6px;";
+    editBtn.innerHTML = `<i class="ph ph-pencil-simple"></i>`;
+    editBtn.title = "编辑群";
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openGroupEditor(g.id);
+    });
+    item.appendChild(editBtn);
+    host.appendChild(item);
+  });
+}
+function openGroupEditor(groupId){
+  ensureChats();
+  _editingGroupId = groupId || null;
+  showGroupEditView();
+  if (_editingGroupId && chats[_editingGroupId]){
+    const g = chats[_editingGroupId];
+    $("groupDrawerTitle").textContent = "编辑群聊";
+    $("groupNameInput").value = g.title || "";
+    $("deleteGroupBtn").style.display = (g.id === "group_default") ? "none" : "";
+    $("clearGroupChatBtn").style.display = "";
+  } else {
+    $("groupDrawerTitle").textContent = "新建群聊";
+    $("groupNameInput").value = "";
+    $("deleteGroupBtn").style.display = "none";
+    $("clearGroupChatBtn").style.display = "none";
+  }
+  renderMemberPickList();
+}
+function renderMemberPickList(){
+  const host = $("memberPickList");
+  host.innerHTML = "";
+  const current = _editingGroupId ? (chats[_editingGroupId] || {}) : {};
+  const currentMembers = new Set(current.memberIds || []);
+  // Main
+  if (card && card.name){
+    const item = document.createElement("label");
+    item.className = "member-pick-item";
+    const checked = currentMembers.has("__main__") ? "checked" : "";
+    const avaHTML = card.avatar ? `<img src="${card.avatar}" alt="">` : `<span>${escapeHTML(card.name.slice(0,1))}</span>`;
+    item.innerHTML = `
+      <input type="checkbox" data-member-id="__main__" ${checked}>
+      <div class="member-pick-ava">${avaHTML}</div>
+      <span class="member-pick-name">${escapeHTML(card.name)} <span style="font-size:10px;color:#06A046;">主角</span></span>
+    `;
+    host.appendChild(item);
+  }
+  // Secondary
+  (card?.secondary_characters || []).forEach(s => {
+    const item = document.createElement("label");
+    item.className = "member-pick-item";
+    const checked = currentMembers.has(s.id) ? "checked" : "";
+    const avaHTML = s.avatar ? `<img src="${s.avatar}" alt="">` : `<span>${escapeHTML((s.name||"?").slice(0,1))}</span>`;
+    item.innerHTML = `
+      <input type="checkbox" data-member-id="${escapeHTML(s.id)}" ${checked}>
+      <div class="member-pick-ava">${avaHTML}</div>
+      <span class="member-pick-name">${escapeHTML(s.name)}${s.nickname ? ` <span style="font-size:11px;color:#9BA8B8;">(${escapeHTML(s.nickname)})</span>` : ""}</span>
+    `;
+    host.appendChild(item);
+  });
+}
+
+$("newGroupBtn")?.addEventListener("click", () => { openGroupEditor(null); });
+$("newGroupQuickBtn")?.addEventListener("click", () => { openDrawer(groupDrawer); openGroupEditor(null); });
+$("groupBackBtn")?.addEventListener("click", () => { showGroupListView(); });
+$("saveGroupBtn")?.addEventListener("click", () => {
+  const title = $("groupNameInput").value.trim();
+  if (!title){ alert("请填写群名"); return; }
+  const checked = Array.from($("memberPickList").querySelectorAll("input[type=checkbox]:checked"))
+    .map(el => el.dataset.memberId);
+  if (checked.length === 0){ alert("至少选一个成员"); return; }
+  ensureChats();
+  if (_editingGroupId && chats[_editingGroupId]){
+    const g = chats[_editingGroupId];
+    g.title = title;
+    g.memberIds = checked;
+  } else {
+    const id = "group_" + Math.random().toString(36).slice(2, 8);
+    chats[id] = _makeChat(id, "group", title, checked);
+  }
+  persistChats();
+  showGroupListView();
+  renderChatList();
+});
+$("deleteGroupBtn")?.addEventListener("click", () => {
+  if (!_editingGroupId || !chats[_editingGroupId]) return;
+  if (_editingGroupId === "group_default"){
+    alert("默认群不能删除"); return;
+  }
+  if (!confirm(`删除群「${chats[_editingGroupId].title}」?聊天记录也会清除。`)) return;
+  if (currentChatId === _editingGroupId){ switchToChat("main"); }
+  delete chats[_editingGroupId];
+  persistChats();
+  showGroupListView();
+  renderChatList();
+});
+$("clearGroupChatBtn")?.addEventListener("click", () => {
+  if (!_editingGroupId || !chats[_editingGroupId]) return;
+  if (!confirm(`清空「${chats[_editingGroupId].title}」的聊天记录?群和成员保留,但所有消息会消失。`)) return;
+  chats[_editingGroupId].history = [];
+  persistChats();
+  if (currentChatId === _editingGroupId) renderMessages();
+  addSystemMessage("聊天记录已清空");
+});
+
+// ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
 // Character: secondary & locations chips
 // ═══════════════════════════════════════════════════════════
 function ensureCard(){ if (!card) card = DEFAULT_CARD(); }
+// Make sure every secondary character has an id (backfill for old data)
+function _ensureSecIds(){
+  if (!card || !Array.isArray(card.secondary_characters)) return;
+  let mutated = false;
+  card.secondary_characters.forEach(s => {
+    if (!s.id){ s.id = "sec_" + Math.random().toString(36).slice(2, 10); mutated = true; }
+  });
+  if (mutated) persistCard();
+}
 function renderSecondary(){
-  const list = $("secList"); const arr = card?.secondary_characters || [];
-  $("secCount").textContent = arr.length;
+  const list = $("secCardList"); const arr = card?.secondary_characters || [];
+  const countEl = $("secCount");
+  if (countEl) countEl.textContent = arr.length;
+  if (!list) return;
+  _ensureSecIds();
   list.innerHTML = "";
+  if (arr.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "chat-list-empty";
+    empty.textContent = `还没有次要角色,先用下面表单加一个,或者点上面"导入"载入 JSON`;
+    list.appendChild(empty);
+    return;
+  }
   arr.forEach((s, i) => {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    const nick = s.nickname ? `「${s.nickname}」` : "";
-    chip.innerHTML = `
-      <span class="chip-name">${escapeHTML(s.name)}</span>
-      ${nick ? `<span class="chip-sub">${escapeHTML(nick)}</span>` : ""}
-      ${s.description ? `<span class="chip-sub">· ${escapeHTML(s.description)}</span>` : ""}
-      <button class="chip-x" data-i="${i}" data-kind="sec">×</button>`;
-    list.appendChild(chip);
+    const card_ = document.createElement("div");
+    card_.className = "sec-char-card";
+    card_.dataset.idx = i;
+    const init = (s.name || "?").slice(0, 1);
+    const avaHTML = s.avatar
+      ? `<img src="${s.avatar}" alt="">`
+      : `<span>${escapeHTML(init)}</span>`;
+    const subText = s.nickname
+      ? `「${escapeHTML(s.nickname)}」${s.description ? " · " + escapeHTML(s.description) : ""}`
+      : (s.description ? escapeHTML(s.description) : "(还没简介)");
+    card_.innerHTML = `
+      <div class="sec-char-head">
+        <div class="sec-char-ava">${avaHTML}</div>
+        <div class="sec-char-name-block">
+          <div class="sec-char-name">${escapeHTML(s.name || "未命名")}</div>
+          <div class="sec-char-sub">${subText}</div>
+        </div>
+        <i class="ph ph-caret-right sec-char-caret"></i>
+      </div>
+      <div class="sec-char-body">
+        <div class="field avatar-field">
+          <div class="field-head"><span class="field-label">头像</span></div>
+          <div class="avatar-row">
+            <div class="sec-char-ava" style="width:56px;height:56px;font-size:18px;" data-sec-ava-preview>
+              ${avaHTML}
+            </div>
+            <div class="avatar-actions">
+              <button type="button" class="btn ghost" data-sec-ava-up><i class="ph ph-upload-simple"></i>上传</button>
+              <button type="button" class="btn ghost" data-sec-ava-rm style="${s.avatar ? "" : "display:none;"}"><i class="ph ph-trash"></i>移除</button>
+            </div>
+            <input type="file" data-sec-ava-file accept="image/*" style="display:none;">
+          </div>
+        </div>
+        <div class="field"><div class="field-head"><span class="field-label">名字</span></div><input type="text" class="input" data-sec-field="name" value="${escapeHTML(s.name || "")}"></div>
+        <div class="field"><div class="field-head"><span class="field-label">昵称</span></div><input type="text" class="input" data-sec-field="nickname" value="${escapeHTML(s.nickname || "")}"></div>
+        <div class="field"><div class="field-head"><span class="field-label">一句话介绍</span></div><input type="text" class="input" data-sec-field="description" value="${escapeHTML(s.description || "")}"></div>
+        <div class="field"><div class="field-head"><span class="field-label">性格 / 说话方式</span></div><textarea class="ta" rows="4" data-sec-field="personality" placeholder="性格、说话节奏、口头禅、对玩家的态度…">${escapeHTML(s.personality || "")}</textarea></div>
+        <div class="field"><div class="field-head"><span class="field-label">背景</span></div><textarea class="ta" rows="4" data-sec-field="background" placeholder="过去、社会关系、和其他角色的连系…">${escapeHTML(s.background || "")}</textarea></div>
+        <div class="field"><div class="field-head"><span class="field-label">系统指令 (可选)</span></div><textarea class="ta" rows="3" data-sec-field="system_prompt" placeholder="额外的输出规则、避讳、口头禅…">${escapeHTML(s.system_prompt || "")}</textarea></div>
+        <div class="sec-char-actions">
+          <button class="btn ghost" data-sec-action="save"><i class="ph ph-check"></i>保存</button>
+          <button class="btn ghost" data-sec-action="chat"><i class="ph ph-chat-circle"></i>私聊</button>
+          <button class="btn ghost" data-sec-action="export"><i class="ph ph-download-simple"></i>导出</button>
+          <button class="btn danger" data-sec-action="delete"><i class="ph ph-trash"></i>删除</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(card_);
   });
 }
+// Sec-card interaction: toggle open, edit, save, chat, export, delete, avatar
+document.addEventListener("click", (e) => {
+  const head = e.target.closest(".sec-char-head");
+  if (head && !e.target.closest("[data-sec-action]") && !e.target.closest(".sec-char-actions")){
+    const card_ = head.parentElement;
+    card_.classList.toggle("open");
+    return;
+  }
+  const action = e.target.closest("[data-sec-action]");
+  if (action){
+    const card_ = action.closest(".sec-char-card");
+    if (!card_ || !card) return;
+    const idx = parseInt(card_.dataset.idx);
+    const sec = card.secondary_characters[idx];
+    if (!sec) return;
+    const which = action.dataset.secAction;
+    if (which === "save"){
+      _readSecFieldsFromDOM(card_, sec);
+      persistCard();
+      renderSecondary();
+      // Reopen the same card
+      const newCard = $("secCardList").querySelector(`.sec-char-card[data-idx="${idx}"]`);
+      if (newCard) newCard.classList.add("open");
+      addSystemMessage(`角色已保存:${sec.name}`);
+    } else if (which === "chat"){
+      _readSecFieldsFromDOM(card_, sec);
+      persistCard();
+      // Open or create the sec chat
+      const chatId = "sec_" + sec.id;
+      if (!chats[chatId]){
+        chats[chatId] = _makeChat(chatId, "sec", sec.name, [sec.id]);
+        persistChats();
+      }
+      switchToChat(chatId);
+      closeDrawers();
+    } else if (which === "export"){
+      _readSecFieldsFromDOM(card_, sec);
+      persistCard();
+      const blob = new Blob([JSON.stringify(sec, null, 2)], { type:"application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `sec-${(sec.name||"char").replace(/\s+/g,"_")}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (which === "delete"){
+      if (!confirm(`删除「${sec.name}」?对应的私聊记录也会清除。`)) return;
+      const secId = sec.id;
+      card.secondary_characters.splice(idx, 1);
+      persistCard();
+      // Drop sec chat if exists
+      const chatId = "sec_" + secId;
+      if (chats[chatId]){ delete chats[chatId]; }
+      // Remove from any group
+      Object.values(chats).forEach(c => {
+        if (c.type === "group"){
+          c.memberIds = (c.memberIds || []).filter(id => id !== secId);
+        }
+      });
+      // If currently viewing this sec chat, fall back to main
+      if (currentChatId === chatId){ switchToChat("main"); }
+      persistChats();
+      renderSecondary();
+      renderChatList();
+    }
+    return;
+  }
+  // Avatar upload triggers
+  if (e.target.closest("[data-sec-ava-up]")){
+    const card_ = e.target.closest(".sec-char-card");
+    card_.querySelector("[data-sec-ava-file]")?.click();
+  }
+  if (e.target.closest("[data-sec-ava-rm]")){
+    const card_ = e.target.closest(".sec-char-card");
+    const idx = parseInt(card_.dataset.idx);
+    const sec = card.secondary_characters[idx];
+    if (sec){
+      sec.avatar = "";
+      persistCard();
+      renderSecondary();
+      const newCard = $("secCardList").querySelector(`.sec-char-card[data-idx="${idx}"]`);
+      if (newCard) newCard.classList.add("open");
+    }
+  }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.matches("[data-sec-ava-file]")){
+    const file = e.target.files[0];
+    if (!file) return;
+    const card_ = e.target.closest(".sec-char-card");
+    const idx = parseInt(card_.dataset.idx);
+    const sec = card?.secondary_characters?.[idx];
+    if (!sec) return;
+    _avatarFileToDataURL(file).then(dataUrl => {
+      sec.avatar = dataUrl;
+      _readSecFieldsFromDOM(card_, sec);
+      persistCard();
+      renderSecondary();
+      const newCard = $("secCardList").querySelector(`.sec-char-card[data-idx="${idx}"]`);
+      if (newCard) newCard.classList.add("open");
+    }).catch(err => alert("图片处理失败:" + err.message));
+    e.target.value = "";
+  }
+});
+function _readSecFieldsFromDOM(cardEl, sec){
+  cardEl.querySelectorAll("[data-sec-field]").forEach(el => {
+    const f = el.dataset.secField;
+    sec[f] = el.value;
+  });
+}
+
 function renderLocations(){
   const list = $("locList"); const arr = card?.locations || [];
   $("locCount").textContent = arr.length;
@@ -4546,8 +6232,7 @@ document.addEventListener("click", (e) => {
     const i = parseInt(e.target.dataset.i);
     const kind = e.target.dataset.kind;
     if (!card) return;
-    if (kind === "sec") { card.secondary_characters.splice(i, 1); renderSecondary(); }
-    else if (kind === "loc") { card.locations.splice(i, 1); renderLocations(); }
+    if (kind === "loc") { card.locations.splice(i, 1); renderLocations(); }
     else if (kind === "term") { (card.terms||[]).splice(i, 1); renderTerms(); }
     else if (kind === "prop") { (card.props||[]).splice(i, 1); renderProps(); }
     else if (kind === "patch") { (card.notes||[]).splice(i, 1); renderPatches(); }
@@ -4558,11 +6243,54 @@ $("addSecBtn").addEventListener("click", () => {
   const name = $("secName").value.trim();
   if (!name) { alert("请填写名字"); return; }
   ensureCard();
-  card.secondary_characters.push({
-    name, nickname: $("secNick").value.trim(), description: $("secDesc").value.trim()
+  const newSec = Object.assign(DEFAULT_SEC(), {
+    name,
+    nickname: $("secNick").value.trim(),
+    description: $("secDesc").value.trim()
   });
+  card.secondary_characters.push(newSec);
   $("secName").value = ""; $("secNick").value = ""; $("secDesc").value = "";
   renderSecondary(); persistCard();
+  // Auto-sync default group
+  ensureChats(); persistChats(); renderChatList();
+});
+// Import secondary character JSON (single or array)
+$("importSecBtn")?.addEventListener("click", () => $("fileInputSec").click());
+$("fileInputSec")?.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    ensureCard();
+    const incoming = Array.isArray(data) ? data : [data];
+    let added = 0;
+    incoming.forEach(item => {
+      if (!item || typeof item !== "object" || !item.name) return;
+      const sec = Object.assign(DEFAULT_SEC(), item);
+      // Always assign a fresh id to avoid collisions
+      sec.id = "sec_" + Math.random().toString(36).slice(2, 10);
+      card.secondary_characters.push(sec);
+      added++;
+    });
+    persistCard();
+    ensureChats(); persistChats();
+    renderSecondary(); renderChatList();
+    addSystemMessage(`已导入 ${added} 个次要角色`);
+  } catch(err){
+    console.error(err); alert("导入失败:" + err.message);
+  } finally { e.target.value = ""; }
+});
+$("exportAllSecBtn")?.addEventListener("click", () => {
+  if (!card || !card.secondary_characters || !card.secondary_characters.length){
+    alert("还没有次要角色可导出"); return;
+  }
+  const blob = new Blob([JSON.stringify(card.secondary_characters, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `secondary-characters.json`;
+  a.click();
+  URL.revokeObjectURL(url);
 });
 $("addLocBtn").addEventListener("click", () => {
   const name = $("locName").value.trim();
@@ -4939,7 +6667,12 @@ $("saveCharBtn").addEventListener("click", () => {
     summaries = { story:null, intimate:null, chat:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
     refreshStats();
+    chats = {};
+    currentChatId = "main";
   }
+  _ensureSecIds();
+  ensureChats();
+  persistChats();
   refreshTopBar(); renderMessages(); updateSendBtn();
   closeDrawers();
 });
@@ -4950,9 +6683,16 @@ $("clearCharBtn").addEventListener("click", () => {
   stats = { story:{aff:0,int:0}, intimate:{arousal:0,initiator:"user",laps:0}, chat:{aff:0,int:0,arousal:0,laps:0} };
   pendingMilestone = { story:null, intimate:null, chat:null };
   summaries = { story:null, intimate:null, chat:null };
+  chats = {};
+  currentChatId = "main";
   idbDel("card").catch(()=>{});
+  idbDel("chats").catch(()=>{});
+  try { localStorage.removeItem("dzmm_curchat"); } catch(e){}
   persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
-  refreshStats(); refreshTopBar(); renderMessages(); updateSendBtn();
+  ensureChats();
+  persistChats();
+  applyMode();
+  refreshStats(); refreshTopBar(); renderMessages(); renderSecondary(); updateSendBtn();
   closeDrawers();
 });
 
@@ -5080,8 +6820,15 @@ $("fileInput").addEventListener("change", async (e) => {
     pendingMilestone = { story:null, intimate:null, chat:null };
     summaries = { story:null, intimate:null, chat:null };
     persistHistories(); persistStats(); persistPendingMilestone(); persistSummaries();
+    // Reset all chats and rebuild from the new card
+    chats = {};
+    _ensureSecIds();
+    ensureChats();
+    currentChatId = "main";
+    persistChats(); persistCurrentChatId();
     refreshStats(); populateCharForm(); refreshTopBar();
     renderMessages(); updateSendBtn();
+    renderSecondary();
     addSystemMessage(`已导入角色卡:${card.name}`);
   } catch (err) {
     console.error(err); alert("导入失败:" + err.message);
@@ -5101,7 +6848,9 @@ $("exportAllBtn").addEventListener("click", async () => {
       histories: histories,
       stats: stats,
       summaries: summaries,
-      pendingMilestone: pendingMilestone
+      pendingMilestone: pendingMilestone,
+      chats: chats,
+      currentChatId: currentChatId
     }
   };
   const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
@@ -5169,8 +6918,19 @@ $("fileInputAll").addEventListener("change", async (e) => {
       pendingMilestone = { story:null, intimate:null, chat:null };
       persistPendingMilestone();
     }
+    if (d.chats && typeof d.chats === "object"){
+      chats = d.chats;
+    } else {
+      chats = {};
+    }
+    _ensureSecIds();
+    ensureChats();
+    if (d.currentChatId && chats[d.currentChatId]){ currentChatId = d.currentChatId; }
+    else currentChatId = "main";
+    persistChats(); persistCurrentChatId();
     await flushPending();
-    refreshStats(); populateCharForm(); refreshTopBar(); renderMessages(); updateSendBtn();
+    applyMode();
+    refreshStats(); populateCharForm(); refreshTopBar(); renderMessages(); renderSecondary(); updateSendBtn();
     addSystemMessage("全部数据已导入");
   } catch(err){
     console.error(err);
@@ -5182,29 +6942,42 @@ $("fileInputAll").addEventListener("change", async (e) => {
 
 // ─── Per-chat export (#16) ───
 $("exportChatBtn").addEventListener("click", () => {
-  const h = histories[mode] || [];
-  if (!h.length){ addSystemMessage("当前模式还没有对话内容", true); return; }
+  const h = currentHistory() || [];
+  if (!h.length){ addSystemMessage("当前对话还没有内容", true); return; }
+  const c = getCurrentChat();
+  let kind, title;
+  if (isMainChat()){ kind = mode; title = (card && card.name) || "chat"; }
+  else if (isSecChat()){
+    kind = "sec";
+    const sec = getSecById(currentChatId.replace(/^sec_/, ""));
+    title = (sec && sec.name) || "sec";
+  }
+  else { kind = "group"; title = c.title || "group"; }
   const bundle = {
     schema: "dzmm-chat-export",
     version: 1,
     exportedAt: new Date().toISOString(),
     character: card ? { name: card.name, tagline: card.tagline } : null,
+    chatId: currentChatId,
+    chatType: c.type || "main",
+    kind,
+    title,
     mode: mode,
-    stats: stats[mode],
+    stats: isMainChat() ? stats[mode] : null,
     messages: h
   };
   const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  const safeName = ((card && card.name) || "chat").replace(/[^\w\u4e00-\u9fff-]/g, "_");
+  const safeName = (title || "chat").replace(/[^\w\u4e00-\u9fff-]/g, "_");
   const ts = new Date();
   const pad = n => String(n).padStart(2, "0");
   const stamp = `${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}`;
-  a.download = `dzmm-chat-${safeName}-${mode}-${stamp}.json`;
+  a.download = `dzmm-chat-${safeName}-${kind}-${stamp}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  addSystemMessage(`已导出 ${mode === "story" ? "故事" : "亲密"}模式对话 (${h.length} 条)`);
+  addSystemMessage(`已导出 ${title} 的对话 (${h.length} 条)`);
 });
 
 
@@ -5253,11 +7026,22 @@ $("tempRange").addEventListener("input", e => { currentTemp = parseFloat(e.targe
 $("tokRange").addEventListener("input", e => { currentMaxTokens = parseInt(e.target.value); $("tokVal").textContent = currentMaxTokens; });
 $("resetBtn").addEventListener("click", () => {
   if (!card) { closeDrawers(); return; }
-  if (!confirm(`重置「${mode === "intimate" ? "亲密" : "故事"}」模式的对话?`)) return;
+  // Sec / group chat: just wipe this chat's history
+  if (!isMainChat()){
+    const c = getCurrentChat();
+    if (!c){ closeDrawers(); return; }
+    if (!confirm(`重置当前对话「${c.title || (isSecChat() ? "私聊" : "群聊")}」?`)) return;
+    c.history = [];
+    persistChats();
+    renderMessages(); closeDrawers();
+    return;
+  }
+  if (!confirm(`重置「${mode === "intimate" ? "亲密" : mode === "chat" ? "聊天" : "故事"}」模式的对话?`)) return;
   histories[mode] = [];
   persistHistories();
   if (mode === "story") { stats.story = { aff:0, int:0 }; }
-  else { stats.intimate = { arousal:0, initiator:"user", laps:0 }; }
+  else if (mode === "intimate") { stats.intimate = { arousal:0, initiator:"user", laps:0 }; }
+  else { stats.chat = { aff:0, int:0, arousal:0, laps:0 }; }
   persistStats(); refreshStats();
   // Clear any pending 心动 trigger for this mode too — start fresh.
   pendingMilestone[mode] = null;
@@ -5336,7 +7120,11 @@ function _wireMessageActions(){
 //  - chat mode AI: each .chat-line-bubble is independently tappable
 //  - everything else: the whole .bubble-ai / .bubble-user is one unit
 function _findActionableBubble(target){
-  if (mode === "chat"){
+  // Group chats use a different message structure (segments per turn) — the
+  // edit/delete/regen flow assumes flat user/assistant pairs, so we disable
+  // bubble actions there. Future work could implement per-segment edits.
+  if (isGroupChat()) return null;
+  if (mode === "chat" || (typeof currentChatId !== "undefined" && currentChatId !== "main")){
     return target.closest(".chat-line-bubble, .bubble-user");
   }
   return target.closest(".bubble-ai, .bubble-user");
@@ -5444,7 +7232,7 @@ function _showBubbleActMenu(bubble){
   if (Number.isNaN(idx)) return;
   const segIdx = bubble.dataset.segIdx !== undefined ? parseInt(bubble.dataset.segIdx) : undefined;
   const isUser = row.classList.contains("user-row");
-  const isChat = mode === "chat";
+  const isChat = mode === "chat" || (typeof currentChatId !== "undefined" && currentChatId !== "main");
 
   // Build button set:
   //  - quote (chat mode only — quoting is a chat-app affordance)
@@ -5564,6 +7352,36 @@ async function handleMsgAction(idx, kind){
   const h = currentHistory();
   const msg = h[idx];
   if (!msg) return;
+
+  // ─── Sec chat path: simpler, no stats to roll back ───
+  if (isSecChat()){
+    if (kind === "delete"){
+      if (!confirm(msg.role === "user" ? "删除这条消息?" : "删除这条回复?")) return;
+      h.splice(idx, 1);
+      persistHistories();
+      renderMessages();
+      return;
+    }
+    if (kind === "edit"){
+      _openEditor(idx);
+      return;
+    }
+    if (kind === "regen"){
+      if (msg.role !== "assistant"){ addSystemMessage("只有回复可以重新生成", true); return; }
+      let lastUserIdx = -1;
+      for (let i = idx - 1; i >= 0; i--){
+        if (h[i].role === "user"){ lastUserIdx = i; break; }
+      }
+      if (lastUserIdx === -1){ addSystemMessage("找不到对应的用户消息", true); return; }
+      h.splice(idx);
+      const lastUserMsg = h.splice(lastUserIdx, 1)[0];
+      persistHistories();
+      renderMessages();
+      // Re-send via sec chat path
+      await sendToSecChat(lastUserMsg.display || lastUserMsg.content, true);
+      return;
+    }
+  }
 
   if (kind === "delete"){
     if (!confirm(msg.role === "user" ? "删除这条消息？" : "删除这条角色回复？")) return;
@@ -5823,6 +7641,18 @@ function _openEditor(idx){
     if (b.dataset.act === "save"){
       const v = ta.value.trim();
       if (!v){ alert("不能为空"); return; }
+      // ─── Aux chat (sec): plain text, no marker re-derivation needed ───
+      if (!isMainChat()){
+        if (msg.role === "user"){
+          msg.display = v;
+          msg.content = v;
+        } else {
+          msg.content = v;
+        }
+        persistHistories();
+        renderMessages();
+        return;
+      }
       if (msg.role === "user"){
         // Re-derive the wire format from display form (parens / asterisks)
         let display = v;
@@ -5918,6 +7748,127 @@ function _renderScenePopList(filter){
 }
 
 // ═══════════════════════════════════════════════════════════
+// @ mention picker — group chat: type @ to pop a member picker
+// ═══════════════════════════════════════════════════════════
+let _mentionState = { open:false, anchorAt:-1, activeIdx:0, candidates:[] };
+function _wireMentionPicker(){
+  const pop = $("mentionPop");
+  if (!pop || !input) return;
+
+  function close(){
+    pop.classList.remove("open");
+    pop.innerHTML = "";
+    _mentionState.open = false;
+    _mentionState.anchorAt = -1;
+    _mentionState.candidates = [];
+  }
+
+  function open(candidates, query){
+    if (!candidates.length){ close(); return; }
+    _mentionState.candidates = candidates;
+    _mentionState.activeIdx = 0;
+    _mentionState.open = true;
+    pop.innerHTML = candidates.map((m, i) => {
+      const init = (m.name || "?").slice(0,1);
+      const ava = (m.kind === "main" && card && card.avatar) ? `<img src="${card.avatar}" alt="">`
+                : (m.kind === "sec"  && m.sec && m.sec.avatar) ? `<img src="${m.sec.avatar}" alt="">`
+                : `<span>${escapeHTML(init)}</span>`;
+      const sub = m.kind === "main" ? "主角" : (m.sec && m.sec.nickname ? m.sec.nickname : "");
+      return `<div class="mention-item${i === 0 ? " active" : ""}" data-mi="${i}">
+        <div class="mention-item-ava">${ava}</div>
+        <div class="mention-item-name">${escapeHTML(m.name)}</div>
+        ${sub ? `<div class="mention-item-sub">${escapeHTML(sub)}</div>` : ""}
+      </div>`;
+    }).join("");
+    pop.classList.add("open");
+  }
+
+  function pick(idx){
+    const m = _mentionState.candidates[idx];
+    if (!m) { close(); return; }
+    const text = input.value;
+    const at = _mentionState.anchorAt;
+    if (at < 0) { close(); return; }
+    // Replace from anchor (the @) up to the cursor with @Name + space
+    const cursor = input.selectionStart;
+    const before = text.slice(0, at);
+    const after = text.slice(cursor);
+    const inserted = `@${m.name} `;
+    input.value = before + inserted + after;
+    const newPos = (before + inserted).length;
+    input.setSelectionRange(newPos, newPos);
+    close();
+    input.focus();
+    if (typeof autoGrow === "function") autoGrow();
+    if (typeof updateSendBtn === "function") updateSendBtn();
+  }
+
+  // Click handler delegated on pop
+  pop.addEventListener("mousedown", (e) => {
+    const it = e.target.closest(".mention-item");
+    if (!it) return;
+    e.preventDefault();
+    pick(parseInt(it.dataset.mi));
+  });
+  pop.addEventListener("touchstart", (e) => {
+    const it = e.target.closest(".mention-item");
+    if (!it) return;
+    e.preventDefault();
+    pick(parseInt(it.dataset.mi));
+  });
+
+  // Update candidates as user types
+  input.addEventListener("input", () => {
+    if (!isGroupChat()){ close(); return; }
+    const text = input.value;
+    const cursor = input.selectionStart || text.length;
+    // Look back from cursor to find the most recent unmatched @
+    let at = -1;
+    for (let i = cursor - 1; i >= 0; i--){
+      const ch = text[i];
+      if (ch === "@") { at = i; break; }
+      // Allow CJK, alphanumeric, etc inside the partial mention; whitespace ends the search
+      if (/\s/.test(ch)) break;
+    }
+    if (at < 0){ close(); return; }
+    // Don't trigger if @ is preceded directly by a word char (e.g. email)
+    if (at > 0 && /[A-Za-z0-9]/.test(text[at-1])){ close(); return; }
+    const query = text.slice(at + 1, cursor).toLowerCase();
+    const chat = getCurrentChat();
+    const members = _groupMembers(chat);
+    const candidates = members.filter(m => {
+      if (!query) return true;
+      return (m.name || "").toLowerCase().includes(query)
+          || (m.sec && (m.sec.nickname || "").toLowerCase().includes(query));
+    });
+    _mentionState.anchorAt = at;
+    open(candidates, query);
+  });
+
+  // Keyboard nav
+  input.addEventListener("keydown", (e) => {
+    if (!_mentionState.open) return;
+    if (e.key === "ArrowDown"){
+      e.preventDefault();
+      _mentionState.activeIdx = (_mentionState.activeIdx + 1) % _mentionState.candidates.length;
+      pop.querySelectorAll(".mention-item").forEach((el, i) => el.classList.toggle("active", i === _mentionState.activeIdx));
+    } else if (e.key === "ArrowUp"){
+      e.preventDefault();
+      _mentionState.activeIdx = (_mentionState.activeIdx - 1 + _mentionState.candidates.length) % _mentionState.candidates.length;
+      pop.querySelectorAll(".mention-item").forEach((el, i) => el.classList.toggle("active", i === _mentionState.activeIdx));
+    } else if (e.key === "Enter" || e.key === "Tab"){
+      e.preventDefault();
+      pick(_mentionState.activeIdx);
+    } else if (e.key === "Escape"){
+      e.preventDefault();
+      close();
+    }
+  }, true);  // capture phase so we beat the global Enter→send handler
+
+  input.addEventListener("blur", () => { setTimeout(close, 150); });
+}
+
+// ═══════════════════════════════════════════════════════════
 // Keyboard inset (#19) — keep input above the mobile keyboard
 // ═══════════════════════════════════════════════════════════
 function _wireKeyboardInset(){
@@ -6000,6 +7951,10 @@ async function _loadFromIDB(){
   if (all.pendingMilestone && typeof all.pendingMilestone === "object"){
     pendingMilestone = Object.assign({ story:null, intimate:null, chat:null }, all.pendingMilestone);
   }
+  // chats — sec/group conversations
+  if (all.chats && typeof all.chats === "object"){
+    chats = all.chats;
+  }
 }
 
 async function _migrateFromLocalStorageIfNeeded(){
@@ -6057,6 +8012,16 @@ async function _migrateFromLocalStorageIfNeeded(){
     console.error("[init] storage load failed:", err);
     addSystemMessage("数据加载失败,使用空状态。控制台有详细信息。", true);
   }
+  // Initialize chat system (creates main + group_default if missing,
+  // backfills sec character ids, syncs default group members)
+  _ensureSecIds();
+  ensureChats();
+  persistChats();
+  // Restore last-active chat (fall back to main if it no longer exists)
+  const savedChat = localStorage.getItem("dzmm_curchat");
+  if (savedChat && chats[savedChat]) currentChatId = savedChat;
+  else currentChatId = "main";
+
   applyMode();
   refreshStats();
   refreshTopBar();
@@ -6070,9 +8035,11 @@ async function _migrateFromLocalStorageIfNeeded(){
   _wireBulkImport();
   _wireInputDrawers();
   _wireTopbarPops();
+  _wireMentionPicker();
   // 主动方 chip → click cycles user → char → both → user
   $("initiatorCol")?.addEventListener("click", () => cycleInitiator());
   renderMessages();
+  renderSecondary();
   updateSendBtn();
   if (token) { setKeyAlert(false); loadModels(); }
   else { setKeyAlert(true); }
