@@ -44,12 +44,19 @@
     /* bubble fills — aligned to the header glass (0.25) for a consistent
        transparency across the top bar and chat bubbles. */
     --bubble-fill-ai:rgba(255,255,255,0.25);
-    --bubble-fill-user:rgba(255,255,255,0.25);
+    /* 玩家气泡:在半透明白底上叠一层很淡的主色 tint,用来和角色气泡区分。
+       比选中态(--accent-soft,主色16%)更淡 —— 这里主色只占约 8%。 */
+    --bubble-tint-user:color-mix(in srgb, var(--primary) 8%, rgba(255,255,255,0.25));
+    --bubble-fill-user:var(--bubble-tint-user);
+    /* 玩家气泡边框:同样叠一点主色 tint,和填充呼应。比填充稍明显些(主色约
+       18%),否则细边看不出染色;但整体仍是淡淡的玻璃边。 */
+    --bubble-edge-user:color-mix(in srgb, var(--primary) 18%, var(--glass-edge));
     --glass-edge:rgba(255,255,255,0.30);
     --glass-shadow:0 2px 8px rgba(0,0,0,0.07);
     /* ── Theme tokens (user-settable via 生成设置 → 主题) ── */
     --text-body:#000000;          /* 正文字 (对白) */
     --text-note:#5A6878;          /* 注释字 (动作/心绪/场景) */
+    --action-btn-color:var(--text-note);   /* 动作抽屉按钮统一字色 (推进/承接/时跳/场景/调试) — 派生自 --text-note,与 marker 按钮同源 */
     --accent-soft:rgba(91,100,112,0.16);   /* derived: active/selected tint */
     --accent-ink:#FFFFFF;         /* text on top of the accent fill */
     --diary-bg:#FFFFFF;           /* 日记模式背景色 (仅颜色) */
@@ -198,7 +205,7 @@
     color:var(--text-body);
     border-radius:18px 4px 18px 18px;
     padding:10px 13px;
-    border:1px solid var(--glass-edge);
+    border:1px solid var(--bubble-edge-user);
     box-shadow:var(--glass-shadow);
     max-width:75%;
     width:max-content;
@@ -240,7 +247,7 @@
     padding:9px 13px;
     max-width:100%;
   }
-  .chat-bubbles-col .chat-line-bubble:first-child{
+  .chat-bubbles-col > .chat-line-bubble:first-child{
     border-radius:4px 18px 18px 18px;
   }
   .chat-line-bubble .dlg{
@@ -269,17 +276,35 @@
     display:flex;
     align-items:flex-end;
     justify-content:flex-end;
-    gap:6px;
+    gap:4px;
     align-self:flex-end;
     max-width:100%;
   }
   .user-last-line .user-line-bubble{ flex:0 1 auto; min-width:0; }
+  /* AI multi-bubble: last dialogue bubble is paired with the timestamp in this
+     flex row so the time hugs the bottom bubble's bottom-RIGHT, instead of
+     floating beside the widest bubble in the column. Left-aligned within the
+     left-aligned .chat-bubbles-col. */
+  .ai-last-line{
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-start;
+    gap:4px;
+    align-self:flex-start;
+    max-width:100%;
+  }
+  .ai-last-line .chat-line-bubble{ flex:0 1 auto; min-width:0; }
+  /* 尖角修正:若整条回复只有一条气泡,它会被 .ai-last-line 包住,不再是
+     .chat-bubbles-col 的直接 :first-child,需补回左上尖角。 */
+  .chat-bubbles-col > .ai-last-line:first-child .chat-line-bubble{
+    border-radius:4px 18px 18px 18px;
+  }
   .user-line-bubble{
     background:var(--bubble-fill-user);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
     color:var(--text-body);
-    border:1px solid var(--glass-edge);
+    border:1px solid var(--bubble-edge-user);
     box-shadow:var(--glass-shadow);
     /* default (2nd-and-onward bubbles): fully rounded */
     border-radius:18px;
@@ -582,9 +607,9 @@
   .date-pill{
     display:inline-block;
     font-family:var(--font-ui);
-    font-size:11.5px;font-weight:500;
+    font-size:9.5px;font-weight:500;
     color:var(--text-body);
-    padding:2px 9px;
+    padding:1px 7px;
     background:var(--bubble-fill-ai);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
@@ -605,6 +630,7 @@
     align-items:flex-end;
     line-height:1.15;
     margin-bottom:2px;
+    margin-right:-2px;   /* 让时间戳更贴近气泡(玩家侧戳在气泡左边) */
     flex-shrink:0;
   }
   .msg-read{
@@ -621,11 +647,15 @@
     text-shadow:0 1px 1px rgba(0,0,0,0.08);
     margin-top:1px;
   }
-  /* AI side time uses the same colors (small grey on blue bg) */
+  /* AI side time uses the same colors as the player's timestamp */
   .msg-side-info-ai{
     align-items:flex-start;
     flex-shrink:0;
+    margin-right:0;
+    margin-left:-2px;   /* 角色侧戳在气泡右边,往左贴近气泡 */
   }
+  /* 角色戳颜色与玩家戳完全一致:沿用 .msg-time 的白字+阴影,不再单独覆盖,
+     这样两边时间戳颜色由 .msg-time 一处统一控制。 */
   /* ai-row name label — LINE shows just the name (small, on bg) above bubbles */
   .meta-line.ai-name{
     margin-bottom:1px;
@@ -913,6 +943,7 @@
   #charDrawer:not([data-focus]) .accordion[data-acc="terms"],
   #charDrawer:not([data-focus]) .accordion[data-acc="persona"],
   #charDrawer:not([data-focus]) .accordion[data-acc="jsonedit"],
+  #charDrawer:not([data-focus]) .accordion[data-acc="patches"],
   #charDrawer:not([data-focus]) .accordion[data-acc="props"]{ display:none; }
   /* In focus mode, hide top tools and all accordions except the focused one */
   #charDrawer[data-focus] .char-tools-row{ display:none; }
@@ -921,6 +952,7 @@
   #charDrawer[data-focus="locations"] .accordion[data-acc="locations"]{ display:block; }
   #charDrawer[data-focus="terms"] .accordion[data-acc="terms"]{ display:block; }
   #charDrawer[data-focus="props"] .accordion[data-acc="props"]{ display:block; }
+  #charDrawer[data-focus="patches"] .accordion[data-acc="patches"]{ display:block; }
   /* In focus mode, the lone accordion always shows its body (force-open).
      The acc-head title row is hidden entirely — the big POP title already
      names the section, so repeating it (with the 0 count / 亲密模式 tag) is
@@ -1211,8 +1243,12 @@
     align-items:stretch;
     gap:5px;
   }
-  /* 名词 = 按来源分组的折叠卡片(沿用记忆库 .mem-card 的观感) */
-  #termList{
+  /* 名词 / 地点 / 道具 / 数据补完 = 按来源(或目标)分组的折叠卡片
+     (沿用记忆库 .mem-card 的观感) */
+  #termList,
+  #locList,
+  #propList,
+  #patchList{
     flex-direction:column;
     align-items:stretch;
     gap:8px;
@@ -1278,6 +1314,37 @@
     transition:all 0.12s;
   }
   .term-entry-x:hover{ color:#C98787;background:rgba(201,135,135,0.12); }
+
+  /* ─── 道具条目(在分组卡片里):名字行内含 开关圆点 + 谁用标签 ─── */
+  .term-entry-namerow{
+    display:flex;align-items:center;gap:6px;padding-right:22px;
+  }
+  .term-entry-namerow .term-entry-name{ padding-right:0; }
+  .prop-entry{ cursor:pointer; }
+  .prop-entry .prop-toggle-dot{
+    flex-shrink:0;width:9px;height:9px;border-radius:50%;
+    background:#C7CDD6;transition:background 0.15s,box-shadow 0.15s;
+  }
+  .prop-entry.enabled .prop-toggle-dot{
+    background:var(--primary);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .prop-entry:not(.enabled) .term-entry-name{ color:#9BA8B8; }
+  .prop-entry:not(.enabled) .term-entry-desc{ opacity:0.6; }
+  .term-entry-tag{
+    flex-shrink:0;font-size:10px;font-weight:600;line-height:1.6;
+    padding:1px 7px;border-radius:999px;
+    background:rgba(0,0,0,0.05);color:#5A6878;
+  }
+  /* ─── 数据补完条目:目标·字段 小标题 + 正文 ─── */
+  .term-entry-meta{
+    font-size:10px;font-family:var(--font-ui);letter-spacing:0.08em;
+    margin-bottom:2px;padding-right:22px;
+  }
+  .term-entry-body{
+    font-size:12.5px;color:#1A2230;line-height:1.55;
+    white-space:pre-wrap;word-wrap:break-word;padding-right:22px;
+  }
   /* Long chip lists (locations) — capped height with scroll */
   #locList{max-height:240px;overflow-y:auto;padding-right:4px;}
   #locList::-webkit-scrollbar{width:4px;}
@@ -1687,9 +1754,10 @@
   .marker-btn{
     transition:all 0.25s cubic-bezier(.4,0,.2,1);
     position:relative;
+    color:var(--text-note);   /* 未选中字色,与动作抽屉按钮同源 */
   }
   .marker-btn.active{
-    background:#FFFFFF;
+    background:var(--accent-soft);
     color:#3A4452;
     border-color:var(--primary);
     box-shadow:0 1px 2px rgba(0,0,0,0.08);
@@ -1705,14 +1773,20 @@
     flex-shrink:0;
   }
 
-  /* ─── Action pills (推进/承接/时跳) — distinct styling ─── */
+  /* ─── Action pills (推进/承接/时跳/场景/调试) ─── */
+  /* 玻璃质感由 .glass-card 提供(与对白/动作/心绪未选中时同源);这里只管
+     字色和过渡,不要再设 background/border/box-shadow,否则会盖住玻璃。 */
   .action-btn{
-    background:#FFFFFF;
-    border:1px solid #E0E4E9;
-    box-shadow:0 1px 2px rgba(0,0,0,0.04);
+    color:var(--action-btn-color);
     transition:all 0.2s;
   }
-  .action-btn:hover{background:#F4F6F8;}
+  /* 点按反馈:这五个按钮没有"选中"态(点一下即触发),按下那一刻在玻璃上染一层
+     主色淡 tint + 主色边,松手即恢复 —— 和 marker 选中态用同一个 --accent-soft。 */
+  .action-btn:active{
+    background:var(--accent-soft);
+    border-color:var(--primary);
+    color:#3A4452;
+  }
 
   /* divider between marker group and action group */
   .input-bar-sep{
@@ -2903,6 +2977,9 @@
           <button class="topbar-pop-item" id="menu-props">
             <i class="ph ph-package"></i><span>道具</span>
           </button>
+          <button class="topbar-pop-item" id="menu-patches">
+            <i class="ph ph-sparkle"></i><span>数据补完</span>
+          </button>
         </div>
       </div>
     </div>
@@ -2928,36 +3005,54 @@
     <div class="scene-pop-body" id="scenePopBody"></div>
   </div>
 
+  <!-- Debug-inject pop — 给下一轮注入一句掰正指令（不进聊天气泡，只影响生成） -->
+  <div class="scene-pop" id="debugPop">
+    <div class="scene-pop-head">
+      <div class="scene-pop-title"><i class="ph ph-wrench text-[var(--text-note)]"></i>调试 · 掰正下一轮</div>
+      <div class="scene-pop-sub">写一句注入到下一轮生成的导演指令 · 不出现在聊天里</div>
+    </div>
+    <div class="scene-pop-body" id="debugPopBody">
+      <textarea id="debugInjectTa" class="scene-pop-search" rows="3" style="resize:none;min-height:64px;line-height:1.5;" placeholder="例：刚才的回复太顺从了，下一轮请克制一点，带点犹豫和试探，别立刻答应。"></textarea>
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px;">
+        <button class="msg-edit-btn" id="debugCancelBtn" data-act="cancel">取消</button>
+        <button class="msg-edit-btn primary" id="debugSendBtn" data-act="send">注入下一轮</button>
+      </div>
+    </div>
+  </div>
+
   <!-- INPUT -->
   <footer class="absolute bottom-0 left-0 right-0 p-3 pt-2 pointer-events-none">
     <div class="pointer-events-auto flex flex-col gap-2" style="position:relative;">
 
       <!-- ── Marker drawer (对白/动作/心绪 — opens above input on demand) -->
       <div class="input-drawer" id="markerDrawer">
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5 active" data-marker="dialogue" title="对白 — 你说出口的话">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5 active" data-marker="dialogue" title="对白 — 你说出口的话">
           <span class="marker-dot"></span><span class="cn">对白</span>
         </button>
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-marker="action" title="动作 — 你做出的动作">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="action" title="动作 — 你做出的动作">
           <span class="marker-dot"></span><span class="cn">动作</span>
         </button>
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-marker="inner" title="心绪 — 你的内心活动">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="inner" title="心绪 — 你的内心活动">
           <span class="marker-dot"></span><span class="cn">心绪</span>
         </button>
       </div>
 
       <!-- ── Action drawer (推进/承接/时跳/场景 — opens above input on demand) -->
       <div class="input-drawer" id="actionDrawer">
-        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="advance" title="请角色主动推进剧情">
+        <button class="action-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-action="advance" title="请角色主动推进剧情">
           <i class="ph ph-fast-forward text-[12px]"></i><span class="cn">推进</span>
         </button>
-        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="continue" title="承接展开当前话题">
+        <button class="action-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-action="continue" title="承接展开当前话题">
           <i class="ph ph-arrow-right text-[12px]"></i><span class="cn">承接</span>
         </button>
-        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#5A6878] flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
+        <button class="action-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-action="timeskip" title="时间流逝">
           <i class="ph ph-clock-clockwise text-[12px]"></i><span class="cn">时跳</span>
         </button>
-        <button class="action-btn px-3 py-1.5 rounded-full text-[11px] font-medium text-[#7c7b88] flex items-center gap-1.5" id="scenePickerBtn" title="切换场景">
+        <button class="action-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" id="scenePickerBtn" title="切换场景">
           <i class="ph ph-map-pin text-[12px]"></i><span class="cn">场景</span>
+        </button>
+        <button class="action-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" id="debugInjectBtn" title="给下一轮注入一句掰正指令（不进聊天、只影响生成）">
+          <i class="ph ph-wrench text-[12px]"></i><span class="cn">调试</span>
         </button>
       </div>
 
@@ -3445,8 +3540,27 @@
           <div class="acc-title"><i class="ph ph-sparkle text-[14px] text-[var(--text-note)]"></i>数据补完 <span class="acc-count" id="patchCount">0</span></div>
         </div>
         <div class="acc-body">
+          <input type="file" id="bulkPatchFile" class="hidden-file" accept=".json,application/json">
+
           <div class="chip-list" id="patchList" style="flex-direction:column;align-items:stretch;"></div>
           <div id="patchEmpty" class="text-[11px] text-[var(--text-note)] cn text-center py-3" style="display:none;">还没有补完内容</div>
+
+          <!-- 手写新增 (目标 + 字段 + 内容) -->
+          <div class="add-form" style="margin-top:14px;border-top:0.5px solid rgba(0,0,0,0.04);padding-top:14px;">
+            <div class="note" style="margin-bottom:8px;">手动添加一条补完 (会归到「手打」组)</div>
+            <div class="field" style="padding:0;background:transparent;border:none;">
+              <div class="field-head"><span class="field-label">目标</span></div>
+              <div class="seg-group" id="patchTargetGroup">
+                <button class="seg active" data-val="玩家">玩家</button>
+                <button class="seg" data-val="角色">角色</button>
+                <button class="seg" data-val="共同">共同</button>
+              </div>
+            </div>
+            <input type="text" class="input" id="patchField" placeholder="字段 *  例:习惯 / 喜好 / 身份">
+            <textarea class="ta" id="patchContent" rows="2" placeholder="内容 *  例:喝咖啡不加糖"></textarea>
+            <button class="btn ghost" id="addPatchBtn"><i class="ph ph-plus"></i>添加补完</button>
+          </div>
+
           <button class="btn ghost" id="clearPatchesBtn" style="margin-top:8px;"><i class="ph ph-trash"></i>清空全部补完</button>
         </div>
       </div>
@@ -3509,7 +3623,9 @@
     <div class="drawer-head">
       <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">个性化</h2>
       <div class="head-actions">
+        <button class="head-ico is-import" id="thImportBtn" title="导入主题（JSON）"><i class="ph ph-file-arrow-down"></i></button>
         <button class="head-ico is-reset" id="thResetBtn" title="恢复默认主题"><i class="ph ph-arrow-counter-clockwise"></i></button>
+        <input type="file" id="thImportFile" accept="application/json,.json" style="display:none;">
       </div>
     </div>
     <div class="drawer-body">
@@ -3631,7 +3747,8 @@ const DEFAULT_CARD = () => ({
   personality: "", scenario: "", description: "",
   system_prompt: "", user_name: "",
   secondary_characters: [], locations: [], terms: [],
-  props: []  // [{ name, description, target: "char"|"user"|"both", enabled: bool }]
+  props: [],  // [{ name, description, target: "char"|"user"|"both", enabled: bool }]
+  notes: []   // 数据补完 [{ target, field, content, _src:"AI"|"手打"|文件名, ts }]
 });
 
 // Secondary char schema — created on the fly from old simple records,
@@ -4511,6 +4628,44 @@ function _wireThemeUI(){
       _loadTheme();
     });
   }
+  // ─── 导入主题(JSON)──────────────────────────────────────────
+  // 接受形如 {accent,body,note,bg,diary} 的 JSON(也兼容嵌在 {theme:{...}} 里)。
+  // 只采纳合法的 6 位 hex 字段,其余用当前/默认值补全;全无有效字段则报错。
+  const importBtn  = document.getElementById("thImportBtn");
+  const importFile = document.getElementById("thImportFile");
+  if (importBtn && importFile){
+    importBtn.addEventListener("click", () => { importFile.value = ""; importFile.click(); });
+    importFile.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        let raw;
+        try { raw = JSON.parse(String(reader.result || "")); }
+        catch(err){ showToast("主题文件不是有效的 JSON", true); return; }
+        // 兼容 {theme:{...}} 包一层的情况
+        const src = (raw && typeof raw === "object" && raw.theme && typeof raw.theme === "object") ? raw.theme : raw;
+        if (!src || typeof src !== "object"){ showToast("主题格式不对", true); return; }
+        const keys = ["accent","body","note","bg","diary"];
+        const next = Object.assign({}, _getTheme());
+        let applied = 0;
+        keys.forEach(k => {
+          let v = src[k];
+          if (typeof v === "string"){
+            v = v.trim();
+            if (v && v[0] !== "#") v = "#" + v;
+            if (_isHex(v)){ next[k] = v.toUpperCase(); applied++; }
+          }
+        });
+        if (!applied){ showToast("没读到有效的颜色字段（需要 #RRGGBB)", true); return; }
+        _saveTheme(next);
+        _loadTheme();
+        showToast(`已导入主题 · 应用了 ${applied} 项`);
+      };
+      reader.onerror = () => showToast("读取文件失败", true);
+      reader.readAsText(file);
+    });
+  }
 }
 
 function _renderCardAvatarPreview(){
@@ -5289,7 +5444,7 @@ function applyCardPatches(patches){
     const sig = _patchSig({ target, field, content });
     if (have.has(sig)){ skipped++; continue; } // dedupe
     have.add(sig);
-    card.notes.push({ target, field, content, ts: Date.now() });
+    card.notes.push({ target, field, content, _src: "AI", ts: Date.now() });
     added++;
   }
   // Cap: keep newest PATCH_CAP entries (FIFO drop)
@@ -5428,6 +5583,15 @@ function _collapseConsecutiveAvatars(){
       return;
     }
     const sender = node.dataset.sender || "";
+    // 静默动作回合(推进/承接/时跳/场景/调试)产出的 AI 行被标了 force-avatar:
+    // 它没有用户气泡在前面打断,但我们仍要让它像普通气泡一样显示头像。把它
+    // 当作一个"独立起点"——既保留自己的头像,也重置连续计数,避免被前一条
+    // 同发送者的消息折叠掉。
+    if (node.dataset.forceAvatar === "1"){
+      node.classList.remove("no-ava");
+      prevSender = sender;
+      return;
+    }
     if (sender && sender === prevSender){
       node.classList.add("no-ava");
     } else {
@@ -5469,8 +5633,11 @@ function renderMessages() {
       if (m.at && _shouldShowPill(lastPillMs, m.at)){
         renderDatePill(m.at); lastPillMs = m.at;
       }
-      if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at);
-      else if (m.role === "assistant") buildSecChatBubble(sec, m.content, false, undefined, m.at);
+      if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at, undefined, m.forceAvatar);
+      else if (m.role === "assistant"){
+        const w = buildSecChatBubble(sec, m.content, false, undefined, m.at);
+        if (w && m.forceAvatar) w.dataset.forceAvatar = "1";
+      }
       else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
     }
     _collapseConsecutiveAvatars();
@@ -5552,7 +5719,7 @@ function renderMessages() {
       renderDatePill(m.at);
       lastPillMs = m.at;
     }
-    if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at, m.quote);
+    if (m.role === "user") renderUserMessage(m.display || m.content, idx, m.at, m.quote, m.forceAvatar);
     else if (m.role === "assistant") renderAssistantStored(m, idx);
     else if (m.role === "system_ui") renderSystemDivider(m.content, m.error);
   }
@@ -5561,10 +5728,13 @@ function renderMessages() {
   requestAnimationFrame(() => { chatArea.scrollTop = chatArea.scrollHeight; });
 }
 
-function renderUserMessage(content, idx, at, quote){
+function renderUserMessage(content, idx, at, quote, forceAvatar){
   const wrap = document.createElement("div");
   wrap.className = "msg-row user-row flex flex-col items-end gap-0.5 fade-up";
   wrap.dataset.sender = "__user__";
+  // 中断/失败后重发的用户消息:强制保留头像(见 send() 里的判定)。和 AI 侧
+  // 的静默动作回合用同一套 data-force-avatar 机制,折叠逻辑会让它当独立起点。
+  if (forceAvatar) wrap.dataset.forceAvatar = "1";
   if (idx !== undefined) wrap.dataset.idx = idx;
   const timeMs = at || Date.now();
   const time = new Date(timeMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -5661,6 +5831,7 @@ function renderAssistantStored(msg, idx){
   // 但 UI 仍要显示主 AI 实际写的内容)。没有就用 content。
   const shown = (msg.displayContent && String(msg.displayContent).trim()) ? msg.displayContent : msg.content;
   const wrap = buildAssistantBubble(shown, msg.statsApplied, false, undefined, msg.at);
+  if (msg.forceAvatar) wrap.dataset.forceAvatar = "1";
   if (idx !== undefined){
     wrap.dataset.idx = idx;
     // Actions (regen/edit/delete + quote in chat mode) are surfaced via
@@ -5681,18 +5852,24 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
     wrap = document.createElement("div");
     wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
     wrap.dataset.sender = card?.name || "角色";
+    // 静默动作回合(推进/承接/时跳/场景/调试)的回复:没有用户气泡打断头像
+    // 折叠,标记它强制保留头像(流式创建时就打上,避免生成中途头像缺失闪烁)。
+    if (_lastTurnSilentAction) wrap.dataset.forceAvatar = "1";
     const timeMs = atOverride || Date.now();
     const time = new Date(timeMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    wrap.dataset.time = time;   // 存下来,流式重渲染时(非 newBubble)循环里取用
     const name = card?.name || "角色";
     if (isChatMode){
-      // LINE-style: avatar on the LEFT of the bubble column. No name, no time.
+      // LINE-style: avatar on the LEFT of the bubble column.
       // Consecutive messages from the same sender hide the avatar (handled by
       // the render loop adding `.no-ava`).
+      // 时间戳不放在列旁边(那样会贴最长那条的右边、短的最后一条会让戳悬空),
+      // 而是在下面渲染气泡时和**最后一条**气泡包进同一个 .ai-last-line 行里。
       wrap.innerHTML = `
         <div class="ai-row-line">
           <div class="ai-avatar">${_mainAvatarHTML()}</div>
           <div class="ai-content-col">
-            <div class="ai-msg-line flex items-end gap-1.5 w-full">
+            <div class="ai-msg-line w-full">
               <div class="chat-bubbles-col" data-chat-host></div>
             </div>
             <div class="stat-chips" style="display:none;"></div>
@@ -5704,7 +5881,10 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
         <div class="ai-row-line">
           <div class="ai-avatar">${_mainAvatarHTML()}</div>
           <div class="ai-content-col">
-            <div class="ai-seg-col" data-seg-col></div>
+            <div class="ai-msg-line flex items-end gap-1.5 w-full">
+              <div class="ai-seg-col" data-seg-col></div>
+              <span class="msg-side-info msg-side-info-ai"><span class="msg-time msg-time-ai">${time}</span></span>
+            </div>
             <div class="stat-chips" style="display:none;"></div>
           </div>
         </div>
@@ -5719,6 +5899,8 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
     const host = wrap.querySelector("[data-chat-host]");
     host.innerHTML = "";
     const segs = parsed.segments.filter(s => s.type === "dialogue");
+    const _time = wrap.dataset.time || "";
+    const _timeHTML = `<span class="msg-side-info msg-side-info-ai"><span class="msg-time msg-time-ai">${_time}</span></span>`;
     segs.forEach((seg, idx) => {
       const b = document.createElement("div");
       const isLast = idx === segs.length - 1;
@@ -5730,7 +5912,17 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
       p.className = "dlg" + (isLive ? " streaming" : "");
       p.textContent = seg.content;
       b.appendChild(p);
-      host.appendChild(b);
+      if (isLast){
+        // 最后一条气泡和时间戳包进同一个横向 flex 行,让戳贴**最后一条**气泡的
+        // 右下角,而不是悬在整列(最长那条)的右边。
+        const lastLine = document.createElement("div");
+        lastLine.className = "ai-last-line";
+        lastLine.appendChild(b);
+        lastLine.insertAdjacentHTML("beforeend", _timeHTML);
+        host.appendChild(lastLine);
+      } else {
+        host.appendChild(b);
+      }
     });
     // Empty state during streaming (no segment yet) — drop a stub bubble
     if (partial && segs.length === 0){
@@ -5740,7 +5932,11 @@ function buildAssistantBubble(rawText, statsApplied, partial, wrap, atOverride){
       p.className = "dlg streaming";
       p.textContent = "";
       b.appendChild(p);
-      host.appendChild(b);
+      const lastLine = document.createElement("div");
+      lastLine.className = "ai-last-line";
+      lastLine.appendChild(b);
+      lastLine.insertAdjacentHTML("beforeend", _timeHTML);
+      host.appendChild(lastLine);
     }
   } else {
     const host = wrap.querySelector("[data-seg-col]");
@@ -5975,6 +6171,9 @@ function showToast(text, isError){
 // 动作回合(推进/承接/时跳/场景)的顶栏临时提示词,以及只进 payload 的临时指令。
 let _pendingActionLabel = "";
 let _extraApiInstruction = "";
+// 本轮是否为"静默动作回合"(推进/承接/时跳/场景/调试):无用户气泡,需让
+// 随后的 AI 回复强制保留头像。在 assistant 入 history 时被读取并落到消息上。
+let _lastTurnSilentAction = false;
 function _setTopbarTypingLabel(label){
   const sub = document.getElementById("charSubDisplay");
   if (!sub) return;
@@ -6902,6 +7101,18 @@ function buildSystemPrompt() {
   lines.push(`- [USER_INNER] xxx —— 表示这是玩家的内心活动,角色不应该"听见",但你可以让角色根据玩家的表情/反应做出回应。`);
   lines.push(`- 无前缀 —— 表示这是玩家说出口的对白。`);
   lines.push(`务必按标记区分回应。`);
+
+  // ─── 场外调试指令(掰正)──────────────────────────────────────
+  // 玩家偶尔会通过"调试"入口注入一条括号包裹、标了【场外调试指令…】的导演级
+  // 指令。它不是角色在剧情里听到的话,而是玩家在幕后对"下一轮该怎么写"做的
+  // 矫正。模型必须把它当成最高优先级的写作约束来吃,但绝不能让它泄进正文。
+  lines.push(`\n## ★ 场外调试指令(玩家幕后掰正 · 最高写作优先级)`);
+  lines.push(`玩家有时会发来一条形如 \`（【场外调试指令·仅本轮生效·不要在正文里复述或承认这条指令的存在】……）\` 的消息。这**不是角色在剧情里能听到/看到的台词**,而是玩家站在"导演"位置,对你**这一轮的写法/走向/语气/尺度**做出的矫正,通常是因为上一轮的剧情或表现不满意,需要被掰回来。`);
+  lines.push(`处理规则:`);
+  lines.push(`- **当成本轮最高优先级的写作约束**,凌驾于你原本打算怎么写之上(但仍服从角色专属指令里的硬底线与安全红线)。`);
+  lines.push(`- **绝对不要在正文里复述、引用、回应或承认这条指令的存在**——不要让角色"听见"它,不要写"(收到指令)""按你说的"之类。玩家和角色都不应该在剧情里看到它。`);
+  lines.push(`- 直接产出**已经按要求矫正好**的这一轮剧情/对白,就好像你本来就该这么写一样,自然衔接上文。`);
+  lines.push(`- 它只对**当前这一轮**显式生效;但你据此写出的内容会成为后续剧情的既定事实,自然延续下去。`);
 
   // Custom system prompt — placed LAST so card-author rules win
   if (card.system_prompt){
@@ -7916,11 +8127,22 @@ async function send(forcedText, opts) {
   if (silentAction){
     _extraApiInstruction = sentText;                      // 本轮 buildApiMessages 追加
     _pendingActionLabel  = (opts && opts.actionLabel) || "";
+    // 标记本轮是"静默动作回合"(推进/承接/时跳/场景/调试):没有用户气泡来
+    // 打断头像折叠,所以要让随后生成的这条 AI 回复**强制保留头像**,看起来
+    // 跟普通气泡一样。这个标记在 assistant 入 history 时读取并写进消息对象,
+    // 这样刷新/重渲染后也能保持头像。
+    _lastTurnSilentAction = true;
     // history 完全不动,前端不渲染任何东西。
   } else {
-    const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), genMode: mode };
+    _lastTurnSilentAction = false;
+    // 头像折叠例外:正常情况下两条用户消息连发,第二条会折叠掉头像(LINE 风格)。
+    // 但如果上一轮"发起了生成却没产出 AI 回复"(被主动停止 / 生成失败),history
+    // 末尾会停在一条 user 消息上 —— 这时再发的这条其实是一次新的尝试,而不是连发,
+    // 应该像普通气泡一样带头像。判定:push 之前 history 最后一条是不是 user。
+    const _prevWasUnanswered = h.length > 0 && h[h.length - 1] && h[h.length - 1].role === "user";
+    const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), genMode: mode, forceAvatar: _prevWasUnanswered || undefined };
     h.push(newMsg);
-    renderUserMessage(displayText, h.length - 1, newMsg.at, null);
+    renderUserMessage(displayText, h.length - 1, newMsg.at, null, newMsg.forceAvatar);
   }
   if (forcedText === undefined){ input.value = ""; input.style.height = "auto"; }
   addTyping();
@@ -8105,6 +8327,13 @@ async function send(forcedText, opts) {
       } else {
         buildAssistantBubble(assistantText, statsApplied, false, liveBubble);
       }
+      // 静默动作回合(推进/承接/时跳/场景/调试)没有用户气泡打断头像折叠 ——
+      // 强制本轮 AI 气泡保留头像,和普通气泡一样。设完标记要重跑一次折叠,
+      // 因为 buildAssistantBubble 内部已先跑过一次(那时还没打标)。
+      if (liveBubble && _lastTurnSilentAction){
+        liveBubble.dataset.forceAvatar = "1";
+        if (typeof _collapseConsecutiveAvatars === "function") _collapseConsecutiveAvatars();
+      }
 
       // Persist
       // ── NSFW 兜底:main 兜底写的这一轮,**先原样存原文 + 打 pendingRedact 标记**,
@@ -8121,7 +8350,8 @@ async function send(forcedText, opts) {
         displayForUi = assistantText;
         pendingRedact = true;
       }
-      h.push({ role: "assistant", content: persistedContent, displayContent: displayForUi || undefined, pendingRedact: pendingRedact || undefined, parsed, statsApplied, statsPre, at: Date.now(), genMode: mode });
+      h.push({ role: "assistant", content: persistedContent, displayContent: displayForUi || undefined, pendingRedact: pendingRedact || undefined, parsed, statsApplied, statsPre, at: Date.now(), genMode: mode, forceAvatar: _lastTurnSilentAction || undefined });
+      _lastTurnSilentAction = false;
       persistHistories();
       // ─── 角色主动提及 → 武装下一轮注入 ───
       // 用角色这条真实回复(assistantText,不是脱敏后的 persistedContent)做
@@ -8339,9 +8569,10 @@ async function sendToSecChat(rawText, isForced){
   const displayText = rawText;
   const sentText = rawText;
   const h = currentHistory();
-  const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now() };
+  const _prevWasUnanswered = h.length > 0 && h[h.length - 1] && h[h.length - 1].role === "user";
+  const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), forceAvatar: _prevWasUnanswered || undefined };
   h.push(newMsg);
-  renderUserMessage(displayText, h.length - 1, newMsg.at);
+  renderUserMessage(displayText, h.length - 1, newMsg.at, undefined, newMsg.forceAvatar);
   if (!isForced){ input.value = ""; input.style.height = "auto"; }
   addTyping();
   setStreamingUI(true);
@@ -8419,7 +8650,12 @@ async function sendToSecChat(rawText, isForced){
     } else {
       buildSecChatBubble(sec, cleanedFinal, false, liveBubble);
     }
-    h.push({ role:"assistant", content: cleanedFinal, at: Date.now() });
+    if (liveBubble && _lastTurnSilentAction){
+      liveBubble.dataset.forceAvatar = "1";
+      if (typeof _collapseConsecutiveAvatars === "function") _collapseConsecutiveAvatars();
+    }
+    h.push({ role:"assistant", content: cleanedFinal, at: Date.now(), forceAvatar: _lastTurnSilentAction || undefined });
+    _lastTurnSilentAction = false;
     persistHistories();
   } else if (!chainResult.slot){
     _toastAllSlotsFailed(chainResult.attempts);
@@ -8453,6 +8689,7 @@ function buildSecChatBubble(sec, rawText, partial, wrap, atOverride){
     wrap = document.createElement("div");
     wrap.className = "msg-row ai-row flex flex-col items-start gap-0.5 fade-up";
     wrap.dataset.sender = sec.name || "私聊";
+    if (_lastTurnSilentAction) wrap.dataset.forceAvatar = "1";
     const timeMs = atOverride || Date.now();
     const time = new Date(timeMs).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
     const secAva = sec.avatar ? `<img src="${sec.avatar}" alt="">` : `<span>${escapeHTML((sec.name||"?").slice(0,1))}</span>`;
@@ -10132,7 +10369,7 @@ function _focusCharSection(accName){
   if (!drawer) return;
   if (accName){
     drawer.dataset.focus = accName;
-    const titles = { secondary: "次要角色", locations: "场景设定", terms: "名词", props: "道具" };
+    const titles = { secondary: "次要角色", locations: "场景设定", terms: "名词", props: "道具", patches: "数据补完" };
     const label = titles[accName] || "角色卡";
     if (title) title.textContent = label;
     // Retarget the header icon tooltips to the focused section
@@ -10395,6 +10632,7 @@ $("menu-groups")?.addEventListener("click", () => { _closeAllTopbarPops(); openD
 $("menu-locations").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("locations"); });
 $("menu-terms").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("terms"); });
 $("menu-props").addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("props"); });
+$("menu-patches")?.addEventListener("click", () => { _closeAllTopbarPops(); openDrawer(charDrawer); _focusCharSection("patches"); });
 scrim.addEventListener("click", closeDrawers);
 [charDrawer, setDrawer, keyDrawer, memoryDrawer, profileDrawer, chatListDrawer, groupDrawer].forEach(d => {
   let startY = null;
@@ -11006,17 +11244,110 @@ document.addEventListener("input", (e) => {
 function renderLocations(){
   const list = $("locList"); const arr = card?.locations || [];
   $("locCount").textContent = arr.length;
+  if (!list) return;
   list.innerHTML = "";
-  arr.forEach((l, i) => {
-    const chip = document.createElement("span");
-    chip.className = "chip";
-    chip.innerHTML = `
-      <span class="chip-name">${escapeHTML(l.name)}</span>
-      ${l.description ? `<span class="chip-sub">· ${escapeHTML(l.description)}</span>` : ""}
-      <button class="chip-x" data-i="${i}" data-kind="loc">×</button>`;
-    list.appendChild(chip);
+  if (!arr.length) return;
+  _renderSrcGroups(list, arr, "loc");
+}
+// ─── 共享:按来源(或目标)分组的折叠卡片渲染 ───
+// kind: "term" | "loc" | "prop" | "patch"
+//   term/loc/prop → 按 _src 分组(手打 / 各导入文件)
+//   patch         → 按 target 分组(玩家 / 角色 / 共同 / 未指定)
+// 保留每条在原数组里的真实下标(idx),删除/切换时按 idx 操作。
+function _renderSrcGroups(list, arr, kind){
+  const isPatch = kind === "patch";
+  const groups = new Map();
+  arr.forEach((it, idx) => {
+    // 全部按来源分组:补完→AI/手打;其余→手打/各导入文件。
+    const key = (it && it._src) ? it._src : (isPatch ? "AI" : "手打");
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ it, idx });
+  });
+
+  // 排序:补完→手打最前、AI其后;其余→手打最前,导入文件按名称。
+  const orderedKeys = Array.from(groups.keys()).sort((a, b) => {
+    if (a === "手打") return -1;
+    if (b === "手打") return 1;
+    if (isPatch){
+      if (a === "AI") return -1;
+      if (b === "AI") return 1;
+    }
+    return a.localeCompare(b, "zh");
+  });
+
+  // 目标→颜色(补完条目的 目标·字段 小标题用,快速扫读)
+  const _targetColor = {
+    "玩家": "var(--text-body)",
+    "角色": "#c98787",
+    "共同": (getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#5B6470"),
+  };
+
+  orderedKeys.forEach((key) => {
+    const items = groups.get(key);
+    const isManual = (key === "手打");
+    const cardEl = document.createElement("div");
+    cardEl.className = "term-group";
+    let headIco;
+    if (isPatch){
+      // AI组用 sparkle,手打组用铅笔
+      const ico = isManual ? "ph-pencil-simple" : "ph-sparkle";
+      headIco = `<i class="ph ${ico} term-group-ico"></i>`;
+    } else {
+      headIco = `<i class="ph ${isManual ? "ph-pencil-simple" : "ph-file-text"} term-group-ico"></i>`;
+    }
+    cardEl.innerHTML = `
+      <div class="term-group-head">
+        ${headIco}
+        <div class="term-group-title">${escapeHTML(key)}</div>
+        <span class="term-group-count">${items.length}</span>
+        <i class="ph ph-caret-right caret"></i>
+      </div>
+      <div class="term-group-body"></div>
+    `;
+    const body = cardEl.querySelector(".term-group-body");
+    items.forEach(({ it, idx }) => {
+      const entry = document.createElement("div");
+      if (kind === "prop"){
+        entry.className = "term-entry prop-entry" + (it.enabled ? " enabled" : "");
+        entry.dataset.i = idx;
+        const t = it.target === "user" ? "玩家" : it.target === "both" ? "都可" : "角色";
+        entry.innerHTML = `
+          <button class="term-entry-x" data-kind="prop" data-i="${idx}" title="删除">&times;</button>
+          <div class="term-entry-namerow">
+            <span class="prop-toggle-dot"></span>
+            <span class="term-entry-tag">${t}</span>
+            <span class="term-entry-name">${escapeHTML(it.name || "")}</span>
+          </div>
+          ${it.description ? `<div class="term-entry-desc">${escapeHTML(it.description)}</div>` : ""}
+        `;
+      } else if (isPatch){
+        entry.className = "term-entry";
+        const target = it.target || "";
+        const tColor = _targetColor[target] || "var(--text-note)";
+        const fld = it.field ? escapeHTML(it.field) : "";
+        const meta = (target || fld)
+          ? `<div class="term-entry-meta">${target ? `<span style="color:${tColor};font-weight:600;">${escapeHTML(target)}</span>` : ""}${(target && fld) ? `<span style="color:var(--text-note);"> · ${fld}</span>` : (fld ? `<span style="color:var(--text-note);">${fld}</span>` : "")}</div>`
+          : "";
+        entry.innerHTML = `
+          <button class="term-entry-x" data-kind="patch" data-i="${idx}" title="删除">&times;</button>
+          ${meta}
+          <div class="term-entry-body">${escapeHTML(it.content || "")}</div>
+        `;
+      } else {
+        entry.className = "term-entry";
+        entry.innerHTML = `
+          <button class="term-entry-x" data-kind="${kind}" data-i="${idx}" title="删除">&times;</button>
+          <div class="term-entry-name">${escapeHTML(it.name || "")}</div>
+          ${it.description ? `<div class="term-entry-desc">${escapeHTML(it.description)}</div>` : ""}
+        `;
+      }
+      body.appendChild(entry);
+    });
+    cardEl.querySelector(".term-group-head").addEventListener("click", () => cardEl.classList.toggle("open"));
+    list.appendChild(cardEl);
   });
 }
+
 function renderTerms(){
   const list = $("termList"); const arr = card?.terms || [];
   const countEl = $("termCount");
@@ -11024,58 +11355,18 @@ function renderTerms(){
   if (!list) return;
   list.innerHTML = "";
   if (!arr.length) return;
-
-  // 按来源分组:每个导入文件一组,手打的统一归到「手打」一组。
-  // 保留每条在原数组里的真实下标(idx),删除时按 idx 操作。
-  const groups = new Map();   // srcLabel -> [{ t, idx }]
-  arr.forEach((t, idx) => {
-    const src = (t && t._src) ? t._src : "手打";
-    if (!groups.has(src)) groups.set(src, []);
-    groups.get(src).push({ t, idx });
-  });
-
-  // 「手打」固定排在最前,其余(导入文件)按名称排其后。
-  const orderedKeys = Array.from(groups.keys()).sort((a, b) => {
-    if (a === "手打") return -1;
-    if (b === "手打") return 1;
-    return a.localeCompare(b, "zh");
-  });
-
-  orderedKeys.forEach((src) => {
-    const items = groups.get(src);
-    const isManual = src === "手打";
-    const cardEl = document.createElement("div");
-    cardEl.className = "term-group";
-    cardEl.innerHTML = `
-      <div class="term-group-head">
-        <i class="ph ${isManual ? "ph-pencil-simple" : "ph-file-text"} term-group-ico"></i>
-        <div class="term-group-title">${escapeHTML(src)}</div>
-        <span class="term-group-count">${items.length}</span>
-        <i class="ph ph-caret-right caret"></i>
-      </div>
-      <div class="term-group-body"></div>
-    `;
-    const body = cardEl.querySelector(".term-group-body");
-    items.forEach(({ t, idx }) => {
-      const entry = document.createElement("div");
-      entry.className = "term-entry";
-      entry.innerHTML = `
-        <button class="term-entry-x" data-kind="term" data-i="${idx}" title="删除">&times;</button>
-        <div class="term-entry-name">${escapeHTML(t.name || "")}</div>
-        ${t.description ? `<div class="term-entry-desc">${escapeHTML(t.description)}</div>` : ""}
-      `;
-      body.appendChild(entry);
-    });
-    cardEl.querySelector(".term-group-head").addEventListener("click", () => cardEl.classList.toggle("open"));
-    list.appendChild(cardEl);
-  });
+  _renderSrcGroups(list, arr, "term");
 }
 document.addEventListener("click", (e) => {
   if (e.target.matches(".term-entry-x")) {
     const i = parseInt(e.target.dataset.i);
-    if (!card || !Array.isArray(card.terms)) return;
-    card.terms.splice(i, 1);
-    renderTerms(); persistCard();
+    const kind = e.target.dataset.kind || "term";
+    if (!card) return;
+    if (kind === "term") { if (!Array.isArray(card.terms)) return; card.terms.splice(i, 1); renderTerms(); }
+    else if (kind === "loc") { if (!Array.isArray(card.locations)) return; card.locations.splice(i, 1); renderLocations(); }
+    else if (kind === "prop") { if (!Array.isArray(card.props)) return; card.props.splice(i, 1); renderProps(); }
+    else if (kind === "patch") { if (!Array.isArray(card.notes)) return; card.notes.splice(i, 1); renderPatches(); }
+    persistCard();
     return;
   }
   if (e.target.matches(".chip-x")) {
@@ -11139,7 +11430,7 @@ $("addLocBtn").addEventListener("click", () => {
   const name = $("locName").value.trim();
   if (!name) { alert("请填写地点名"); return; }
   ensureCard();
-  card.locations.push({ name, description: $("locDesc").value.trim() });
+  card.locations.push({ name, description: $("locDesc").value.trim(), _src: "手打" });
   $("locName").value = ""; $("locDesc").value = "";
   renderLocations(); persistCard();
 });
@@ -11172,30 +11463,16 @@ function renderProps(){
     return;
   }
   if (empty) empty.style.display = "none";
-  arr.forEach((p, i) => {
-    const chip = document.createElement("div");
-    chip.className = "chip prop-chip" + (p.enabled ? " enabled" : "");
-    chip.dataset.i = i;
-    const t = p.target === "user" ? "玩家" : p.target === "both" ? "都可" : "角色";
-    chip.style.cssText = "padding:7px 10px; display:flex; align-items:center; gap:6px;";
-    chip.innerHTML = `
-      <span class="prop-toggle-dot"></span>
-      <span class="prop-target-tag">${t}</span>
-      <span class="chip-name" style="flex:1;">${escapeHTML(p.name)}</span>
-      ${p.description ? `<span class="chip-sub" style="opacity:0.85;">${escapeHTML(p.description)}</span>` : ""}
-      <button class="chip-x" data-i="${i}" data-kind="prop" style="margin-left:2px;">×</button>
-    `;
-    list.appendChild(chip);
-  });
+  _renderSrcGroups(list, arr, "prop");
 }
 
 // Click to toggle enabled state (delegated)
 $("propList")?.addEventListener("click", (e) => {
-  // X button already handled by the global chip-x handler
-  if (e.target.matches(".chip-x")) return;
-  const chip = e.target.closest(".prop-chip");
-  if (!chip) return;
-  const i = parseInt(chip.dataset.i);
+  // X (delete) button handled by the global .term-entry-x handler
+  if (e.target.matches(".term-entry-x")) return;
+  const entry = e.target.closest(".prop-entry");
+  if (!entry) return;
+  const i = parseInt(entry.dataset.i);
   if (isNaN(i) || !card?.props?.[i]) return;
   card.props[i].enabled = !card.props[i].enabled;
   renderProps();
@@ -11220,10 +11497,38 @@ $("addPropBtn")?.addEventListener("click", () => {
     name,
     description: $("propDesc").value.trim(),
     target: _propTarget,
-    enabled: true   // newly added → on by default
+    enabled: true,   // newly added → on by default
+    _src: "手打"
   });
   $("propName").value = ""; $("propDesc").value = "";
   renderProps(); persistCard();
+});
+
+// ─── 数据补完:手写新增 (目标 + 字段 + 内容),归到「手打」组 ───
+let _patchTarget = "玩家";  // current pick for the add-form target segmented control
+document.querySelectorAll("#patchTargetGroup .seg").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#patchTargetGroup .seg").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    _patchTarget = b.dataset.val;
+  });
+});
+$("addPatchBtn")?.addEventListener("click", () => {
+  const field = $("patchField").value.trim();
+  const content = $("patchContent").value.trim();
+  if (!field){ alert("请填写字段"); return; }
+  if (!content){ alert("请填写内容"); return; }
+  ensureCard();
+  if (!Array.isArray(card.notes)) card.notes = [];
+  // 去重:与 AI 补完共用同一套 signature(目标|字段|内容)
+  const sig = _patchSig({ target: _patchTarget, field, content });
+  if (card.notes.some(n => _patchSig(n) === sig)){
+    showToast("已有相同补完，跳过", true);
+    return;
+  }
+  card.notes.push({ target: _patchTarget, field, content, _src: "手打", ts: Date.now() });
+  $("patchField").value = ""; $("patchContent").value = "";
+  renderPatches(); persistCard();
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -11274,9 +11579,11 @@ function _parseBulkImport(text, kind){
         // Prefer the key matching this import kind; otherwise pick the first
         // array-valued key. (Convenient when the same file has both
         // "locations" and "terms" — user picks which import to run.)
-        const preferredKey = ({ loc:"locations", term:"terms", prop:"props" })[kind];
+        const preferredKey = ({ loc:"locations", term:"terms", prop:"props", patch:"notes" })[kind];
         if (preferredKey && Array.isArray(parsed[preferredKey])){
           arr = parsed[preferredKey];
+        } else if (kind === "patch" && Array.isArray(parsed["patches"])){
+          arr = parsed["patches"];
         } else {
           for (const k of Object.keys(parsed)){
             if (Array.isArray(parsed[k])){ arr = parsed[k]; break; }
@@ -11285,6 +11592,18 @@ function _parseBulkImport(text, kind){
       }
       if (!Array.isArray(arr)){
         return { items: out, error: "JSON 里没找到条目数组" };
+      }
+      // 补完用独立形状:目标 / 字段 / 内容
+      if (kind === "patch"){
+        for (const it of arr){
+          if (!it || typeof it !== "object") continue;
+          const target  = String(it.target ?? it["目标"] ?? "").trim();
+          const field   = String(it.field ?? it["字段"] ?? "").trim();
+          const content = String(it.content ?? it["内容"] ?? "").trim();
+          if (!field || !content) continue;
+          out.push({ target, field, content });
+        }
+        return { items: out, error: null };
       }
       for (const it of arr){
         if (!it) continue;
@@ -11332,9 +11651,10 @@ function _parseBulkImport(text, kind){
 //        这里只负责监听各自隐藏 file input 的 change 事件并应用。
 // 导出:由 charExportIco 在聚焦模式下按分区调用 _exportCardSection。
 const _BULK_META = {
-  loc:  { file: "bulkLocFile",  arrKey: "locations", render: renderLocations, label: "场景", fname: "locations.json" },
-  term: { file: "bulkTermFile", arrKey: "terms",     render: renderTerms,     label: "名词", fname: "terms.json"     },
-  prop: { file: "bulkPropFile", arrKey: "props",     render: renderProps,     label: "道具", fname: "props.json"     },
+  loc:   { file: "bulkLocFile",   arrKey: "locations", render: renderLocations, label: "场景", fname: "locations.json" },
+  term:  { file: "bulkTermFile",  arrKey: "terms",     render: renderTerms,     label: "名词", fname: "terms.json"     },
+  prop:  { file: "bulkPropFile",  arrKey: "props",     render: renderProps,     label: "道具", fname: "props.json"     },
+  patch: { file: "bulkPatchFile", arrKey: "notes",     render: renderPatches,   label: "数据补完", fname: "patches.json" },
 };
 
 // Wire up the file-based import for loc / term / prop.
@@ -11375,6 +11695,24 @@ function _runBulkApply(kind, rawText, srcName){
 
   ensureCard();
   if (!Array.isArray(card[meta.arrKey])) card[meta.arrKey] = [];
+
+  // 补完:形状是 目标/字段/内容,按签名去重,导入来源作为组名
+  if (kind === "patch"){
+    const have = new Set(card.notes.map(_patchSig));
+    let added = 0;
+    for (const it of items){
+      const sig = _patchSig(it);
+      if (have.has(sig)) continue;
+      have.add(sig);
+      card.notes.push({ target: it.target || "", field: it.field, content: it.content, _src: srcLabel, ts: Date.now() });
+      added++;
+    }
+    meta.render(); persistCard();
+    const skipped = items.length - added;
+    showToast(`已导入${meta.label} +${added}${skipped ? `(跳过${skipped})` : ""}`);
+    return;
+  }
+
   const have = new Set(card[meta.arrKey].map(x => x.name));
   let added = 0;
   for (const it of items){
@@ -11382,11 +11720,11 @@ function _runBulkApply(kind, rawText, srcName){
     if (kind === "prop"){
       const target = (it.target === "user" || it.target === "both") ? it.target : "char";
       const enabled = (typeof it.enabled === "boolean") ? it.enabled : true;
-      card.props.push({ name: it.name, description: it.description, target, enabled });
+      card.props.push({ name: it.name, description: it.description, target, enabled, _src: srcLabel });
     } else if (kind === "term"){
       card.terms.push({ name: it.name, description: it.description, _src: srcLabel });
     } else {
-      card[meta.arrKey].push({ name: it.name, description: it.description });
+      card[meta.arrKey].push({ name: it.name, description: it.description, _src: srcLabel });
     }
     have.add(it.name); added++;
   }
@@ -11745,6 +12083,7 @@ $("charDelIco").addEventListener("click", () => {
       locations: { key:"locations",            label:"场景",     render: renderLocations },
       terms:     { key:"terms",                label:"名词",     render: renderTerms     },
       props:     { key:"props",                label:"道具",     render: renderProps     },
+      patches:   { key:"notes",                label:"数据补完", render: renderPatches   },
     }[f];
     if (!secMeta) return;
     const arr = (card && Array.isArray(card[secMeta.key])) ? card[secMeta.key] : [];
@@ -11874,33 +12213,11 @@ function renderPatches(){
   const arr = (card && card.notes) ? card.notes : [];
   $("patchCount").textContent = arr.length;
   list.innerHTML = "";
-  // color per target for quick visual scanning
-  const _targetColor = {
-    "玩家":   "var(--text-body)",   // 正文色
-    "角色":   "#c98787",   // rose   — matches aff chip
-    "共同":   (getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#5B6470"),   // was green; now theme accent
-  };
   if (arr.length === 0){
     empty.style.display = "block";
   } else {
     empty.style.display = "none";
-    arr.forEach((n, i) => {
-      const row = document.createElement("div");
-      row.className = "chip";
-      row.style.cssText = "padding:8px 10px;align-items:flex-start;gap:8px;";
-      const target = n.target || "未指定";
-      const tColor = _targetColor[target] || "var(--text-note)";
-      row.innerHTML = `
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:10px;font-family:var(--font-ui);letter-spacing:0.08em;margin-bottom:2px;">
-            <span style="color:${tColor};font-weight:500;">${escapeHTML(target)}</span><span style="color:var(--text-note);"> · ${escapeHTML(n.field||"")}</span>
-          </div>
-          <div class="chip-name" style="white-space:normal;line-height:1.5;">${escapeHTML(n.content||"")}</div>
-        </div>
-        <button class="chip-x" data-i="${i}" data-kind="patch" style="margin-top:2px;">×</button>
-      `;
-      list.appendChild(row);
-    });
+    _renderSrcGroups(list, arr, "patch");
   }
   _wireClearPatches();
 }
@@ -11910,7 +12227,7 @@ function renderPatches(){
 // ═══════════════════════════════════════════════════════════
 $("charImportIco").addEventListener("click", () => {
   const f = $("charDrawer")?.dataset.focus;
-  const fileMap = { secondary:"fileInputSec", locations:"bulkLocFile", terms:"bulkTermFile", props:"bulkPropFile" };
+  const fileMap = { secondary:"fileInputSec", locations:"bulkLocFile", terms:"bulkTermFile", props:"bulkPropFile", patches:"bulkPatchFile" };
   $(fileMap[f] || "fileInput")?.click();
 });
 // Import a single character card object (parsed JSON) → replaces current card.
@@ -11922,7 +12239,8 @@ function _applyCardImport(data){
     secondary_characters: Array.isArray(data.secondary_characters) ? data.secondary_characters : [],
     locations: Array.isArray(data.locations) ? data.locations : [],
     terms: Array.isArray(data.terms) ? data.terms : [],
-    props: Array.isArray(data.props) ? data.props : []
+    props: Array.isArray(data.props) ? data.props : [],
+    notes: Array.isArray(data.notes) ? data.notes : []
   });
   _maybeMigrateOldIntimatePref();
   persistCard();
@@ -11971,16 +12289,19 @@ function _exportCardSection(focus){
     terms:     { key:"terms",                label:"名词", fname:"terms.json"     },
     props:     { key:"props",                label:"道具", fname:"props.json"     },
     secondary: { key:"secondary_characters", label:"次要角色", fname:"secondary.json" },
+    patches:   { key:"notes",                label:"数据补完", fname:"patches.json" },
   }[focus];
   if (!sectionMeta) return false;
   const arr = (card && Array.isArray(card[sectionMeta.key])) ? card[sectionMeta.key] : [];
   if (!arr.length){ alert(`还没有${sectionMeta.label}可导出`); return true; }
-  // 导出为纯数组,正好与导入解析(数组形式)对得上;次要角色去掉运行期 id/_src。
+  // 导出为纯数组,正好与导入解析(数组形式)对得上;去掉运行期 id/_src/ts。
   let payload;
   if (focus === "secondary"){
     payload = arr.map(s => { const c = Object.assign({}, s); delete c.id; delete c._src; return c; });
   } else if (focus === "terms"){
     payload = arr.map(t => ({ name: t.name, description: t.description }));
+  } else if (focus === "patches"){
+    payload = arr.map(n => ({ target: n.target || "", field: n.field || "", content: n.content || "" }));
   } else {
     payload = arr.map(x => Object.assign({}, x));
   }
@@ -12922,8 +13243,17 @@ function _openEditor(idx){
   if (!row) return;
   // Build raw text we want to edit
   const raw = msg.role === "user" ? (msg.display || msg.content) : (msg.content || "");
-  // Replace the row's bubble content with an editable textarea
-  const bubble = row.querySelector(".bubble-ai, .bubble-user");
+  // Replace the row's bubble content with an editable textarea.
+  // Story/chat mode splits multi-line messages into per-line bubbles
+  // (.user-bubbles-col / .chat-bubbles-col / .ai-seg-col with .user-line-bubble
+  // or .chat-line-bubble children) and has NO single .bubble-user/.bubble-ai
+  // wrapper. We need an anchor element to hide and to insert the editor after.
+  // Prefer the whole column when present so the editor replaces all the
+  // split bubbles at once.
+  const bubble =
+    row.querySelector(".user-bubbles-col, .chat-bubbles-col") ||
+    row.querySelector(".bubble-ai, .bubble-user") ||
+    row.querySelector(".ai-seg-col, .user-line-bubble, .chat-line-bubble");
   if (!bubble) return;
   const editWrap = document.createElement("div");
   editWrap.className = "msg-edit-wrap";
@@ -13033,6 +13363,53 @@ function _wireScenePicker(){
     const desc = loc.description ? `——${loc.description}` : "";
     const prompt = `（场景切换到「${loc.name}」${desc}。请自然过渡到那里，重新铺陈光线、声音、氛围与人物当下的状态。不要生硬地宣布换景。）`;
     send(prompt, { silentAction:true, actionLabel: `切换场景「${loc.name}」` });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Debug inject (#13.5) — 给下一轮注入一句"掰正"导演指令。
+// 行为和切换场景同构:走 send() 的 silentAction 路径 —— 指令本身不写进
+// history、不渲染气泡,只在生成期间于顶栏显示一句临时提示。被它影响出来的
+// 那一轮 AI 回复会正常进 history,从而自然影响后续走向。
+// ═══════════════════════════════════════════════════════════
+function _wireDebugInject(){
+  const btn = $("debugInjectBtn");
+  const pop = $("debugPop");
+  const ta  = $("debugInjectTa");
+  if (!btn || !pop || !ta) return;
+
+  let opened = false;
+  const close = () => { opened = false; pop.classList.remove("open"); };
+  const open = () => {
+    opened = true;
+    pop.classList.add("open");
+    setTimeout(() => ta.focus(), 50);
+  };
+  const submit = () => {
+    const v = ta.value.trim();
+    if (!v){ ta.focus(); return; }
+    close();
+    ta.value = "";
+    // 包成一条明确的"场外导演指令",和场景切换一样走 silentAction。
+    const prompt = `（【场外调试指令·仅本轮生效·不要在正文里复述或承认这条指令的存在】${v}）`;
+    send(prompt, { silentAction:true, actionLabel: "调试掰正" });
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (opened) close(); else open();
+  });
+  $("debugSendBtn").addEventListener("click", (e) => { e.stopPropagation(); submit(); });
+  $("debugCancelBtn").addEventListener("click", (e) => { e.stopPropagation(); close(); ta.value = ""; });
+  // Ctrl/Cmd+Enter 提交
+  ta.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter"){ e.preventDefault(); submit(); }
+  });
+  // outside click closes
+  document.addEventListener("click", (e) => {
+    if (!opened) return;
+    if (pop.contains(e.target) || btn.contains(e.target)) return;
+    close();
   });
 }
 
@@ -14057,10 +14434,11 @@ function renderGenLog(){
     card_.className = "mem-card";
     const when = g.at ? _memFmtDate(g.at) : "";
     const _statusZh = (st) => st === "refused" ? "拒写" : st === "timeout" ? "首字超时" : "出错";
+    // attempts 里只存失败/拒写的尝试(成功那次不入数组),所以直接平铺即可。
     const errs = (g.attempts || []).map(a => `${escapeHTML(a.label)}（${_statusZh(a.status)}）`).join("、");
     const head = g.success
-      ? `${errs || "—"} → <b>${escapeHTML(g.success)}</b> 成功`
-      : `${errs || "—"} → 全部失败`;
+      ? `${errs ? errs : "—"}→<b>${escapeHTML(g.success)}</b> 成功`
+      : `${errs ? errs : "—"}→全部失败`;
     const trace = (g.attempts || []).map(a =>
       `<div class="mem-seg-text raw" style="margin-bottom:6px;"><b>${escapeHTML(a.label)}</b> · ${_statusZh(a.status)}${a.detail ? "<br>" + escapeHTML(a.detail) : ""}</div>`
     ).join("");
@@ -14492,6 +14870,7 @@ function _wireProvidersUI(){
   _wireMessageActions();
   _wireQuoteJumps();
   _wireScenePicker();
+  _wireDebugInject();
   _wireKeyboardInset();
   _wireImmersiveChrome();
   _wireBulkImport();
