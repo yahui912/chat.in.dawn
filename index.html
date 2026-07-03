@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ─── 字体:全局统一用 Noto Sans SC ───
      简体中文 / 日文(含汉字假名) / 拉丁英数 都用同一套 Noto Sans SC,
@@ -92,6 +92,16 @@
     --pop-head-pad:18px 20px 13px;                      /* 头部内边距 */
     --pop-body-pad:14px 18px 20px;                      /* 内容区内边距 */
     --pop-divider:var(--glass-border);                  /* 头部下分隔线 */
+
+    /* ── 卡片层统一规范(记忆库 / 世界书 / 志愿 / 会话 / 分区框等共用) ──
+       所有列表卡片收敛到同一套观感:同圆角、同描边、同悬浮反馈。
+       全部派生自 --primary,跟随主题色,保留原有玻璃/柔和质感。 */
+    --card-radius:14px;                                              /* 卡片统一圆角 */
+    --card-border:color-mix(in srgb, var(--primary) 12%, var(--glass-border)); /* 卡片描边 */
+    --card-surface:color-mix(in srgb, var(--primary) 3%, var(--pop-surface));  /* 卡片表面:近白,极淡主色 */
+    --card-shadow:0 1px 3px rgba(20,28,38,0.05);                     /* 卡片静置投影 */
+    --card-hover:color-mix(in srgb, var(--primary) 7%, var(--pop-surface));    /* 列表项 hover 底色 */
+    --hairline:color-mix(in srgb, var(--primary) 8%, var(--glass-border));     /* 极细分隔线统一色 */
   }
   body.intimate{
     /* inherits themed --primary / --bg-canvas / --ink from :root so the
@@ -255,7 +265,7 @@
     -webkit-backdrop-filter:blur(10px);
     color:var(--text-body);
     border-radius:4px 18px 18px 18px;
-    padding:10px 13px;
+    padding:7px 13px;
     border:1px solid var(--glass-edge);
     box-shadow:var(--glass-shadow);
     max-width:57.5%;
@@ -277,7 +287,7 @@
     -webkit-backdrop-filter:blur(10px);
     color:var(--text-body);
     border-radius:18px 4px 18px 18px;
-    padding:10px 13px;
+    padding:7px 13px;
     border:1px solid var(--bubble-edge-user);
     box-shadow:var(--glass-shadow);
     max-width:75%;
@@ -317,14 +327,14 @@
   .chat-line-bubble{
     /* override bubble-ai border-radius: corner softens after first bubble */
     border-radius:18px 18px 18px 18px;
-    padding:9px 13px;
+    padding:7px 13px;
     max-width:100%;
   }
   .chat-bubbles-col > .chat-line-bubble:first-child{
     border-radius:4px 18px 18px 18px;
   }
   .chat-line-bubble .dlg{
-    font-size:14px;
+    font-size:13px;
     line-height:1.5;
     white-space:pre-wrap;
     word-wrap:break-word;
@@ -405,7 +415,7 @@
   }
   .quote-block:hover{background:rgba(0,0,0,0.06);}
   .quote-block .quote-who{
-    font-size:10.5px;
+    font-size:11px;
     color:#3A4452;
     font-weight:600;
     letter-spacing:0.02em;
@@ -414,7 +424,7 @@
   }
   .quote-block.quote-user .quote-who{ color:#3A6DBE; }
   .quote-block .quote-text{
-    font-size:14px;
+    font-size:13px;
     color:#5A6878;
     line-height:1.4;
     display:-webkit-box;
@@ -459,7 +469,7 @@
     background:transparent;
     color:#5A6878;
     font-family:var(--font-ui);
-    font-size:12px;
+    font-size:13px;
     font-weight:500;
     cursor:pointer;
     display:inline-flex;
@@ -477,7 +487,7 @@
   .bubble-act-menu .bam-glyph-quote{
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size:15px;
-    font-weight:700;
+    font-weight:600;
     line-height:1;
     letter-spacing:-0.08em;
     color:#3A4452;
@@ -488,6 +498,51 @@
 
   /* highlight on the bubble whose action menu is currently open */
   .act-menu-target{ outline:2px solid var(--accent-soft); outline-offset:1px; }
+
+  /* ── 翻訳パネル(気泡下の中文対照) ── */
+  .tr-panel{
+    margin-top:6px;
+    padding:7px 10px;
+    border-radius:10px;
+    background:var(--chip-fill-faint);
+    border:1px solid var(--hairline);
+    animation:fadeUp 0.2s ease;
+    cursor:default;
+  }
+  .tr-panel .tr-label{
+    font-size:10.5px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--chip-ink-soft);
+    display:flex; align-items:center; gap:4px;
+    margin-bottom:3px;
+    opacity:0.85;
+  }
+  .tr-panel .tr-label i{ font-size:12px; }
+  .tr-panel .tr-body{
+    font-size:13px;
+    line-height:1.5;
+    color:var(--text-body);
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .tr-panel .tr-body.tr-err{ color:var(--err); font-size:12px; }
+  /* 翻译中 のドットアニメ(文字の … は使わずこれで表現) */
+  .tr-panel .tr-body.tr-loading{ color:var(--chip-ink-soft); }
+  .tr-panel .tr-dots{ display:inline-flex; gap:2px; margin-left:3px; vertical-align:baseline; }
+  .tr-panel .tr-dots i{
+    width:3px; height:3px; border-radius:50%;
+    background:currentColor; opacity:0.35;
+    animation:trDot 1s infinite ease-in-out;
+  }
+  .tr-panel .tr-dots i:nth-child(2){ animation-delay:0.15s; }
+  .tr-panel .tr-dots i:nth-child(3){ animation-delay:0.3s; }
+  @keyframes trDot{ 0%,60%,100%{ opacity:0.25; } 30%{ opacity:0.9; } }
+
+  /* 覆盖式翻译:被覆盖的气泡不再显示右上角「译」角标(按需求移除)。 */
+  .tr-overlaid{
+    position:relative;
+  }
 
   /* Quote draft chip — sits above the input bar showing what the user
      is replying to before they hit send. */
@@ -503,7 +558,7 @@
   }
   .quote-draft .qd-body{ flex:1; min-width:0; }
   .quote-draft .qd-who{
-    font-size:10.5px;
+    font-size:11px;
     color:#3A4452;
     font-weight:600;
     letter-spacing:0.02em;
@@ -511,7 +566,7 @@
   }
   .quote-draft.quote-user .qd-who{ color:#3A6DBE; }
   .quote-draft .qd-text{
-    font-size:11.5px;
+    font-size:11px;
     color:#5A6878;
     line-height:1.4;
     display:-webkit-box;
@@ -526,14 +581,14 @@
     background:transparent;border:none;cursor:pointer;
     color:#9BA8B8;
     display:flex;align-items:center;justify-content:center;
-    font-size:14px;
+    font-size:15px;
   }
   .quote-draft .qd-close:hover{ background:#F0F3F6; color:#000; }
 
   /* dialogue line inside bubble — LINE: solid black on light bubble */
   .dlg{
     font-family:var(--font-ui);
-    font-size:14px;line-height:1.65;
+    font-size:13px;line-height:1.65;
     color:var(--text-body);
     white-space:pre-wrap;word-wrap:break-word;
   }
@@ -546,7 +601,7 @@
   .narrative{
     font-family:var(--font-ui);
     color:var(--text-note);
-    font-size:14px;font-weight:500;
+    font-size:13px;font-weight:500;
     padding:6px 11px;
     margin-top:6px;
     background:rgba(0,0,0,0.03);
@@ -588,10 +643,45 @@
   }
   .story-frame .dlg{ white-space:pre-wrap;word-wrap:break-word; }
 
+  /* ─── 玩家侧「大框」渲染(剧情/亲密/幻想模式)───
+     和 AI 的 .story-frame 同构:对白 + 动作 + 心绪 全部框进同一个用户气泡里
+     依序竖排,而不是拆成一个个独立小气泡。右上角保留用户侧的「耳朵」尖角。 */
+  .user-story-frame{
+    display:flex;
+    flex-direction:column;
+    max-width:100%;
+    background:var(--bubble-fill-user);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    color:var(--text-body);
+    border:1px solid var(--bubble-edge-user);
+    box-shadow:var(--glass-shadow);
+    border-radius:18px 4px 18px 18px;   /* 耳朵在右上(朝向发送者) */
+    padding:11px 14px;
+  }
+  .user-story-frame > .dlg:first-child,
+  .user-story-frame > .narrative:first-child{ margin-top:0; }
+  .user-story-frame .dlg{ white-space:pre-wrap;word-wrap:break-word; }
+  /* 框内旁白/心声块:玩家气泡是彩色底,内嵌小框改用低透明白色(而非 AI 侧的淡黑),
+     在彩色气泡上更干净、层次也更清楚。 */
+  .user-story-frame .narrative{
+    /* 白色小框上加一条细的、无阴影的描边:派生自主色,很淡,只勾出轮廓。 */
+    border:0.5px solid color-mix(in srgb, var(--primary) 20%, transparent);
+    background:rgba(255,255,255,0.6);
+    padding:5px 10px;
+    box-shadow:none;
+  }
+  /* 玩家大框整体挂在 .user-story-col 里,右对齐,并和时间戳配对 */
+  .user-story-col{
+    display:flex;flex-direction:column;
+    align-items:flex-end;
+    max-width:80%;
+  }
+
   /* stat chips appended to bubble */
   .stat-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
   .stat-chip{
-    font-size:9.5px;font-family:var(--font-ui);
+    font-size:10px;font-family:var(--font-ui);
     padding:2px 8px;border-radius:99px;
     display:inline-flex;align-items:center;gap:4px;
     letter-spacing:0.04em;
@@ -602,7 +692,7 @@
   .stat-chip.int.neg{background:var(--chip-fill-faint);color:var(--chip-ink-soft);border-color:var(--chip-fill);}
   .stat-chip.lvl{background:var(--chip-fill-faint);color:var(--chip-ink);border:1px solid var(--chip-fill);}
 
-  .stat-chip i{font-size:11.5px;}
+  .stat-chip i{font-size:11px;}
 
   /* Red dot on the top-bar stats button — signals stats changed since last viewed */
   .stats-dot{
@@ -621,7 +711,7 @@
      sides of the chat read at the same size. In chat mode both jump to
      14px together (see the body.chat rule below). */
   .user-text{
-    font-family:var(--font-ui);font-size:14px;line-height:1.65;
+    font-family:var(--font-ui);font-size:13px;line-height:1.65;
     white-space:pre-wrap;          /* preserve user's intentional line breaks */
     /* `break-word` only breaks when a single token can't fit; `anywhere`
        would let the browser break between any two characters, which with
@@ -635,17 +725,17 @@
   body.chat .user-text,
   body.chat .user-text.user-action,
   body.chat .user-text.user-inner{
-    font-size:14px;
+    font-size:13px;
   }
   .user-text.user-action{
     font-style:normal;
     opacity:0.92;
-    font-size:14px;
+    font-size:13px;
   }
   .user-text.user-inner{
     font-style:normal;
     opacity:0.86;
-    font-size:14px;
+    font-size:13px;
     letter-spacing:0.02em;
   }
 
@@ -668,7 +758,7 @@
     border-radius:99px;
   }
   .sys-error{
-    align-self:center;font-size:11.5px;font-family:var(--font-ui);
+    align-self:center;font-size:11px;font-family:var(--font-ui);
     color:#FFFFFF;letter-spacing:0.04em;
     padding:5px 12px;
     background:rgba(225,77,77,0.85);
@@ -680,7 +770,7 @@
   .date-pill{
     display:inline-block;
     font-family:var(--font-ui);
-    font-size:9.5px;font-weight:500;
+    font-size:10px;font-weight:600;
     color:var(--text-body);
     padding:1px 7px;
     background:var(--bubble-fill-ai);
@@ -698,13 +788,7 @@
     width:100%;
   }
   .msg-side-info{
-    display:inline-flex;
-    flex-direction:column;
-    align-items:flex-end;
-    line-height:1.15;
-    margin-bottom:2px;
-    margin-right:-2px;   /* 让时间戳更贴近气泡(玩家侧戳在气泡左边) */
-    flex-shrink:0;
+    display:none;
   }
   .msg-read{
     font-family:var(--font-ui);
@@ -715,9 +799,8 @@
   }
   .msg-time{
     font-family:var(--font-ui);
-    font-size:9.5px;
-    color:rgba(255,255,255,0.78);
-    text-shadow:0 1px 1px rgba(0,0,0,0.08);
+    font-size:10px;
+    color:color-mix(in srgb, var(--text-note) 55%, transparent);
     margin-top:1px;
   }
   /* AI side time uses the same colors as the player's timestamp */
@@ -749,7 +832,7 @@
     background:var(--avatar-fill);
     color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:500;
+    font-size:13px;font-weight:500;
     flex-shrink:0;overflow:hidden;
     border:1px solid rgba(0,0,0,0.06);
     margin-top:-2px;   /* nudge up so the avatar top aligns with the first bubble's top */
@@ -761,7 +844,7 @@
     background:var(--avatar-fill);
     color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:500;
+    font-size:13px;font-weight:500;
     flex-shrink:0;overflow:hidden;
     border:1px solid rgba(0,0,0,0.06);
     align-self:flex-start;
@@ -872,7 +955,7 @@
   .mode-new-pill{
     display:none;
     flex-shrink:0;
-    font-size:9px;font-weight:700;letter-spacing:0.06em;
+    font-size:9px;font-weight:600;letter-spacing:0.06em;
     line-height:1;
     color:var(--accent-ink);
     background:var(--primary);
@@ -977,7 +1060,7 @@
     color:var(--text-note);
     border:none;border-radius:50%;
     cursor:pointer;
-    font-size:18px;
+    font-size:17px;
     flex-shrink:0;
   }
   .drawer-back-btn:hover{ background:var(--chip-fill-faint); }
@@ -1015,16 +1098,16 @@
   }
 
   /* Form controls */
-  .field{margin-bottom:14px;}
+  .field{margin-bottom:12px;}
   /* ── Theme settings rows ── */
   .theme-row{
     display:flex;align-items:center;gap:10px;margin-bottom:8px;
   }
   .theme-row-label{
-    font-size:12px;color:#5A6878;width:56px;flex-shrink:0;
+    font-size:10px;color:var(--text-note);width:56px;flex-shrink:0;
   }
   .theme-color-dot{
-    width:30px;height:30px;flex-shrink:0;padding:0;border:1px solid #E0E4E9;
+    width:30px;height:30px;flex-shrink:0;padding:0;border:1px solid var(--card-border);
     border-radius:10px;background:transparent;cursor:pointer;
   }
   .theme-color-dot::-webkit-color-swatch-wrapper{padding:2px;}
@@ -1034,7 +1117,7 @@
     text-transform:uppercase;letter-spacing:0.04em;
   }
   .theme-divider{
-    height:1px;background:#EDF0F3;margin:12px 0;
+    height:1px;background:var(--hairline);margin:12px 0;
   }
   /* Inline "导入图片" link inside the 背景色或导入图片 label */
   .field-label.bg-label{ gap:0; }
@@ -1050,7 +1133,7 @@
     font-size:10px;
     font-weight:600;
     letter-spacing:0.16em;
-    color:#A6AEB8;
+    color:var(--text-note);
     margin:18px 2px 10px;
     display:flex;align-items:center;gap:8px;
   }
@@ -1061,7 +1144,7 @@
     content:"";
     flex:1;
     height:1px;
-    background:#EDF0F3;
+    background:var(--hairline);
   }
   /* Avatar field in 基本信息 */
   .avatar-row{
@@ -1093,13 +1176,14 @@
   .avatar-actions .btn{margin:0;width:auto;}
   .field-label{
     display:flex;align-items:center;gap:6px;
-    font-size:9.5px;color:var(--ink-muted);
-    font-family:var(--font-ui);font-weight:700;
+    font-size:10px;color:var(--text-note);
+    font-family:var(--font-ui);font-weight:600;
     letter-spacing:0.02em;text-transform:uppercase;
-    margin-bottom:3px;
+    margin-bottom:1px;
   }
-  .field-val{font-family:var(--font-ui);font-size:11.5px;color:var(--primary);font-weight:700;}
-  .field-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+  .field-val{font-family:var(--font-ui);font-size:10px;color:var(--primary);font-weight:600;}
+  .field-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;}
+  .field-head.block-title{margin-bottom:10px;}
 
   .input, select, .ta{
     width:100%;
@@ -1107,8 +1191,8 @@
     border:1px solid var(--glass-border);
     color:var(--text-body);
     border-radius:11px;
-    padding:9px 13px;
-    font-family:var(--font-ui);font-size:13px;line-height:1.5;
+    padding:8px 12px;
+    font-family:var(--font-ui);font-size:12px;line-height:1.5;
     outline:none;transition:all 0.2s;
   }
   .ta{font-family:var(--font-ui);resize:vertical;min-height:64px;max-height:260px;}
@@ -1117,7 +1201,7 @@
     box-shadow:0 0 0 3px var(--accent-soft);
     background:color-mix(in srgb, var(--bg-canvas) 60%, rgba(255,255,255,0.5));
   }
-  .input[type="password"]{font-family:var(--font-ui);font-size:11.5px;letter-spacing:-0.02em;}
+  .input[type="password"]{font-family:var(--font-ui);font-size:11px;letter-spacing:-0.02em;}
   select{
     appearance:none;-webkit-appearance:none;
     font-family:var(--font-ui);
@@ -1130,22 +1214,27 @@
     background:var(--chip-fill-faint);
     border:1px solid var(--glass-border);
     border-radius:11px;
+    transition:border-color 0.2s, box-shadow 0.2s;
+  }
+  .seg-group:focus-within{
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px var(--accent-soft);
   }
   .seg{
     background:transparent;border:none;color:var(--text-note);
-    padding:7px 0;font-family:var(--font-ui);font-size:12px;
+    padding:6px 0;font-family:var(--font-ui);font-size:12px;font-weight:600;
     border-radius:8px;cursor:pointer;transition:all 0.2s;/*seg-stays-8*/
     min-width:0;text-align:center;white-space:nowrap;
   }
   .seg.active{
     background:var(--pop-surface);
-    color:var(--chip-ink);
-    box-shadow:0 1px 2px rgba(0,0,0,0.08);
+    color:var(--primary);
+    box-shadow:var(--card-shadow);
   }
   /* 文风(style)组固定四个按钮一行 —— 总宽不变,改为 4 等分列;
      字号略收并允许缩到 0,避免 standard/literary 这种较长词把列撑开换行。 */
   #styleGroup{grid-template-columns:repeat(4,minmax(0,1fr));}
-  #styleGroup .seg{font-size:13px;font-weight:700;padding-left:2px;padding-right:2px;letter-spacing:-0.01em;}
+  #styleGroup .seg{font-size:12px;padding-left:2px;padding-right:2px;letter-spacing:-0.01em;}
 
   /* ─── Toggle switch (round sliding) — used by 辅助AI 开关 ─── */
   .toggle-switch{
@@ -1170,24 +1259,24 @@
     box-shadow:0 1px 3px rgba(0,0,0,0.2);
     transition:transform 0.2s ease;
   }
-  .toggle-switch.on{ background:var(--accent, #5B6470); }
+  .toggle-switch.on{ background:var(--primary); }
   .toggle-switch.on::after{ transform:translateX(18px); }
 
   input[type="range"]{
     -webkit-appearance:none;appearance:none;width:100%;height:4px;
-    background:#E0E4E9;border-radius:99px;outline:none;
+    background:var(--chip-fill);border-radius:99px;outline:none;
   }
   input[type="range"]::-webkit-slider-thumb{
     -webkit-appearance:none;appearance:none;width:16px;height:16px;
     border-radius:50%;background:var(--primary);cursor:pointer;
     box-shadow:0 0 0 3px var(--accent-soft), 0 1px 3px rgba(0,0,0,0.2);
   }
-  .range-end{display:flex;justify-content:space-between;font-size:9px;color:var(--ink-muted);font-family:var(--font-ui);margin-top:6px;letter-spacing:0.04em;}
+  .range-end{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-muted);font-family:var(--font-ui);margin-top:6px;letter-spacing:0.04em;}
 
   .btn{
     width:100%;padding:11px;margin-top:6px;
     border-radius:14px;cursor:pointer;
-    font-family:var(--font-ui);font-size:12px;font-weight:500;letter-spacing:0.04em;
+    font-family:var(--font-ui);font-size:13px;font-weight:500;letter-spacing:0.04em;
     transition:all 0.2s;border:1px solid transparent;
     display:flex;align-items:center;justify-content:center;gap:8px;
   }
@@ -1199,7 +1288,7 @@
   .btn.ghost{
     background:#F4F6F8;
     border-color:#E0E4E9;
-    color:#5A6878;
+    color:var(--text-note);
   }
   .btn.ghost:hover{background:#E8ECF0;color:#000000;}
   .btn.danger{
@@ -1238,7 +1327,7 @@
   .head-ico.is-reset:hover{ color:var(--primary); }
 
   .note{
-    font-size:10.5px;color:#5A6878;
+    font-size:11px;color:var(--text-note);
     font-family:var(--font-ui);line-height:1.5;margin-top:6px;
     padding:9px 12px;
     background:var(--chip-fill-faint);
@@ -1246,8 +1335,9 @@
     border-radius:10px;
   }
   .note strong{color:var(--chip-ink);}
+  b.ui-b{font-weight:600;}
   .note.warn{background:var(--chip-fill);border-color:var(--chip-fill-strong);color:var(--chip-ink);}
-  .note.warn strong{color:var(--chip-ink);font-weight:700;}
+  .note.warn strong{color:var(--chip-ink);font-weight:600;}
 
   /* Accordion */
   .accordion{
@@ -1267,7 +1357,7 @@
   .accordion.open .acc-icon{transform:rotate(90deg);}
   .acc-title{
     flex:1;font-family:var(--font-ui);
-    font-size:13px;font-weight:500;color:var(--text-body);
+    font-size:12px;font-weight:500;color:var(--text-body);
     display:flex;align-items:center;gap:8px;
   }
   .acc-count{
@@ -1325,20 +1415,20 @@
     transition:background 0.15s;
   }
   .term-group-head:hover{ background:rgba(0,0,0,0.03); }
-  .term-group-head .term-group-ico{ font-size:14px;color:#5A6878;flex-shrink:0; }
+  .term-group-head .term-group-ico{ font-size:15px;color:#5A6878;flex-shrink:0; }
   .term-group-title{
-    font-size:13px;font-weight:600;color:#1A2230;
+    font-size:13px;font-weight:600;color:var(--text-body);
     min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .term-group-count{
     flex-shrink:0;
-    font-size:10px;font-weight:600;color:#9BA8B8;
+    font-size:10px;font-weight:600;color:var(--text-note);
     background:rgba(0,0,0,0.05);
     padding:1px 7px;border-radius:999px;line-height:1.6;
   }
   .term-group-head .caret{
     margin-left:auto;flex-shrink:0;
-    color:#9BA8B8;font-size:12px;
+    color:var(--text-note);font-size:13px;
     transition:transform 0.25s;
   }
   .term-group.open .term-group-head .caret{ transform:rotate(90deg); }
@@ -1351,18 +1441,18 @@
   }
   .term-entry + .term-entry{ border-top:1px solid rgba(0,0,0,0.05); }
   .term-entry-name{
-    font-size:13.5px;font-weight:700;color:#1A2230;
+    font-size:13px;font-weight:600;color:var(--text-body);
     line-height:1.5;padding-right:22px;
   }
   .term-entry-desc{
-    font-size:12px;color:#5A6878;line-height:1.65;
+    font-size:13px;color:var(--text-note);line-height:1.65;
     margin-top:2px;white-space:pre-wrap;word-wrap:break-word;
   }
   .term-entry-x{
     position:absolute;top:6px;right:0;
     width:18px;height:18px;line-height:16px;text-align:center;
     border:none;background:transparent;cursor:pointer;
-    color:#C0C7D0;font-size:16px;border-radius:5px;
+    color:var(--text-note);font-size:17px;border-radius:5px;
     transition:all 0.12s;
   }
   .term-entry-x:hover{ color:#C98787;background:rgba(201,135,135,0.12); }
@@ -1381,12 +1471,12 @@
     background:var(--primary);
     box-shadow:0 0 0 3px var(--accent-soft);
   }
-  .prop-entry:not(.enabled) .term-entry-name{ color:#9BA8B8; }
+  .prop-entry:not(.enabled) .term-entry-name{ color:var(--text-note); }
   .prop-entry:not(.enabled) .term-entry-desc{ opacity:0.6; }
   .term-entry-tag{
     flex-shrink:0;font-size:10px;font-weight:600;line-height:1.6;
     padding:1px 7px;border-radius:999px;
-    background:rgba(0,0,0,0.05);color:#5A6878;
+    background:rgba(0,0,0,0.05);color:var(--text-note);
   }
   /* ─── 数据补完条目:目标·字段 小标题 + 正文 ─── */
   .term-entry-meta{
@@ -1395,7 +1485,7 @@
     margin-bottom:2px;padding-right:22px;
   }
   .term-entry-body{
-    font-size:10px;color:#1A2230;line-height:1.55;
+    font-size:10px;color:var(--text-body);line-height:1.55;
     text-align:left;padding-left:0;margin-left:0;
     white-space:pre-wrap;word-wrap:break-word;padding-right:22px;
   }
@@ -1408,7 +1498,7 @@
     border:1px solid #E0E4E9;
     border-radius:99px;
     padding:5px 10px 5px 12px;
-    font-family:var(--font-ui);font-size:11.5px;color:#000000;
+    font-family:var(--font-ui);font-size:11px;color:var(--text-body);
     display:inline-flex;align-items:center;gap:5px;
     transition:all 0.15s;
   }
@@ -1421,25 +1511,27 @@
   .chip-x{
     width:15px;height:15px;border-radius:50%;border:none;
     background:rgba(0,0,0,0.08);
-    color:#6B7C93;font-size:11.5px;line-height:1;
+    color:var(--text-note);font-size:11px;line-height:1;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;padding:0;
   }
   .chip-x:hover{background:#FFD0D0;color:#E14D4D;}
   .chip-name{font-weight:500;}
-  .chip-sub{color:#6B7C93;font-size:10.5px;}
+  .chip-sub{color:var(--text-note);font-size:11px;}
 
   .add-form{
-    background:var(--chip-fill-faint);
-    border:1px solid var(--glass-border);
-    border-radius:14px;padding:11px;
+    background:var(--card-surface);
+    border:1px solid var(--card-border);
+    border-radius:var(--card-radius);padding:11px;
+    box-shadow:var(--card-shadow);
     display:flex;flex-direction:column;gap:6px;margin-top:4px;
   }
   /* 「模型与生成」抽屉里把 生成参数 / AI 志愿 / 生成日志 各自框起来的大细框 */
   .gen-box{
-    background:var(--chip-fill-faint);
-    border:1px solid var(--glass-border);
-    border-radius:14px;padding:12px;
+    background:var(--card-surface);
+    border:1px solid var(--card-border);
+    border-radius:var(--card-radius);padding:12px;
+    box-shadow:var(--card-shadow);
     margin-top:10px;
   }
   .gen-box:first-child{margin-top:4px;}
@@ -1517,15 +1609,15 @@
   }
   .stat-label{
     font-family:var(--font-ui);
-    font-size:9.5px;font-weight:500;
-    color:#6B7C93;
+    font-size:10px;font-weight:500;
+    color:var(--text-note);
     letter-spacing:0.14em;
   }
   .stat-tier{
     margin-left:auto;
     font-family:var(--font-ui);
-    font-size:8.5px;font-weight:500;
-    color:#3A4452;
+    font-size:10px;font-weight:500;
+    color:var(--text-body);
     letter-spacing:0.06em;
     padding:1.5px 6px;
     border-radius:99px;
@@ -1556,15 +1648,15 @@
   }
   .stat-num{
     font-family:var(--font-ui);
-    font-size:20px;font-weight:600;
-    color:#000000;
+    font-size:24px;font-weight:600;
+    color:var(--text-body);
     line-height:1;
     transition:color 0.35s;
   }
   .stat-frac{
     font-family:var(--font-ui);
-    font-size:10.5px;
-    color:#9BA8B8;
+    font-size:10px;
+    color:var(--text-note);
     letter-spacing:0.02em;
   }
   body.intimate .stat-frac{ color:#9BA8B8; }
@@ -1597,8 +1689,7 @@
   .stat-bar-arousal{
     background:linear-gradient(90deg, #E14D4D, #F08585, #C04848);
   }
-  /* ── PAD 情绪三根 VAD 条 (--primary 派生,跟随换肤) ── */
-  /* ── 紧凑单列布局 (B): 每行一指标,三行严格纵向对齐 ── */
+  /* ── 数值条:紧凑单列布局 (B): 每行一指标,三行严格纵向对齐 ── */
   .stat-list{ display:flex; flex-direction:column; gap:7px; }
   .stat-line{
     display:flex; align-items:center; gap:8px; line-height:1;
@@ -1606,11 +1697,11 @@
   /* 标题:固定宽+统一字色(压过 body.intimate 等模式覆盖) */
   .stat-line .stat-label{
     font-size:10px; font-weight:500; letter-spacing:0.08em;
-    color:#6B7C93 !important;
+    color:var(--text-note) !important;
     flex:0 0 28px; width:28px;
   }
   .stat-line .stat-num{
-    font-size:12px; font-weight:600;
+    font-size:13px; font-weight:600;
     flex:0 0 24px; width:24px; text-align:left;
   }
   .stat-line-bar{ flex:1 1 auto; margin-top:0; }
@@ -1623,35 +1714,11 @@
     box-sizing:border-box;
     height:16px; line-height:1;
     display:inline-flex; align-items:center; justify-content:center;
-    font-size:8.5px; font-weight:500; letter-spacing:0.06em;
+    font-size:10px; font-weight:500; letter-spacing:0.06em;
     padding:0; border-width:1px; border-style:solid;
     border-radius:99px;
   }
 
-  .mood-panel{
-    padding:0 12px;
-    display:flex; flex-direction:column; gap:7px;
-  }
-  .mood-row{ display:flex; align-items:center; gap:7px; }
-  .mood-end{
-    font-size:10px; color:var(--text-note);
-    flex:0 0 22px; text-align:center; opacity:0.7; white-space:nowrap;
-  }
-  .mood-track{
-    flex:1; height:3px; border-radius:99px; position:relative; overflow:hidden;
-    background:#E8ECF0;
-  }
-  .mood-mid{
-    position:absolute; left:50%; top:0; width:0.5px; height:3px;
-    background:color-mix(in srgb, var(--primary) 35%, transparent);
-    z-index:1;
-  }
-  .mood-fill{
-    position:absolute; top:0; height:100%; border-radius:99px;
-    transition:left .6s ease, width .6s ease;
-    background:var(--primary);
-  }
-  .mood-dot{ display:none; }
   .stat-bar-fill.surge{
     animation:bar-surge 0.7s cubic-bezier(.4,1.5,.4,1);
   }
@@ -1763,14 +1830,14 @@
     border-radius:10px;
     padding:7px 9px;
     font-family:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;
-    font-size:11.5px;
+    font-size:11px;
     color:var(--text-body);
     outline:none;resize:vertical;
     white-space:pre;
     overflow:auto;
   }
   .bulk-import-hint{
-    font-size:10.5px;
+    font-size:11px;
     font-family:var(--font-ui);
     color:var(--text-note);
     margin-bottom:6px;
@@ -1813,11 +1880,11 @@
   }
   .prop-target-tag{
     font-family:var(--font-ui);
-    font-size:8.5px;
+    font-size:9px;
     padding:1px 5px;
     border-radius:99px;
     background:rgba(0,0,0,0.06);
-    color:#6B7C93;
+    color:var(--text-note);
     margin-right:4px;
   }
   .prop-chip.enabled .prop-target-tag{
@@ -1849,7 +1916,7 @@
   .input-tool-btn:hover{ background:rgba(0,0,0,0.05); }
   .input-tool-btn.open{
     background:var(--accent-soft);
-    color:#3A4452;
+    color:var(--text-body);
   }
   /* Input drawer: hidden by default, opens above the input row */
   .input-drawer{
@@ -1889,7 +1956,7 @@
   }
   .marker-btn.active{
     background:var(--accent-soft);
-    color:#3A4452;
+    color:var(--text-body);
     border-color:var(--primary);
     box-shadow:0 1px 2px rgba(0,0,0,0.08);
   }
@@ -1916,7 +1983,7 @@
   .action-btn:active{
     background:var(--accent-soft);
     border-color:var(--primary);
-    color:#3A4452;
+    color:var(--text-body);
   }
 
   /* ─── 调试按钮 · 暂存状态 ─────────────────────────────────
@@ -1929,7 +1996,7 @@
   .debug-inject-btn[data-pending]{
     background:var(--accent-soft);
     border-color:var(--primary);
-    color:#3A4452;
+    color:var(--text-body);
   }
   .debug-inject-btn[data-pending] .debug-pending-badge{
     display:inline-flex;
@@ -1940,7 +2007,7 @@
     background:var(--primary);
     color:var(--accent-ink);
     border-radius:7px;
-    font-size:9.5px;font-weight:700;line-height:1;
+    font-size:10px;font-weight:600;line-height:1;
     font-family:var(--font-ui);
   }
 
@@ -1968,8 +2035,8 @@
     border:1px solid rgba(0,0,0,0.06);
     border-radius:14px;
     font-family:var(--font-ui);
-    font-size:12px;
-    color:#000000;
+    font-size:13px;
+    color:var(--text-body);
     box-shadow:0 4px 14px rgba(0,0,0,0.15);
     opacity:0;
     transform:translateY(-12px);
@@ -1980,7 +2047,7 @@
   .toast.toast-error{
     background:#FFFFFF;
     border-color:rgba(0,0,0,0.06);
-    color:#000000;
+    color:var(--text-body);
   }
 
   /* ─── Message rows ─── */
@@ -1995,12 +2062,12 @@
     padding:8px 10px;
     font-family:var(--font-ui);
     font-size:13px;line-height:1.65;
-    color:#000000;
+    color:var(--text-body);
     outline:none;resize:vertical;
   }
   .msg-edit-row{display:flex;gap:6px;margin-top:6px;justify-content:flex-end;}
   .msg-edit-btn{
-    font-size:11.5px;padding:4px 12px;border-radius:99px;border:1px solid #E0E4E9;
+    font-size:11px;padding:4px 12px;border-radius:99px;border:1px solid #E0E4E9;
     background:#FFFFFF;color:#5A6878;cursor:pointer;
     font-family:var(--font-ui);
   }
@@ -2014,7 +2081,7 @@
   .scroll-pill{
     --kb-inset: 0px;
     position:absolute;
-    bottom:175px;
+    bottom:100px;
     left:50%;
     transform:translateX(-50%) translateY(calc(8px - var(--kb-inset)));
     z-index:20;
@@ -2022,10 +2089,10 @@
     border:1px solid rgba(0,0,0,0.06);
     box-shadow:0 4px 14px rgba(0,0,0,0.15);
     border-radius:99px;
-    padding:7px 14px 7px 11px;
+    padding:5px 11px;
     font-family:var(--font-ui);
-    font-size:12px;
-    color:#000000;
+    font-size:11px;
+    color:var(--text-body);
     display:flex;align-items:center;gap:6px;
     cursor:pointer;
     opacity:0;pointer-events:none;
@@ -2045,24 +2112,25 @@
   /* ─── Memory bank (记忆库) — #15 ─── */
   .mem-intro{
     font-family:var(--font-ui);
-    font-size:11.5px;
+    font-size:10px;
     line-height:1.6;
-    color:#6B7C93;
+    color:var(--text-note);
     margin:0 0 14px;
   }
   .mem-empty{
     text-align:center;
     font-family:var(--font-ui);
-    font-size:12px;
-    color:#9BA8B8;
+    font-size:13px;
+    color:var(--text-note);
     padding:32px 12px;
     line-height:1.7;
   }
-  .mem-empty i{ font-size:26px; color:#C8CFD7; display:block; margin-bottom:8px; }
+  .mem-empty i{ font-size:24px; color:var(--text-note); display:block; margin-bottom:8px; }
   .mem-card{
-    border:1px solid rgba(0,0,0,0.08);
-    border-radius:14px;
-    background:rgba(255,255,255,0.6);
+    border:1px solid var(--card-border);
+    border-radius:var(--card-radius);
+    background:var(--card-surface);
+    box-shadow:var(--card-shadow);
     margin-bottom:10px;
     overflow:hidden;
   }
@@ -2073,11 +2141,11 @@
     cursor:pointer;
     transition:background 0.15s;
   }
-  .mem-card-head:hover{ background:rgba(0,0,0,0.03); }
-  .mem-card-head .mem-ico{ font-size:15px;color:#5A6878;flex-shrink:0; }
+  .mem-card-head:hover{ background:var(--card-hover); }
+  .mem-card-head .mem-ico{ font-size:15px;color:var(--text-note);flex-shrink:0; }
   .mem-card-title{
     font-family:var(--font-ui);
-    font-size:13px;font-weight:600;color:#1A2230;
+    font-size:12px;font-weight:600;color:var(--text-body);
     display:flex;align-items:center;gap:7px;
   }
   /* 载体来源小标签:剧情(含亲密)/聊天/日记 各一色 */
@@ -2107,12 +2175,12 @@
   .fz-turn-char{ background:rgba(0,0,0,0.025); }
   .fz-turn-who{
     font-family:var(--font-ui);
-    font-size:9.5px;font-weight:600;letter-spacing:0.06em;
+    font-size:10px;font-weight:600;letter-spacing:0.06em;
     color:var(--chip-ink-soft);margin-bottom:3px;
   }
   .fz-turn-text{
     font-family:var(--font-ui);
-    font-size:12.5px;line-height:1.65;color:#1A2230;
+    font-size:13px;line-height:1.65;color:var(--text-body);
     white-space:pre-wrap;word-wrap:break-word;
   }
   .fz-del-btn{
@@ -2126,11 +2194,11 @@
   .fz-del-btn:hover{ background:var(--chip-fill-strong); }
   .mem-card-sub{
     font-family:var(--font-ui);
-    font-size:10px;color:#9BA8B8;letter-spacing:0.02em;margin-top:1px;
+    font-size:10px;color:var(--text-placeholder);letter-spacing:0.02em;margin-top:2px;
   }
   .mem-card-head .caret{
     margin-left:auto;flex-shrink:0;
-    color:#9BA8B8;font-size:12px;
+    color:var(--text-note);font-size:13px;
     transition:transform 0.25s;
   }
   .mem-card.open .mem-card-head .caret{ transform:rotate(90deg); }
@@ -2138,23 +2206,23 @@
   .mem-card.open .mem-card-body{ display:block; }
   .mem-seg-label{
     font-family:var(--font-ui);
-    font-size:9.5px;font-weight:600;
+    font-size:10px;font-weight:600;
     letter-spacing:0.12em;
-    color:#7A8AA0;
+    color:var(--text-note);
     margin:10px 0 5px;
     text-align:left;
   }
   .mem-seg-text{
     font-family:var(--font-ui);
-    font-size:12.5px;
+    font-size:13px;
     line-height:1.7;
-    color:#1A2230;
+    color:var(--text-body);
     white-space:pre-wrap;
     word-wrap:break-word;
     text-align:left;
   }
   .mem-seg-text.raw{
-    color:#4A5563;
+    color:var(--text-note);
     background:rgba(0,0,0,0.025);
     border:1px solid rgba(0,0,0,0.05);
     border-radius:10px;
@@ -2167,11 +2235,11 @@
   /* ─── 艾宾浩斯遗忘曲线:记忆强度条 + 清晰度分级 ─── */
   .mem-strength{
     display:flex;align-items:center;gap:8px;
-    margin:4px 0 2px;
+    margin:6px 0 3px;
   }
   .mem-strength-bar{
-    flex:1;height:5px;border-radius:999px;
-    background:rgba(0,0,0,0.07);overflow:hidden;
+    flex:1;height:4px;border-radius:999px;
+    background:var(--chip-fill);overflow:hidden;
   }
   .mem-strength-fill{
     height:100%;border-radius:999px;
@@ -2191,19 +2259,18 @@
   /* 淡忘的卡:整张稍微"褪色",呼应"快想不起来了" */
   .mem-card.mem-faint{ opacity:0.78; }
   .mem-recall-meta{
-    font-size:10px;color:#9BA8B8;margin-top:3px;letter-spacing:0.02em;
+    font-size:10px;color:var(--text-note);margin-top:3px;letter-spacing:0.02em;
   }
   .mem-reinforce-btn{
     margin-top:10px;
-    display:inline-flex;align-items:center;gap:6px;
-    font-family:var(--font-ui);font-size:11.5px;font-weight:600;
+    display:inline-flex;align-items:center;
+    font-family:var(--font-ui);font-size:11px;font-weight:600;
     color:var(--chip-ink);background:var(--chip-fill);
     border:1px solid var(--chip-fill-strong);
     border-radius:999px;padding:5px 12px;cursor:pointer;
     transition:background 0.15s;
   }
   .mem-reinforce-btn:hover{ background:var(--chip-fill-strong); }
-  .mem-reinforce-btn i{ font-size:13px; }
 
   /* ─── 带情感的记忆点 ─── */
   .mem-point{
@@ -2212,23 +2279,23 @@
   }
   .mem-point-top{ display:flex;align-items:center;gap:7px;margin-bottom:3px; }
   .mem-emo-chip{
-    font-size:10.5px;font-weight:700;color:var(--chip-ink);
+    font-size:11px;font-weight:600;color:var(--chip-ink);
     background:var(--chip-fill);
     padding:1px 8px;border-radius:999px;letter-spacing:0.03em;
   }
-  .mem-emo-dots{ font-size:8px;color:var(--chip-ink-soft);letter-spacing:1px; }
+  .mem-emo-dots{ font-size:9px;color:var(--chip-ink-soft);letter-spacing:1px; }
   .mem-weight-chip{
-    font-size:9.5px;font-weight:700;color:var(--chip-ink);
+    font-size:10px;font-weight:600;color:var(--chip-ink);
     background:var(--chip-fill-strong);
     padding:1px 7px;border-radius:999px;
   }
   .mem-point-gist{
-    font-family:var(--font-ui);font-size:12.5px;line-height:1.65;
-    color:#1A2230;white-space:pre-wrap;word-wrap:break-word;
+    font-family:var(--font-ui);font-size:13px;line-height:1.65;
+    color:var(--text-body);white-space:pre-wrap;word-wrap:break-word;
   }
   .mem-kw-row{ margin-top:5px;display:flex;flex-wrap:wrap;gap:4px; }
   .mem-kw{
-    font-size:9.5px;color:#5A6878;background:rgba(0,0,0,0.05);
+    font-size:10px;color:var(--text-note);background:rgba(0,0,0,0.05);
     padding:1px 7px;border-radius:6px;letter-spacing:0.02em;
   }
 
@@ -2257,14 +2324,14 @@
   }
   .lore-group-head:hover{ background:rgba(0,0,0,0.03); }
   .lore-group-head .lg-caret{
-    font-size:15px;color:#7A8AA0;flex-shrink:0;
+    font-size:15px;color:var(--text-note);flex-shrink:0;
     transition:transform 0.18s;
   }
   .lore-group.open .lore-group-head .lg-caret{ transform:rotate(90deg); }
   .lore-group-title{
     font-family:var(--font-ui);
-    font-size:13.5px;font-weight:600;
-    color:#1A2230;
+    font-size:13px;font-weight:600;
+    color:var(--text-body);
     display:flex;align-items:center;gap:6px;
     flex:1;min-width:0;
     overflow:hidden;
@@ -2276,7 +2343,7 @@
     font-size:11px;font-weight:600;
     padding:1px 8px;border-radius:999px;
     background:rgba(0,0,0,0.06);
-    color:#5A6878;
+    color:var(--text-note);
     flex-shrink:0;
   }
   .lore-group-actions{
@@ -2286,7 +2353,7 @@
     background:transparent;border:none;cursor:pointer;
     width:26px;height:26px;border-radius:6px;
     display:flex;align-items:center;justify-content:center;
-    color:#7A8AA0;font-size:14px;
+    color:var(--text-note);font-size:15px;
     transition:all 0.15s;
   }
   .lore-group-actions button:hover{ background:rgba(0,0,0,0.06);color:#1A2230; }
@@ -2304,7 +2371,7 @@
     border-top:1px solid rgba(0,0,0,0.06);
   }
   /* 组内的条目卡片视觉收窄 */
-  .lore-group-body .lore-card{ margin-top:8px;background:rgba(255,255,255,0.7); }
+  .lore-group-body .lore-card{ margin-top:8px;background:var(--card-surface); }
   /* 散条(无组):直接是一张 mem-card,不包外壳 */
   /* 启用 toggle 圆点(嵌在头部) */
   .lore-enable-dot{
@@ -2320,7 +2387,7 @@
   .lore-const-chip,
   .lore-sel-chip{
     flex-shrink:0;
-    font-size:9px;font-weight:700;
+    font-size:9px;font-weight:600;
     padding:1px 6px;border-radius:999px;
     letter-spacing:0.06em;line-height:1.6;
   }
@@ -2330,16 +2397,16 @@
   .lore-meta-row{
     display:flex;gap:8px;
     font-family:var(--font-ui);
-    font-size:11.5px;line-height:1.7;
+    font-size:11px;line-height:1.7;
     padding:3px 0;
   }
   .lore-meta-row .lmr-k{
-    color:#7A8AA0;font-weight:600;
+    color:var(--text-note);font-weight:600;
     flex-shrink:0;min-width:68px;
     letter-spacing:0.04em;
   }
   .lore-meta-row .lmr-v{
-    color:#1A2230;
+    color:var(--text-body);
     word-break:break-word;
     flex:1;
     white-space:pre-wrap;
@@ -2354,7 +2421,7 @@
     font-family:var(--font-ui);
     display:inline-block;
   }
-  .lore-meta-row .lmr-v.dim{ color:#9BA8B8;font-style:normal; }
+  .lore-meta-row .lmr-v.dim{ color:var(--text-note);font-style:normal; }
   .lore-meta-sep{
     height:1px;
     background:rgba(0,0,0,0.06);
@@ -2368,7 +2435,7 @@
   }
   .lore-mini-btn{
     font-family:var(--font-ui);
-    font-size:11px;color:#5A6878;
+    font-size:11px;color:var(--text-note);
     padding:4px 10px;border-radius:6px;
     background:transparent;
     border:1px solid rgba(0,0,0,0.1);
@@ -2399,13 +2466,13 @@
   }
   .lore-modal-title{
     font-family:var(--font-ui);
-    font-size:14px;font-weight:600;
-    color:#1A2230;
+    font-size:15px;font-weight:600;
+    color:var(--text-body);
     margin-bottom:6px;
   }
   .lore-modal-sub{
     font-family:var(--font-ui);
-    font-size:11.5px;color:#7A8AA0;
+    font-size:11px;color:var(--text-note);
     margin-bottom:14px;line-height:1.6;
   }
   .lore-modal-row{
@@ -2416,14 +2483,14 @@
     font-family:var(--font-ui);
     font-size:10px;font-weight:600;
     letter-spacing:0.10em;
-    color:#7A8AA0;
+    color:var(--text-note);
     text-transform:uppercase;
   }
   .lore-modal-row input[type="number"],
   .lore-modal-row select{
     font-family:var(--font-ui);
-    font-size:12.5px;
-    color:#1A2230;
+    font-size:13px;
+    color:var(--text-body);
     border:1px solid rgba(0,0,0,0.1);
     border-radius:8px;
     background:rgba(255,255,255,0.95);
@@ -2436,7 +2503,7 @@
   .lore-modal-row select:focus{ border-color:var(--primary); }
   .lore-modal-row .lmr-hint{
     font-family:var(--font-ui);
-    font-size:10.5px;color:#9BA8B8;
+    font-size:11px;color:var(--text-note);
     line-height:1.5;
   }
   .lore-modal-row.inline{
@@ -2444,7 +2511,7 @@
   }
   .lore-modal-row.inline label{
     text-transform:none;letter-spacing:0;
-    font-size:12.5px;color:#1A2230;font-weight:500;
+    font-size:13px;color:var(--text-body);font-weight:500;
     flex:1;
   }
   .lore-modal-row.inline .lmr-toggle{
@@ -2472,7 +2539,7 @@
   }
   .lore-modal-btn{
     font-family:var(--font-ui);
-    font-size:12px;font-weight:500;
+    font-size:13px;font-weight:500;
     padding:7px 16px;border-radius:8px;
     cursor:pointer;
     border:1px solid rgba(0,0,0,0.1);
@@ -2504,11 +2571,11 @@
   .slot-list{ display:flex; flex-direction:column; gap:8px; }
   .slot-card{
     display:flex; align-items:center; gap:9px;
-    background:#FFFFFF;
-    border:1px solid #ECECEF;
-    border-radius:13px;
+    background:var(--card-surface);
+    border:1px solid var(--card-border);
+    border-radius:var(--card-radius);
     padding:11px 12px;
-    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+    box-shadow:var(--card-shadow);
     cursor:pointer;
     user-select:none; -webkit-user-select:none;
     touch-action:pan-y;
@@ -2528,9 +2595,9 @@
     padding:3px 7px; flex-shrink:0; white-space:nowrap;
   }
   .slot-main{ flex:1; min-width:0; }
-  .slot-name{ font-size:13.5px; font-weight:600; color:#3A3A44; display:flex; align-items:center; gap:6px; }
+  .slot-name{ font-size:13px; font-weight:600; color:var(--text-body); display:flex; align-items:center; gap:6px; }
   .slot-off{ font-size:10px; font-weight:500; color:#B0B0BA; background:#F0F0F3; border-radius:6px; padding:1px 6px; }
-  .slot-sub{ font-size:11px; color:#9BA8B8; margin-top:2px; font-family:var(--font-ui); }
+  .slot-sub{ font-size:11px; color:var(--text-note); margin-top:2px; font-family:var(--font-ui); }
   .slot-note{
     font-size:11px; color:var(--chip-ink-soft); margin-top:5px; line-height:1.5;
     background:var(--chip-fill-faint); border-radius:7px; padding:5px 8px;
@@ -2542,17 +2609,17 @@
   .slot-adv-head{
     display:flex; align-items:center; gap:8px; width:100%;
     background:none; border:none; cursor:pointer; padding:4px 2px;
-    font-size:13px; font-weight:600; color:#5A6878; font-family:var(--font-ui);
+    font-size:13px; font-weight:600; color:var(--text-note); font-family:var(--font-ui);
   }
   .slot-adv-ico{ color:var(--chip-ink); font-size:15px; }
-  .slot-adv-caret{ margin-left:auto; color:#C8CFD7; font-size:14px; transition:transform 0.2s; }
+  .slot-adv-caret{ margin-left:auto; color:#C8CFD7; font-size:15px; transition:transform 0.2s; }
   .slot-adv.open .slot-adv-caret{ transform:rotate(90deg); }
   .slot-adv-body{ display:none; padding:6px 2px 2px; }
   .slot-adv.open .slot-adv-body{ display:block; }
   .slot-range-head{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
   .slot-chk-row{
     display:flex; align-items:center; gap:7px; margin-top:7px;
-    font-size:11.5px; color:#7A8290; font-family:var(--font-ui); cursor:pointer;
+    font-size:11px; color:var(--text-note); font-family:var(--font-ui); cursor:pointer;
   }
   .slot-chk-row input{ width:14px; height:14px; accent-color:var(--accent,#5B6470); }
   .slot-warn{ color:var(--chip-ink); }
@@ -2561,25 +2628,32 @@
   .slot-fetch-btn{
     display:inline-flex; align-items:center; gap:4px;
     background:var(--chip-fill); color:var(--chip-ink); border:none; border-radius:8px;
-    padding:4px 10px; font-size:11.5px; font-weight:600; cursor:pointer;
+    padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer;
     font-family:var(--font-ui);
   }
   .slot-fetch-btn:disabled{ opacity:0.5; cursor:default; }
   .slot-test-btn{
     display:inline-flex; align-items:center; gap:5px; width:100%; justify-content:center;
     background:#EEF1F4; color:#5A6878; border:none; border-radius:9px;
-    padding:9px 12px; font-size:12.5px; font-weight:600; cursor:pointer; margin-top:8px;
+    padding:9px 12px; font-size:12px; font-weight:600; cursor:pointer; margin-top:8px;
     font-family:var(--font-ui);
   }
   .slot-test-btn:disabled{ opacity:0.55; cursor:default; }
   .slot-test-hint-ok{ color:var(--chip-ink); }
-  .slot-test-hint-bad{ color:var(--chip-ink);font-weight:700; }
+  .slot-test-hint-bad{ color:var(--chip-ink);font-weight:600; }
   .slot-go{ color:#C8CFD7; font-size:15px; flex-shrink:0; }
 
   /* ─── 志愿编辑器 ─── */
   .slot-editor-card{ max-height:84vh; overflow-y:auto; }
   /* ─── 本场愿望 Modal ─── */
   .wish-modal-card{ max-height:86vh; overflow-y:auto; }
+  /* 头部下方一条长横线 —— 贯穿整卡(用负 margin 抵消 modal-card 的左右内边距,
+     与抽屉头部那条分隔线一样顶到卡片两边)。 */
+  .wish-modal-head{
+    margin:0 -20px 16px;
+    padding:0 20px 13px;
+    border-bottom:1px solid var(--pop-divider);
+  }
   .wish-modal-hint{
     font-size:10px;font-weight:600;letter-spacing:0.02em;
     color:var(--chip-ink-soft);background:var(--chip-fill);
@@ -2594,15 +2668,15 @@
   /* 统一浮窗不要 ✕ —— 关闭靠点框外 */
   .slot-editor-x{ display:none !important; }
   .slot-fld-label{
-    display:block; font-size:11px; font-weight:700; color:var(--chip-ink-soft);
-    font-family:var(--font-ui); margin:11px 2px 5px;
+    display:block; font-size:10px; font-weight:600; color:var(--text-note);
+    font-family:var(--font-ui); margin:11px 2px 2px;
   }
-  .slot-fld-hint{ font-size:10.5px; color:var(--text-note); margin:5px 2px 0; line-height:1.5; font-family:var(--font-ui); }
+  .slot-fld-hint{ font-size:10px; color:var(--text-note); margin:5px 2px 0; line-height:1.5; font-family:var(--font-ui); }
   .slot-toggle-row{
     display:flex; align-items:center; justify-content:space-between;
     margin-top:13px; padding-top:12px; border-top:1px solid var(--glass-border);
   }
-  .slot-toggle-label{ font-size:13px; color:var(--text-body); display:flex; align-items:center; gap:7px; }
+  .slot-toggle-label{ font-size:12px; color:var(--text-body); display:flex; align-items:center; gap:7px; }
   .slot-toggle-label i{ color:var(--chip-ink); font-size:15px; }
 
   /* ─── Scene picker / Debug pop (#13) — 统一浮窗 ─── */
@@ -2648,7 +2722,7 @@
     border-radius:12px;
     background:var(--chip-fill-faint);
     border:1px solid var(--glass-border);
-    font-size:12px;outline:none;
+    font-size:13px;outline:none;
     color:var(--text-body);
     font-family:var(--font-ui);
   }
@@ -2665,13 +2739,13 @@
   .scene-pop-item:hover{background:var(--chip-fill-faint);}
   .scene-pop-item .nm{font-size:13px;color:var(--text-body);font-family:var(--font-ui);}
   .scene-pop-item .ds{font-size:11px;color:var(--text-note);font-family:var(--font-ui);line-height:1.5;}
-  .scene-pop-empty{padding:24px;text-align:center;font-size:11.5px;color:var(--text-note);}
+  .scene-pop-empty{padding:24px;text-align:center;font-size:11px;color:var(--text-note);}
 
   /* time-of-day indicator chip in header */
   .time-chip{
     font-family:var(--font-ui);
     font-size:9px;letter-spacing:0.1em;
-    color:#6B7C93;
+    color:var(--text-note);
     margin-left:4px;
     opacity:0.85;
   }
@@ -2684,11 +2758,11 @@
     width:30px;height:30px;
     background:transparent;border:none;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    border-radius:10px;color:#6B7C93;
+    border-radius:10px;color:var(--text-note);
     transition:color 0.18s, background 0.18s;
   }
   .token-eye:hover{background:#F0F3F6;color:#000000;}
-  .token-eye i{font-size:16px;}
+  .token-eye i{font-size:17px;}
 
   /* ═══════════════════════════════════════════════════════════
      Chat list drawer (LINE-style chat home)
@@ -2697,11 +2771,11 @@
     display:flex;align-items:center;gap:11px;
     padding:11px 14px;
     cursor:pointer;
-    border-radius:14px;
+    border-radius:var(--card-radius);
     transition:background 0.15s;
     position:relative;
   }
-  .chat-list-item:hover,.chat-list-item:active{background:#F0F3F6;}
+  .chat-list-item:hover,.chat-list-item:active{background:var(--card-hover);}
   .chat-list-item.active{background:var(--accent-soft);}
   .chat-list-item.active::before{
     content:"";
@@ -2744,7 +2818,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:8px;
   }
   .chat-list-title{
-    font-size:14.5px;font-weight:500;color:#000000;
+    font-size:15px;font-weight:500;color:var(--text-body);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   /* 「默认」群标记药丸 — 与标题文字基线对齐、字号放大一档,不再小到飘在上面 */
@@ -2757,10 +2831,10 @@
     margin-left:6px;position:relative;top:-1px;
   }
   .chat-list-time{
-    font-size:10.5px;color:#9BA8B8;flex-shrink:0;
+    font-size:11px;color:var(--text-note);flex-shrink:0;
   }
   .chat-list-preview{
-    font-size:12px;color:#6B7C93;
+    font-size:13px;color:var(--text-note);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .chat-list-badge{
@@ -2773,7 +2847,7 @@
   .chat-list-unread-dot{ display:none; }
   .chat-list-avatar{ position:relative; }
   .chat-list-section-title{
-    font-size:11.5px;font-weight:500;color:#9BA8B8;
+    font-size:10px;font-weight:500;color:var(--text-note);
     text-transform:uppercase;letter-spacing:0.04em;
     padding:14px 14px 6px;
     display:flex;align-items:center;justify-content:space-between;
@@ -2782,11 +2856,11 @@
     background:transparent;border:none;cursor:pointer;
     width:26px;height:26px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    color:#5A6878;
+    color:var(--text-note);
   }
   .chat-list-section-title .add-btn:hover{background:#F0F3F6;color:var(--primary);}
   .chat-list-empty{
-    padding:10px 14px;font-size:12px;color:#9BA8B8;font-style:italic;
+    padding:10px 14px;font-size:13px;color:var(--text-note);font-style:italic;
   }
 
   /* Secondary-char card editor */
@@ -2805,20 +2879,20 @@
     transition:background 0.15s;
   }
   .sec-group-head:hover{ background:rgba(0,0,0,0.03); }
-  .sec-group-head .sec-group-ico{ font-size:14px;color:#5A6878;flex-shrink:0; }
+  .sec-group-head .sec-group-ico{ font-size:15px;color:#5A6878;flex-shrink:0; }
   .sec-group-title{
-    font-size:13px;font-weight:600;color:#1A2230;
+    font-size:13px;font-weight:600;color:var(--text-body);
     min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
   .sec-group-count{
     flex-shrink:0;
-    font-size:10px;font-weight:600;color:#9BA8B8;
+    font-size:10px;font-weight:600;color:var(--text-note);
     background:rgba(0,0,0,0.05);
     padding:1px 7px;border-radius:999px;line-height:1.6;
   }
   .sec-group-head .caret{
     margin-left:auto;flex-shrink:0;
-    color:#9BA8B8;font-size:12px;
+    color:var(--text-note);font-size:13px;
     transition:transform 0.25s;
   }
   .sec-group.open .sec-group-head .caret{ transform:rotate(90deg); }
@@ -2854,11 +2928,11 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .sec-char-head .sec-char-sub{
-    font-size:11.5px;color:var(--text-note);
+    font-size:11px;color:var(--text-note);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .sec-char-head .sec-char-caret{
-    color:var(--text-note);font-size:12px;transition:transform 0.2s;
+    color:var(--text-note);font-size:13px;transition:transform 0.2s;
   }
   .sec-char-card.open .sec-char-caret{transform:rotate(90deg);}
   .sec-char-body{
@@ -2867,12 +2941,12 @@
   }
   .sec-char-card.open .sec-char-body{display:block;}
   .sec-char-body .field{margin-bottom:10px;}
-  .sec-char-body .field-head{margin-bottom:2px;}
-  .sec-char-body .field-label{font-size:11.5px;}
+  .sec-char-body .field-head{margin-bottom:1px;}
+  .sec-char-body .field-label{font-size:10px;}
   .sec-char-actions{
     display:flex;gap:6px;margin-top:8px;
   }
-  .sec-char-actions .btn{margin-top:0;padding:7px 10px;font-size:11.5px;}
+  .sec-char-actions .btn{margin-top:0;padding:7px 10px;font-size:11px;}
 
   /* Group chat bubble — uses sender name + sender avatar */
   .group-msg-row{
@@ -2885,7 +2959,7 @@
     background:var(--avatar-fill);
     color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:500;
+    font-size:13px;font-weight:500;
     flex-shrink:0;overflow:hidden;
     border:1px solid rgba(0,0,0,0.06);
     margin-top:-2px;
@@ -2898,7 +2972,7 @@
   }
   .group-msg-row.user-row .group-msg-col{align-items:flex-end;}
   .group-msg-row .group-msg-name{
-    font-size:11.5px;color:#5A6878;
+    font-size:11px;color:var(--text-note);
     padding:0 4px;
     white-space:nowrap;
   }
@@ -2921,7 +2995,7 @@
     align-self:stretch;
   }
   .group-msg-row .group-msg-time{
-    font-size:9.5px;color:#9BA8B8;flex-shrink:0;
+    font-size:10px;color:var(--text-note);flex-shrink:0;
   }
   /* ─── Diary mode (交換日記) ─────────────────────────────────
      A 4th mode parallel to story/intimate/chat. The whole chatArea
@@ -2987,7 +3061,7 @@
     margin-left:auto;
     width:22px;height:22px;
     display:flex;align-items:center;justify-content:center;
-    color:#9CA3AF;
+    color:var(--text-note);
     font-size:13px;
     border-radius:99px;
     transition:color 0.15s, background 0.15s, transform 0.4s ease;
@@ -3012,17 +3086,17 @@
   }
   .diary-prompt-q{
     flex:1;
-    font-size:11.5px;
+    font-size:11px;
     color:#555;
     line-height:1.5;
   }
   /* Day separator (shown on date change between adjacent entries) */
   .diary-day-sep{
     text-align:center;
-    font-size:10.5px;
-    color:#9CA3AF;
+    font-size:11px;
+    color:var(--text-note);
     margin:16px 0 4px;
-    letter-spacing:0.14em;
+    letter-spacing:0;
   }
   /* One "page" = the user's entry + (when exchanged) the AI's reply.
      Clean white — no notebook ruling lines. */
@@ -3036,7 +3110,7 @@
     justify-content:space-between;
   }
   .diary-who{
-    font-size:11.5px;
+    font-size:11px;
     color:#444;
     font-weight:500;
     letter-spacing:0.04em;
@@ -3044,8 +3118,8 @@
   .diary-who.her{color:var(--primary);}
   .diary-time{font-size:10px;color:#BBB;}
   .diary-txt{
-    font-size:14px;
-    line-height:24px;
+    font-size:13px;
+    line-height:1.65;
     color:var(--text-body);
     white-space:pre-wrap;
     word-wrap:break-word;
@@ -3064,7 +3138,7 @@
   }
   /* Stat-delta line: "+2 ♥ +1 🔥" — small, muted, right-aligned */
   .diary-stat-line{
-    font-size:9.5px;
+    font-size:10px;
     color:#999;
     margin-top:8px;
     display:flex;
@@ -3092,21 +3166,21 @@
   .diary-empty{
     text-align:center;
     padding:48px 20px 20px;
-    color:#9CA3AF;
+    color:var(--text-note);
   }
   .diary-empty-icon{
-    font-size:34px;
+    font-size:24px;
     color:var(--accent-soft);
     margin-bottom:10px;
   }
   .diary-empty-h{
-    font-size:14px;
+    font-size:15px;
     font-weight:500;
     color:#444;
     margin:0 0 6px;
   }
   .diary-empty-p{
-    font-size:11.5px;
+    font-size:11px;
     color:#888;
     line-height:1.5;
     margin:0;
@@ -3130,27 +3204,27 @@
     line-height:1.05;
   }
   .diary-browse-date .d-day{
-    font-size:17px;font-weight:700;color:var(--primary);
+    font-size:17px;font-weight:600;color:var(--primary);
   }
   .diary-browse-date .d-wk{
-    font-size:9.5px;color:var(--text-note);margin-top:1px;
+    font-size:10px;color:var(--text-note);margin-top:1px;
   }
   .diary-browse-snip{
     flex:1;min-width:0;
   }
   .diary-browse-snip .s-line{
-    font-size:12.5px;color:#3A4452;
+    font-size:13px;color:var(--text-body);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     line-height:1.5;
   }
   .diary-browse-snip .s-line.her{ color:var(--primary); }
   .diary-browse-pending{
-    font-size:9.5px;color:#C98787;
+    font-size:10px;color:#C98787;
     margin-left:4px;
   }
   .diary-browse-empty{
     text-align:center;color:var(--text-note);
-    font-size:12.5px;padding:32px 16px;
+    font-size:13px;padding:32px 16px;
   }
 
   /* ─── 翻阅日记:按周折叠卡片(沿用记忆库 .mem-card 的交互与观感) ─── */
@@ -3172,11 +3246,11 @@
   .diary-week-meta{ flex:1;min-width:0; }
   .diary-week-title{
     font-family:var(--font-ui);
-    font-size:13px;font-weight:600;color:#1A2230;
+    font-size:13px;font-weight:600;color:var(--text-body);
   }
   .diary-week-sub{
     font-family:var(--font-ui);
-    font-size:10px;color:#9BA8B8;letter-spacing:0.02em;margin-top:1px;
+    font-size:10px;color:var(--text-note);letter-spacing:0.02em;margin-top:1px;
     display:flex;align-items:center;gap:6px;
   }
   .diary-week-pending{
@@ -3184,7 +3258,7 @@
   }
   .diary-week-head .caret{
     margin-left:auto;flex-shrink:0;
-    color:#9BA8B8;font-size:12px;
+    color:var(--text-note);font-size:13px;
     transition:transform 0.25s;
   }
   .diary-week-card.open .diary-week-head .caret{ transform:rotate(90deg); }
@@ -3201,7 +3275,7 @@
   /* 摘要行多挂一个 caret;展开时 caret 旋转 */
   .diary-browse-item .caret{
     margin-left:auto;flex-shrink:0;align-self:center;
-    color:#BBC3CE;font-size:11px;
+    color:var(--text-note);font-size:11px;
     transition:transform 0.25s;
   }
   .diary-browse-entry.open .diary-browse-item .caret{ transform:rotate(90deg); }
@@ -3225,9 +3299,9 @@
     display:flex;align-items:baseline;gap:8px;
   }
   .diary-browse-who.her{ color:var(--primary); }
-  .diary-browse-fulltime{ font-size:9.5px;color:#BBB;font-weight:400; }
+  .diary-browse-fulltime{ font-size:10px;color:#BBB;font-weight:400; }
   .diary-browse-fulltxt{
-    font-size:13.5px;line-height:1.75;
+    font-size:13px;line-height:1.75;
     color:var(--text-body);
     white-space:pre-wrap;word-wrap:break-word;
   }
@@ -3246,7 +3320,7 @@
     display:flex;align-items:center;justify-content:center;gap:6px;
     margin:2px auto 14px;
     padding:8px 14px;
-    font-size:12px;color:var(--text-note);
+    font-size:13px;color:var(--text-note);
     background:rgba(255,255,255,0.55);
     border:1px solid rgba(0,0,0,0.06);
     border-radius:999px;
@@ -3255,7 +3329,7 @@
     transition:background 0.15s;
   }
   .diary-older-hint:hover,.diary-older-hint:active{ background:rgba(0,0,0,0.04); }
-  .diary-older-hint i{ font-size:14px; }
+  .diary-older-hint i{ font-size:15px; }
 
   /* Diary mode: keep the look clean and pure-white. The site's default
      `glass-card` (used for the topbar + input bar) adds a 1px border and
@@ -3277,9 +3351,9 @@
   /* Mention pill in group chat */
   .mention-pill{
     display:inline-block;
-    background:var(--accent-soft);color:#3A4452;
+    background:var(--accent-soft);color:var(--text-body);
     font-weight:500;padding:1px 6px;border-radius:10px;
-    font-size:12px;
+    font-size:13px;
     margin-right:2px;
   }
   /* @ picker popover */
@@ -3307,12 +3381,12 @@
     background:var(--avatar-fill);
     color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;
-    font-size:11.5px;font-weight:500;
+    font-size:11px;font-weight:500;
     flex-shrink:0;overflow:hidden;
   }
   .mention-item-ava img{width:100%;height:100%;object-fit:cover;}
   .mention-item-name{font-size:13px;color:var(--text-body);}
-  .mention-item-sub{font-size:11.5px;color:var(--text-note);margin-left:auto;}
+  .mention-item-sub{font-size:11px;color:var(--text-note);margin-left:auto;}
 
   /* Member selector for group chat creation */
   .member-pick-list{
@@ -3335,11 +3409,11 @@
     background:var(--avatar-fill);
     color:#FFFFFF;
     display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:500;
+    font-size:13px;font-weight:500;
     flex-shrink:0;overflow:hidden;
   }
   .member-pick-ava img{width:100%;height:100%;object-fit:cover;}
-  .member-pick-name{font-size:13px;color:#000000;flex:1;}
+  .member-pick-name{font-size:13px;color:var(--text-body);flex:1;}
 
   /* ─── Aux chat (sec / group): hide UI that doesn't apply ─── */
   /* Mode-toggle and stats button stay VISIBLE in sec/group chats so the
@@ -3428,7 +3502,6 @@
           <div class="w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow-sm overflow-hidden" id="charAvatar">
             <span class="cn-serif text-white font-medium text-[14px]" id="avatarChar">?</span>
           </div>
-          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3  border-2 border-white rounded-full" id="statusDot"></div>
         </div>
         <div class="min-w-0 flex-1">
           <h1 class="font-medium text-[15px] leading-tight text-[#000000] truncate" id="charNameDisplay">未设定角色</h1>
@@ -3495,7 +3568,6 @@
           <button class="topbar-pop-item" id="menu-memory">
             <i class="ph ph-archive"></i><span>记忆库</span>
           </button>
-          <div class="topbar-pop-divider"></div>
           <button class="topbar-pop-item" id="menu-patches">
             <i class="ph ph-sparkle"></i><span>数据补完</span>
           </button>
@@ -3510,7 +3582,6 @@
   <!-- Smart scroll pill (#8) -->
   <button class="scroll-pill" id="scrollPill" type="button">
     <span class="dot"></span>
-    <i class="ph ph-arrow-down text-[12px]"></i>
     <span id="scrollPillText">回到底部</span>
   </button>
 
@@ -3550,13 +3621,13 @@
 
       <!-- ── Marker drawer (对白/动作/心绪 — opens above input on demand) -->
       <div class="input-drawer" id="markerDrawer">
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5 active" data-marker="dialogue" title="对白 — 你说出口的话">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="dialogue" title="对白 — 你说出口的话（点一下另起一段裸文本）">
           <span class="marker-dot"></span><span class="cn">对白</span>
         </button>
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="action" title="动作 — 你做出的动作">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="action" title="动作 — 点一下在光标处插入一组（），中间打字">
           <span class="marker-dot"></span><span class="cn">动作</span>
         </button>
-        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="inner" title="心绪 — 你的内心活动">
+        <button class="marker-btn px-3 py-1.5 glass-card rounded-full text-[11px] font-medium flex items-center gap-1.5" data-marker="inner" title="心绪 — 点一下在光标处插入一组 **，中间打字">
           <span class="marker-dot"></span><span class="cn">心绪</span>
         </button>
       </div>
@@ -3628,6 +3699,7 @@
         <option value="grok">Grok</option>
         <option value="gemini">Gemini</option>
         <option value="claude">Claude</option>
+        <option value="newapi">New API（聚合网关，可写成人）</option>
       </select>
 
       <div id="slotEditorKeyWrap">
@@ -3711,10 +3783,14 @@
   <div class="modal" id="wishModal">
     <div class="modal-backdrop-hit" id="wishModalBackdrop" style="position:absolute;inset:0;"></div>
     <div class="modal-card wish-modal-card" style="position:relative;z-index:1;max-width:380px;text-align:left;">
-      <div class="slot-editor-head">
+      <div class="slot-editor-head wish-modal-head">
         <div class="modal-title wish-modal-title" style="text-align:left;margin:0;display:flex;align-items:center;gap:8px;">
           <span>本场愿望</span>
           <span class="wish-modal-hint">仅幻想模式注入</span>
+        </div>
+        <div class="head-actions">
+          <button class="head-ico is-save" id="wishSaveIco" title="保存愿望"><i class="ph ph-floppy-disk"></i></button>
+          <button class="head-ico is-del" id="wishDelIco" title="清空愿望"><i class="ph ph-trash"></i></button>
         </div>
       </div>
 
@@ -3729,11 +3805,6 @@
 
       <label class="slot-fld-label">给她的悄悄话</label>
       <textarea class="input wish-ta" id="wishWhisper" rows="4" placeholder="希望她在这场里怎么样..." autocomplete="off"></textarea>
-
-      <div class="btn-row" style="margin-top:16px;">
-        <button class="btn ghost" id="wishClearBtn"><i class="ph ph-eraser"></i>清空</button>
-        <button class="btn primary" id="wishSaveBtn"><i class="ph ph-check"></i>保存</button>
-      </div>
     </div>
   </div>
 
@@ -3785,7 +3856,7 @@
     <div class="drawer-body" style="padding:8px 8px 28px;">
       <div class="chat-list-section-title" style="display:flex;align-items:center;justify-content:space-between;">
         <span>会话</span>
-        <button id="chatListNewGroupBtn" title="新建群聊" style="background:transparent;border:none;cursor:pointer;color:#5A6878;padding:2px 4px;display:flex;align-items:center;"><i class="ph ph-rows-plus-top" style="font-size:18px;"></i></button>
+        <button id="chatListNewGroupBtn" title="新建群聊" style="background:transparent;border:none;cursor:pointer;color:#5A6878;padding:2px 4px;display:flex;align-items:center;"><i class="ph ph-rows-plus-top" style="font-size:17px;"></i></button>
       </div>
       <div id="chatListBody"></div>
     </div>
@@ -3807,7 +3878,7 @@
     <div class="drawer-handle"></div>
     <div class="drawer-head">
       <button class="drawer-back-btn" id="groupBackBtn" title="返回列表" style="display:none;"><i class="ph ph-caret-left"></i></button>
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]" id="groupDrawerTitle">群聊</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]" id="groupDrawerTitle">群聊</h2>
       <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 text-[#5A6878] ml-auto" id="newGroupBtn" title="新建群聊">
         <i class="ph ph-rows-plus-top text-lg"></i>
       </button>
@@ -3840,7 +3911,7 @@
   <div class="drawer" id="keyDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">模型与生成</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]">模型与生成</h2>
       <div class="head-actions">
         <button class="head-ico is-save" id="tokenSaveIco" title="保存并连接"><i class="ph ph-floppy-disk"></i></button>
         <button class="head-ico is-del" id="tokenDelIco" title="清除 DZMM Token"><i class="ph ph-trash"></i></button>
@@ -3850,12 +3921,12 @@
 
       <!-- ─── 全局生成参数(每个模式各自独立) ─────────────────── -->
       <div class="gen-box">
-        <div class="field-head">
-          <span class="field-label"><i class="ph ph-sliders-horizontal"></i> 生成参数</span>
-          <span class="field-val" id="genParamModeLabel" style="font-size:9.5px;">当前模式</span>
+        <div class="field-head block-title">
+          <span class="field-label">生成参数</span>
+          <span class="field-val" id="genParamModeLabel" style="font-size:10px;">当前模式</span>
         </div>
 
-        <label class="field-label" style="margin-bottom:6px;">文风</label>
+        <label class="field-label" style="margin-bottom:1px;">文风</label>
         <div class="seg-group" id="styleGroup">
           <button type="button" class="seg" data-val="standard">Standard</button>
           <button type="button" class="seg" data-val="literary">Literary</button>
@@ -3866,28 +3937,73 @@
         <div style="display:flex;gap:10px;margin-top:14px;">
           <div style="flex:1;min-width:0;">
             <label class="field-label" style="margin:0;">温度</label>
-            <select class="input" id="tempSel" style="margin-top:6px;width:100%;font-weight:700;"></select>
+            <select class="input" id="tempSel" style="margin-top:2px;width:100%;font-weight:600;"></select>
           </div>
           <div style="flex:1;min-width:0;">
             <label class="field-label" style="margin:0;">最大输出</label>
-            <select class="input" id="tokSel" style="margin-top:6px;width:100%;font-weight:700;"></select>
+            <select class="input" id="tokSel" style="margin-top:2px;width:100%;font-weight:600;"></select>
           </div>
         </div>
       </div>
 
-      <!-- ─── 多 AI 志愿(有序回落链) ─────────────────────── -->
+      <!-- ─── 剧情志愿(剧情 / 亲密模式,有序回落链) ─────────── -->
       <div class="gen-box">
         <div class="field-head" style="display:block;">
-          <span class="field-label">AI 志愿（按顺序回落）</span>
+          <span class="field-label">剧情志愿（剧情/亲密模式 · 按顺序回落）</span>
         </div>
-        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn" title="添加志愿"><i class="ph ph-plus"></i>添加</button>
-        <div id="slotList" class="slot-list"></div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_story" title="添加剧情志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_story" class="slot-list"></div>
+      </div>
+
+      <!-- ─── 聊天志愿(聊天模式) ─────────────────────────── -->
+      <div class="gen-box">
+        <div class="field-head" style="display:block;">
+          <span class="field-label">聊天志愿（聊天模式 · 按顺序回落）</span>
+        </div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_chat" title="添加聊天志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_chat" class="slot-list"></div>
+      </div>
+
+      <!-- ─── 幻想志愿(幻想模式) ─────────────────────────── -->
+      <div class="gen-box">
+        <div class="field-head" style="display:block;">
+          <span class="field-label">幻想志愿（幻想模式 · 按顺序回落）</span>
+        </div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_fantasy" title="添加幻想志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_fantasy" class="slot-list"></div>
+      </div>
+
+      <!-- ─── 日记志愿(日记模式) ─────────────────────────── -->
+      <div class="gen-box">
+        <div class="field-head" style="display:block;">
+          <span class="field-label">日记志愿（日记模式 · 按顺序回落）</span>
+        </div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_diary" title="添加日记志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_diary" class="slot-list"></div>
+      </div>
+
+      <!-- ─── 补充志愿(摘要 / 记忆 / 补完 等杂项) ───────────── -->
+      <div class="gen-box">
+        <div class="field-head" style="display:block;">
+          <span class="field-label">补充志愿（摘要/记忆/补完等杂项 · 可留空）</span>
+        </div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_supp" title="添加补充志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_supp" class="slot-list"></div>
+      </div>
+
+      <!-- ─── 翻译志愿(翻译专用 API,可单独设定) ───────────── -->
+      <div class="gen-box">
+        <div class="field-head" style="display:block;">
+          <span class="field-label">翻译志愿（翻译专用，可留空）</span>
+        </div>
+        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_translate" title="添加翻译志愿"><i class="ph ph-plus"></i>添加</button>
+        <div id="slotList_translate" class="slot-list"></div>
       </div>
 
       <!-- ─── 生成日志(仅记失败/切换) ─────────────────────── -->
       <div class="gen-box">
         <div class="field-head">
-          <span class="field-label"><i class="ph ph-list-magnifying-glass"></i> 生成日志</span>
+          <span class="field-label">生成日志</span>
         </div>
         <div id="genLogList" class="mem-list" style="margin-top:6px;"></div>
       </div>
@@ -3898,7 +4014,7 @@
   <div class="drawer" id="memoryDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">记忆库</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]">记忆库</h2>
       <div class="head-actions">
         <button class="head-ico is-import" id="memImportIco" title="导入记忆库 JSON"><i class="ph ph-file-arrow-down"></i></button>
         <button class="head-ico is-export" id="memExportIco" title="导出记忆库 JSON"><i class="ph ph-file-arrow-up"></i></button>
@@ -3915,10 +4031,9 @@
   <div class="drawer" id="fantasyDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">幻想档案</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]">幻想档案</h2>
     </div>
     <div class="drawer-body">
-      <p class="mem-intro" style="margin-bottom:12px;">幻想模式的每一场都是<b>独立、与其它记忆完全隔离</b>的私密沙盒。按动作条里的「结束」即可收束当前这场——上下文清零，整场原文归档到这里。归档<b>只读</b>，点开任意一条可回看当时的完整原文。</p>
       <div id="fantasyArchiveList"></div>
     </div>
   </div>
@@ -3927,11 +4042,10 @@
   <div class="drawer" id="lorebookDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">世界书</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]">世界书</h2>
       <div class="head-actions">
         <button class="head-ico is-import" id="loreImportIco" title="导入条目 JSON"><i class="ph ph-file-arrow-down"></i></button>
         <button class="head-ico is-export" id="loreExportIco" title="导出全部条目 (ZIP)"><i class="ph ph-file-arrow-up"></i></button>
-        <button class="head-ico is-settings" id="loreSettingsIco" title="全局参数"><i class="ph ph-sliders-horizontal"></i></button>
       </div>
     </div>
     <div class="drawer-body">
@@ -3944,7 +4058,7 @@
   <div class="drawer" id="charDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]" id="charDrawerTitle">角色卡</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]" id="charDrawerTitle">角色卡</h2>
       <div class="head-actions">
         <button class="head-ico is-import" id="charImportIco" title="导入 (自动识别角色卡或全量备份)"><i class="ph ph-file-arrow-down"></i></button>
         <button class="head-ico is-export" id="charExportIco" title="导出全部数据"><i class="ph ph-file-arrow-up"></i></button>
@@ -3960,7 +4074,7 @@
       <div class="accordion open" data-acc="basic">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-user-circle text-[14px] text-[var(--text-note)]"></i>基本信息</div>
+          <div class="acc-title"><i class="ph ph-user-circle text-[12px] text-[var(--text-note)]"></i>基本信息</div>
         </div>
         <div class="acc-body">
           <div class="field avatar-field" style="text-align:center;">
@@ -3986,7 +4100,7 @@
       <div class="accordion" data-acc="persona">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-mask-happy text-[14px] text-[var(--text-note)]"></i>人设</div>
+          <div class="acc-title"><i class="ph ph-mask-happy text-[12px] text-[var(--text-note)]"></i>人设</div>
         </div>
         <div class="acc-body">
           <div class="field"><div class="field-head"><span class="field-label">性格</span></div><textarea class="ta" id="cPersonality" rows="5" placeholder="性格、说话方式、特征..."></textarea></div>
@@ -4000,7 +4114,7 @@
       <div class="accordion open" data-acc="stats">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-chart-line-up text-[14px] text-[var(--text-note)]"></i>数值</div>
+          <div class="acc-title"><i class="ph ph-chart-line-up text-[12px] text-[var(--text-note)]"></i>数值</div>
         </div>
         <div class="acc-body">
           <div id="cardStatsHost" class="card-stats-host">
@@ -4037,24 +4151,6 @@
                 <span id="initiatorCol" class="initiator-label" title="点击切换主动方">你</span>
               </div>
             </div>
-            <!-- PAD 情绪 (三根 VAD 条,去标签化,--primary 派生) -->
-            <div id="moodPanel" class="mood-panel" style="display:none">
-              <div class="mood-row">
-                <span class="mood-end">疏远</span>
-                <div class="mood-track"><div class="mood-mid"></div><div class="mood-fill mood-v" id="mood_v_fill"></div><div class="mood-dot mood-v" id="mood_v_dot"></div></div>
-                <span class="mood-end">亲昵</span>
-              </div>
-              <div class="mood-row">
-                <span class="mood-end">平静</span>
-                <div class="mood-track"><div class="mood-mid"></div><div class="mood-fill mood-a" id="mood_a_fill"></div><div class="mood-dot mood-a" id="mood_a_dot"></div></div>
-                <span class="mood-end">激动</span>
-              </div>
-              <div class="mood-row">
-                <span class="mood-end">退让</span>
-                <div class="mood-track"><div class="mood-mid"></div><div class="mood-fill mood-d" id="mood_d_fill"></div><div class="mood-dot mood-d" id="mood_d_dot"></div></div>
-                <span class="mood-end">主导</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -4064,13 +4160,13 @@
       <div class="accordion" data-acc="props">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-magic-wand text-[14px] text-[var(--text-note)]"></i>道具 <span class="acc-count" id="propCount">0</span> <span class="acc-lock">亲密模式</span></div>
+          <div class="acc-title"><i class="ph ph-magic-wand text-[12px] text-[var(--text-note)]"></i>道具 <span class="acc-count" id="propCount">0</span> <span class="acc-lock">亲密模式</span></div>
         </div>
         <div class="acc-body">
           <input type="file" id="bulkPropFile" class="hidden-file" accept=".json,application/json">
 
           <div class="chip-list" id="propList" style="flex-direction:column;align-items:stretch;gap:5px;"></div>
-          <div id="propEmpty" class="text-[11px] text-[var(--text-note)] cn text-center py-3" style="display:none;"></div>
+          <div id="propEmpty" class="text-[10px] text-[var(--text-note)] cn text-center py-3" style="display:none;"></div>
           <div class="add-form">
             <input type="text" class="input" id="propName" placeholder="道具名 *">
             <input type="text" class="input" id="propDesc" placeholder="用途 / 介绍">
@@ -4090,16 +4186,16 @@
       <div class="accordion open" data-acc="patches">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-sparkle text-[14px] text-[var(--text-note)]"></i>数据补完 <span class="acc-count" id="patchCount">0</span></div>
+          <div class="acc-title"><i class="ph ph-sparkle text-[12px] text-[var(--text-note)]"></i>数据补完 <span class="acc-count" id="patchCount">0</span></div>
         </div>
         <div class="acc-body">
           <input type="file" id="bulkPatchFile" class="hidden-file" accept=".json,application/json">
 
           <div class="chip-list" id="patchList" style="flex-direction:column;align-items:stretch;"></div>
-          <div id="patchEmpty" class="text-[11px] text-[var(--text-note)] cn text-center py-3" style="display:none;">还没有补完内容</div>
+          <div id="patchEmpty" class="text-[10px] text-[var(--text-note)] cn text-center py-3" style="display:none;">还没有补完内容</div>
 
           <!-- 手写新增 (目标 + 字段 + 内容) -->
-          <div class="add-form" style="margin-top:14px;border-top:0.5px solid rgba(0,0,0,0.04);padding-top:14px;">
+          <div class="add-form" style="margin-top:14px;">
             <div class="note" style="margin-bottom:8px;">手动添加一条补完 (会归到「手打」组)</div>
             <div class="field" style="padding:0;background:transparent;border:none;">
               <div class="field-head"><span class="field-label">目标</span></div>
@@ -4110,27 +4206,24 @@
               </div>
             </div>
             <input type="text" class="input" id="patchField" placeholder="字段 *  例:习惯 / 喜好 / 身份">
-            <textarea class="ta" id="patchContent" rows="2" placeholder="内容 *  例:喝咖啡不加糖"></textarea>
-            <button class="btn ghost" id="addPatchBtn"><i class="ph ph-plus"></i>添加补完</button>
+            <textarea class="ta" id="patchContent" rows="2" placeholder="内容 *  按回车添加  例:喝咖啡不加糖"></textarea>
           </div>
-
-          <button class="btn ghost" id="clearPatchesBtn" style="margin-top:8px;"><i class="ph ph-trash"></i>清空全部补完</button>
         </div>
       </div>
 
       <div class="accordion" data-acc="jsonedit">
         <div class="acc-head">
           <div class="acc-icon"><i class="ph ph-caret-right text-[11px]"></i></div>
-          <div class="acc-title"><i class="ph ph-code text-[14px] text-[var(--text-note)]"></i>原始 JSON</div>
+          <div class="acc-title"><i class="ph ph-code text-[12px] text-[var(--text-note)]"></i>原始 JSON</div>
         </div>
         <div class="acc-body">
-          <textarea class="ta mono" id="jsonEditArea" rows="12" placeholder="JSON…" style="font-size:11.5px;line-height:1.5;"></textarea>
+          <textarea class="ta mono" id="jsonEditArea" rows="12" placeholder="JSON…" style="font-size:11px;line-height:1.5;"></textarea>
           <div class="btn-row" style="margin-top:8px;">
             <button class="btn ghost" id="jsonLoadBtn"><i class="ph ph-arrow-down"></i>读取</button>
             <button class="btn ghost" id="jsonApplyBtn"><i class="ph ph-check"></i>应用</button>
             <button class="btn ghost" id="jsonCopyBtn"><i class="ph ph-copy"></i>复制</button>
           </div>
-          <div id="jsonEditStatus" class="text-[10.5px] mono mt-1.5" style="min-height:14px;"></div>
+          <div id="jsonEditStatus" class="text-[10px] mono mt-1.5" style="min-height:14px;"></div>
         </div>
       </div>
     </div>
@@ -4140,7 +4233,7 @@
   <div class="drawer" id="profileDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="font-bold text-[16px] text-[#5a5562]">玩家档案</h2>
+      <h2 class="font-bold text-[16px] text-[var(--text-body)]">玩家档案</h2>
       <div class="head-actions">
         <button class="head-ico is-save" id="profileSaveIco" title="保存档案"><i class="ph ph-floppy-disk"></i></button>
         <button class="head-ico is-del" id="profileDelIco" title="清除档案"><i class="ph ph-trash"></i></button>
@@ -4174,7 +4267,7 @@
   <div class="drawer" id="setDrawer">
     <div class="drawer-handle"></div>
     <div class="drawer-head">
-      <h2 class="cn-serif font-bold text-[16px] text-[#5a5562]">个性化</h2>
+      <h2 class="cn-serif font-bold text-[16px] text-[var(--text-body)]">个性化</h2>
       <div class="head-actions">
         <button class="head-ico is-import" id="thImportBtn" title="导入主题（JSON）"><i class="ph ph-file-arrow-down"></i></button>
         <button class="head-ico is-reset" id="thResetBtn" title="恢复默认主题"><i class="ph ph-arrow-counter-clockwise"></i></button>
@@ -4183,7 +4276,7 @@
     </div>
     <div class="drawer-body">
       <div class="gen-box">
-        <div class="field-head"><span class="field-label"><i class="ph ph-palette"></i> 外观</span></div>
+        <div class="field-head block-title"><span class="field-label">外观</span></div>
       <div class="field theme-field">
         <div class="field-head"><span class="field-label">主题</span></div>
 
@@ -4224,7 +4317,7 @@
       <select class="input" id="modelSel" style="display:none;"><option value="">— 加载中 —</option></select>
 
       <div class="gen-box">
-        <div class="field-head"><span class="field-label"><i class="ph ph-chats-circle"></i> 对话体验</span></div>
+        <div class="field-head block-title"><span class="field-label">对话体验</span></div>
       <div class="field">
         <div class="field-head"><span class="field-label">时间感</span></div>
         <div class="seg-group" id="timeModeGroup">
@@ -4245,7 +4338,7 @@
       <!-- ─── 主动消息 ─── -->
       <div class="field">
         <div class="field-head">
-          <span class="field-label" title="你一段时间没回，角色会自己发来一条消息"><i class="ph ph-bell-ringing"></i> 主动消息</span>
+          <span class="field-label" title="你一段时间没回，角色会自己发来一条消息">主动消息</span>
         </div>
         <div class="seg-group" id="proactiveGroup">
           <button class="seg active" data-val="off">关闭</button>
@@ -5314,6 +5407,20 @@ function _mergeStoryIntimate(){
   const i = Array.isArray(histories.intimate) ? histories.intimate : [];
   // 已是同一引用 → 无需再合并
   if (s === i) return;
+  // 防重复:若两边长度相同且逐条 role/content 完全一致,说明这是「同一条共享
+  // 时间线被导出成两份独立副本」(旧版导出 bug,或备份文件被重复填充)——
+  // 直接取其中一份即可,不能当成两条独立时间线穿插合并,否则每条消息都会变成两条。
+  if (s.length && s.length === i.length){
+    const isDupPair = s.every((m, k) => {
+      const n = i[k];
+      return m && n && m.role === n.role && String(m.content||"") === String(n.content||"");
+    });
+    if (isDupPair){
+      histories.story = s;
+      histories.intimate = s;   // 同一引用 → 真正共享记忆
+      return;
+    }
+  }
   // 给缺少 genMode 的旧消息打标,便于渲染区分语气
   for (const m of s){ if (m && !m.genMode) m.genMode = "story"; }
   for (const m of i){ if (m && !m.genMode) m.genMode = "intimate"; }
@@ -5745,8 +5852,8 @@ if (proactiveEnabled) _rescheduleProactive(proactiveDelayMin);
 // Top bar / status
 // ═══════════════════════════════════════════════════════════
 function setStatus(text, online) {
-  // legacy — only the dot now
-  $("statusDot").style.background = online ? "#9BA8B8" : "#CDD3DA";
+  // legacy — dot removed from top bar, keep function as a no-op so callers don't break
+  const d = $("statusDot"); if (d) d.style.background = online ? "#9BA8B8" : "#CDD3DA";
 }
 function setKeyAlert(on){
   $("keyAlert").classList.toggle("hidden", !on);
@@ -6291,176 +6398,6 @@ function clearStatsChanged(){
   if (dot) dot.style.display = "none";
 }
 
-// ═══════════════════════════════════════════════════════════
-// PAD 情绪引擎 (PAD底座 + 突触耦合层)
-//   状态: mood {v,a,d} ∈ [-1,1]  ——  效价/唤起/支配
-//   驱动: applyStatChange 的 delta 经 STIM 注入 → 耦合矩阵 → 非线性场
-//         → 噪声 → 漂移回基线 → 软饱和 → 能量监控
-//   全部参数读自 card.pad;无卡/无pad时引擎失活,零副作用。
-// ═══════════════════════════════════════════════════════════
-const PAD_ENABLED = () => !!(card && card.pad && card.pad.baseline);
-
-// 刺激表: 模型已报的老信号 → 推动三轴 (这步替代"让模型报情绪")
-const PAD_STIM = {
-  aff: { v: 0.10, a: 0.04, d: 0.03 },   // 好感Δ
-  int: { v: 0.06, a: -0.02, d: 0.05 },  // 亲密Δ
-  psy: { v: 0.08, a: 0.18, d: -0.05 },  // 心理快感Δ
-  phy: { v: 0.03, a: 0.10, d: -0.04 },  // 生理快感Δ
-};
-
-// live mood — 每个角色卡独立,随卡加载时 padInit() 重置
-let mood = { v: 0, a: 0, d: 0 };
-let _moodDrift = { v: 0, a: 0, d: 0 };   // 噪声惯性记忆
-let _moodReady = false;
-
-const _clamp1 = x => Math.max(-1, Math.min(1, x));
-const _relu = x => x > 0 ? x : 0;
-// 近似正态 (Box-Muller 简化)
-function _randn(){ return (Math.random()+Math.random()+Math.random()+Math.random()-2) / 1.0; }
-
-// 从卡载入基线,初始化 mood (切角色卡时调用)
-function padInit(){
-  if (!PAD_ENABLED()){ _moodReady = false; return; }
-  const b = card.pad.baseline;
-  // 尝试从持久化恢复,否则落在基线
-  const saved = (stats && stats.pad) ? stats.pad : null;
-  mood = saved ? { v: saved.v, a: saved.a, d: saved.d } : { v: b.v, a: b.a, d: b.d };
-  _moodDrift = { v: 0, a: 0, d: 0 };
-  _moodReady = true;
-  refreshMood();
-}
-
-// 核心: 把本轮 delta 喂进引擎,跑完整七步管线
-//   deltas: {aff?,int?,psy?,phy?}  ——  本轮所有数值变化
-function padStep(deltas){
-  if (!PAD_ENABLED() || !_moodReady) return;
-  const P = card.pad;
-  const C = P.coupling || {};
-  const before = { v: mood.v, a: mood.a, d: mood.d };
-
-  // ── 1. 刺激注入 ──
-  for (const k in deltas){
-    const dd = deltas[k], s = PAD_STIM[k];
-    if (!s || !dd) continue;
-    mood.v = _clamp1(mood.v + s.v * dd);
-    mood.a = _clamp1(mood.a + s.a * dd);
-    mood.d = _clamp1(mood.d + s.d * dd);
-  }
-
-  // ── 2. 防御回弹 (v涨太多 → d尖一下,幅度小) ──
-  if (P.defensiveRebound){
-    const rise = mood.v - before.v;
-    const th = P.reboundThreshold ?? 0.3;
-    if (rise > th){
-      mood.d = _clamp1(mood.d + (rise - th) * (P.reboundGain ?? 0.25));
-    }
-  }
-
-  // 本轮净变化 (供耦合矩阵用)
-  const dv = mood.v - before.v, da = mood.a - before.a, dd = mood.d - before.d;
-
-  // 能量监控刹车: 单轮动太猛 → 非线性项打折
-  const energy = Math.abs(dv) + Math.abs(da) + Math.abs(dd);
-  const damp = energy > (P.energyThreshold ?? 0.8) ? (P.energyDamp ?? 0.5) : 1;
-
-  // ── 3. 耦合矩阵 (轴间导电,对角恒0) ──
-  mood.v = _clamp1(mood.v + (da*(C.a_v||0) + dd*(C.d_v||0)));
-  mood.a = _clamp1(mood.a + (dv*(C.v_a||0) + dd*(C.d_a||0)));
-  mood.d = _clamp1(mood.d + (dv*(C.v_d||0) + da*(C.a_d||0)));
-
-  // ── 4. 非线性场 (恼怒区→滑向高d, 耗竭区→拽低v) ──
-  const fg = (P.fieldGain || 0) * damp;
-  if (fg){
-    mood.d = _clamp1(mood.d + fg * _relu(mood.a) * _relu(-mood.v));
-    mood.v = _clamp1(mood.v - fg * _relu(mood.a - 0.6));
-  }
-
-  padIdle(damp);  // 噪声+漂移+饱和 (与静置共用)
-  refreshMood();
-  persistMood();
-}
-
-// 静置演化: 噪声 + 漂移 + 软饱和 (无玩家输入时也跑,给"活气")
-function padIdle(damp){
-  if (!PAD_ENABLED() || !_moodReady) return;
-  const P = card.pad, b = P.baseline;
-  damp = damp ?? 1;
-
-  // ── 5. 噪声 (惯性自发涨落) ──
-  const amp = (P.noiseAmp || 0) * damp, inert = P.noiseInertia ?? 0.8;
-  if (amp){
-    ["v","a","d"].forEach(k => {
-      _moodDrift[k] = _moodDrift[k]*inert + _randn()*amp;
-      mood[k] = _clamp1(mood[k] + _moodDrift[k]);
-    });
-  }
-
-  // ── 6. 漂移回基线 (向心刹车) ──
-  const dr = P.drift ?? 0.06;
-  mood.v += (b.v - mood.v) * dr;
-  mood.a += (b.a - mood.a) * dr;
-  mood.d += (b.d - mood.d) * dr;
-
-  // ── 7. 软饱和 (tanh,防焊死边界) ──
-  const sat = P.saturation ?? 0.98;
-  mood.v = Math.tanh(mood.v * sat);
-  mood.a = Math.tanh(mood.a * sat);
-  mood.d = Math.tanh(mood.d * sat);
-}
-
-// 幂等守卫: 卡未变只刷新条;卡变了(或首次)才重置 mood 到基线/存档
-let _padCardKey = null;
-function padEnsure(){
-  if (!PAD_ENABLED()){ _moodReady = false; _padCardKey = null; refreshMood(); return; }
-  const key = (card.name || "") + "|" + JSON.stringify(card.pad.baseline);
-  if (key !== _padCardKey){
-    _padCardKey = key;
-    padInit();
-  } else {
-    refreshMood();
-  }
-}
-
-function persistMood(){
-  if (!_moodReady) return;
-  if (!stats) return;
-  stats.pad = { v: mood.v, a: mood.a, d: mood.d };
-  persistStats();
-}
-
-// 刷新三根 VAD 条
-function refreshMood(){
-  const host = document.getElementById("moodPanel");
-  if (!host) return;
-  host.style.display = (PAD_ENABLED() && _moodReady) ? "" : "none";
-  if (!(PAD_ENABLED() && _moodReady)) return;
-  const set = (axis, val) => {
-    const pct = (val + 1) / 2 * 100;
-    const fill = document.getElementById("mood_"+axis+"_fill");
-    const dot  = document.getElementById("mood_"+axis+"_dot");
-    if (fill){
-      fill.style.left  = Math.min(pct, 50) + "%";
-      fill.style.width = Math.abs(pct - 50) + "%";
-    }
-    if (dot) dot.style.left = pct + "%";
-  };
-  set("v", mood.v); set("a", mood.a); set("d", mood.d);
-}
-
-// 把一轮的 statsApplied 归一成 PAD deltas 并跑一步引擎。
-// statsApplied 形态: {aff,int} (故事/聊天) 或 {psy,phy,effective} (亲密/快感)
-function padFromStatsApplied(sa){
-  if (!PAD_ENABLED() || !_moodReady || !sa) return;
-  const d = {};
-  if (sa.aff) d.aff = sa.aff;
-  if (sa.int) d.int = sa.int;
-  if (sa.psy) d.psy = sa.psy;
-  if (sa.phy) d.phy = sa.phy;
-  // 有任何刺激就跑注入管线;完全空轮则只做静置演化(给"活气")
-  if (Object.keys(d).length) padStep(d);
-  else { padIdle(1); refreshMood(); persistMood(); }
-}
-
 function applyStatChange(kind, delta){
   // STORY MODE: kind = "aff" or "int", delta integer, tier system with 心动 trigger.
   // INTIMATE MODE: kind = "arousal", delta integer, capped to AROUSAL_MAX, reset to random(0..20) on overflow.
@@ -6607,7 +6544,6 @@ function refreshStats() {
   // 聊天:按当前要显示的那块刷新即可(两块都刷也无妨,DOM 存在)。
   _refreshAffInt();
   _refreshArousal();
-  padEnsure();
 }
 
 function flashMilestone(kind){
@@ -7115,7 +7051,7 @@ function _formatDatePill(ms){
 }
 function renderDatePill(ms){
   const div = document.createElement("div");
-  div.className = "self-center py-2 fade-up";
+  div.className = "self-center py-1 fade-up";
   div.innerHTML = `<span class="date-pill">${_formatDatePill(ms)}</span>`;
   chatArea.appendChild(div);
 }
@@ -7218,11 +7154,7 @@ function renderMessages() {
     const members = _groupMembers(chat);
     const h = currentHistory();
     if (h.length === 0){
-      const div = document.createElement("div");
-      div.className = "self-center py-2 fade-up";
-      const namesPreview = members.map(m => m.name).slice(0, 5).join("、") + (members.length > 5 ? " 等" : "");
-      div.innerHTML = `<span class="sys-divider">${escapeHTML(chat.title || "群聊")} · ${escapeHTML(namesPreview)}${members.length ? " 在线" : "(无成员)"}</span>`;
-      chatArea.appendChild(div); return;
+      return;
     }
     let lastPillMs = null;
     for (let idx = 0; idx < h.length; idx++){
@@ -7313,85 +7245,116 @@ function renderUserMessage(content, idx, at, quote, forceAvatar){
   const sideInfo = `<span class="msg-side-info"><span class="msg-time">${time}</span></span>`;
   const avaHTML = `<div class="user-avatar">${_userAvatarHTML()}</div>`;
 
-  // ─── Multi-bubble (split-by-line) path ───
-  // If the message has line breaks and isn't an action/inner marker block
-  // (those are single styled bubbles), render each line as its own bubble.
-  // The first bubble keeps the "ear"; the rest are fully rounded.
-  const isActionBlock = /^（[\s\S]+）$/.test(content);
-  const isInnerBlock  = /^\*[\s\S]+\*$/.test(content);
-  const lines = String(content).split("\n").map(s => s.trim()).filter(Boolean);
-  if (!isActionBlock && !isInnerBlock && lines.length > 1){
-    // Quote header (if any) sits in its own first bubble so it stays attached
-    // to the start of the message.
-    const quoteBlockHTML = quote ? _buildQuoteBlockHTML(quote) : "";
-    // The timestamp must hug the BOTTOM bubble, not float beside the widest
-    // one. So we don't put sideInfo at the row level; instead the last bubble
-    // gets wrapped in a small flex row together with the timestamp.
+  // ─── Parse segments (mixed markers per line) ───
+  // 玩家一条消息可以混合 对白(裸文本) / 动作（…） / 心绪 *…*。
+  const quoteBlockHTML = quote ? _buildQuoteBlockHTML(quote) : "";
+  const rawLines = String(content).split("\n");
+  const segs = [];
+  for (const ln of rawLines){
+    if (!ln.trim()) continue;
+    const mk = (typeof _detectLineMarker === "function")
+      ? _detectLineMarker(ln)
+      : { kind: "dialogue", inner: ln.trim() };
+    if (!mk.inner) continue;
+    segs.push(mk);
+  }
+  // 兜底:若没解析出任何段(纯空白等),仍显示原文一段。
+  if (!segs.length) segs.push({ kind: "dialogue", inner: String(content).trim() });
+
+  // 渲染模式:
+  //  · 聊天模式 / 副本(sec/group)→ 逐段拆成独立小气泡。
+  //  · 剧情/亲密/幻想(主聊天):只有当这条消息「混着」动作/心绪等非对白段时,
+  //    才用一整个大框(同 AI 侧 story-frame);如果整条全是裸对白(哪怕多行、
+  //    空行分隔),就像聊天模式那样拆成一个个独立气泡。
+  const _isChatSurface = (typeof mode !== "undefined" && mode === "chat")
+    || (typeof isMainChat === "function" && !isMainChat());
+  const _hasNonDialogue = segs.some(s => s.kind !== "dialogue");
+  const useBigFrame = !_isChatSurface && _hasNonDialogue;
+
+  if (useBigFrame){
+    // ── 大框:所有段框进同一个用户气泡,竖排;时间戳贴框左下 ──
     wrap.innerHTML = `
       <div class="user-msg-line flex items-end justify-end gap-1.5 w-full">
-        <div class="user-bubbles-col"></div>
+        <div class="user-last-line">
+          ${sideInfo}
+          <div class="user-story-col"></div>
+        </div>
         ${avaHTML}
       </div>
     `;
-    const col = wrap.querySelector(".user-bubbles-col");
-    const buildBubble = (ln, i) => {
-      const b = document.createElement("div");
-      b.className = "user-line-bubble";
-      if (i === 0 && quoteBlockHTML) b.innerHTML = quoteBlockHTML;
-      const p = document.createElement("div");
-      p.className = "user-text";
-      p.textContent = ln;
-      b.appendChild(p);
-      return b;
-    };
-    lines.forEach((ln, i) => {
-      const isLast = i === lines.length - 1;
-      const b = buildBubble(ln, i);
-      if (isLast){
-        // Pair the timestamp with the last bubble so it sits at the bottom
-        // bubble's bottom-left, regardless of the other bubbles' widths.
-        const lastLine = document.createElement("div");
-        lastLine.className = "user-last-line";
-        lastLine.innerHTML = sideInfo;
-        lastLine.appendChild(b);
-        col.appendChild(lastLine);
+    const colHost = wrap.querySelector(".user-story-col");
+    const frame = document.createElement("div");
+    frame.className = "user-story-frame";
+    if (quoteBlockHTML) frame.innerHTML = quoteBlockHTML;
+    for (const seg of segs){
+      if (seg.kind === "action"){
+        const d = document.createElement("div");
+        d.className = "narrative";
+        d.textContent = "（" + seg.inner + "）";
+        frame.appendChild(d);
+      } else if (seg.kind === "inner"){
+        const d = document.createElement("div");
+        d.className = "narrative inner";
+        d.textContent = "*" + seg.inner + "*";
+        frame.appendChild(d);
       } else {
-        col.appendChild(b);
+        // 对白:框内每行一个 .dlg(裸文本)
+        const p = document.createElement("p");
+        p.className = "dlg";
+        p.textContent = seg.inner;
+        frame.appendChild(p);
       }
-    });
+    }
+    colHost.appendChild(frame);
     chatArea.appendChild(wrap);
     if (typeof _collapseConsecutiveAvatars === "function") _collapseConsecutiveAvatars();
     maybeScrollToBottom();
     return;
   }
 
-  // ─── Single-bubble path (default) ───
-  // Quote header inside bubble — clicking it jumps back to the source.
-  const quoteBlockHTML = quote ? _buildQuoteBlockHTML(quote) : "";
+  // ── 聊天模式 / 副本:逐段拆成独立小气泡(和 AI 聊天侧一致) ──
   wrap.innerHTML = `
     <div class="user-msg-line flex items-end justify-end gap-1.5 w-full">
-      ${sideInfo}
-      <div class="bubble-user">
-        ${quoteBlockHTML}
-        <div class="user-text"></div>
-      </div>
+      <div class="user-bubbles-col"></div>
       ${avaHTML}
     </div>
   `;
-  // If wrapped with （...） treat as action marker styling; *...* inner; else dialogue
-  const ut = wrap.querySelector(".user-text");
-  if (isActionBlock){
-    ut.textContent = content;
-    ut.classList.add("user-action");
-  } else if (isInnerBlock){
-    ut.textContent = content;
-    ut.classList.add("user-inner");
-  } else {
-    ut.textContent = content;
-  }
+  const col = wrap.querySelector(".user-bubbles-col");
+  const buildBubble = (seg, i) => {
+    const b = document.createElement("div");
+    b.className = "user-line-bubble";
+    if (i === 0 && quoteBlockHTML) b.innerHTML = quoteBlockHTML;
+    const p = document.createElement("div");
+    p.className = "user-text";
+    // 显示文本:动作/心绪保留符号(和之前观感一致),对白裸文本。
+    if (seg.kind === "action"){
+      p.textContent = "（" + seg.inner + "）";
+      p.classList.add("user-action");
+    } else if (seg.kind === "inner"){
+      p.textContent = "*" + seg.inner + "*";
+      p.classList.add("user-inner");
+    } else {
+      p.textContent = seg.inner;
+    }
+    b.appendChild(p);
+    return b;
+  };
+  segs.forEach((seg, i) => {
+    const isLast = i === segs.length - 1;
+    const b = buildBubble(seg, i);
+    if (isLast){
+      // 时间戳贴最后一段气泡的左下角。
+      const lastLine = document.createElement("div");
+      lastLine.className = "user-last-line";
+      lastLine.innerHTML = sideInfo;
+      lastLine.appendChild(b);
+      col.appendChild(lastLine);
+    } else {
+      col.appendChild(b);
+    }
+  });
   chatArea.appendChild(wrap);
   if (typeof _collapseConsecutiveAvatars === "function") _collapseConsecutiveAvatars();
-  // Note: scroll handled by caller via maybeScrollToBottom; we used to force it here
   maybeScrollToBottom();
 }
 
@@ -8323,70 +8286,382 @@ function _buildElapsedTimeLine(mode){
 //      亲密原文也原样跨模式共享(若配了「不可写成人」志愿,亲密轮可能已被本地脱敏成清水版)。
 //      剧情线与亲密线共用一个 history 数组;此处不再按 genMode 过滤,
 //      亲密原文一并跨模式注入。
+// ─── 统一时间线:把 剧情/亲密 + 聊天 + 日记 三条线的真实消息按墙钟时间戳
+//      合并成 **一条** 时序流注入。这样模型能读出「载体切换的因果」:
+//        · 上一条是聊天、下一条是剧情  → 中间见面了(从隔屏 → 面对面)
+//        · 上一条是剧情、下一条是聊天  → 分开了/各自回去了(面对面 → 隔屏)
+//        · 相邻两条时间差很大          → 这中间隔了多久,情绪该有相应变化
+//   与 _buildCrossModeSummaryLines 的区别:那个把各线**分桶**罗列并强调
+//   「别当同一条时间线」;这个反过来,**刻意合并**、要求按时序因果理解。
+//   摘要(较早、已压缩的记忆)仍由 _buildCrossModeSummaryLines 提供;
+//   这里只负责「最近这段」的合并原文。
+//
+//   参数 maxItems:合并后最多保留最近多少条(默认 24)。
+function _buildUnifiedTimeline(mode, maxItems){
+  const TAKE = (typeof maxItems === "number" && maxItems > 0) ? maxItems : 24;
+  const me = (profile && profile.name) || (card && card.user_name) || "玩家";
+  const them = (card && card.name) || "角色";
+
+  // 载体定义:key = histories 键;label/icon 用于时间线标注。
+  // 剧情与亲密共用 histories.story,合并为「线下」一条载体。
+  const carriers = [
+    { key: "story", tag: "线下", icon: "🎬", desc: "面对面相处(剧情/亲密)" },
+    { key: "chat",  tag: "聊天", icon: "📱", desc: "手机上隔屏打字" },
+    { key: "diary", tag: "日记", icon: "📔", desc: "纸面写下的心声" },
+  ];
+
+  // 收集所有真实对白,打上载体标签 + 时间戳
+  const events = [];
+  for (const c of carriers){
+    const h = (histories && histories[c.key]) || [];
+    if (!Array.isArray(h) || !h.length) continue;
+    for (const m of h){
+      if (!m || (m.role !== "user" && m.role !== "assistant")) continue;
+      if (!m.content && !m.display) continue;
+      const text = _cleanMsgForCrossMode(m);
+      if (!text) continue;
+      events.push({
+        at: (typeof m.at === "number") ? m.at : 0,
+        carrier: c,
+        who: m.role === "user" ? me : them,
+        role: m.role,
+        text,
+      });
+    }
+  }
+  if (events.length < 2) return [];
+
+  // 按真实时间戳升序;没有时间戳(at=0)的沉到最前(视为最早的旧记录)
+  events.sort((a, b) => a.at - b.at);
+  const recent = events.slice(-TAKE);
+  if (recent.length < 2) return [];
+
+  // 判断本段里是否真的跨了载体(只有一种载体就没必要摆「统一时间线」的架子)
+  const carrierSet = new Set(recent.map(e => e.carrier.key));
+  if (carrierSet.size < 2) return [];
+
+  // 相邻间隔的人话描述
+  const _gapWord = (ms) => {
+    if (!ms || ms < 0) return "";
+    const min = ms / 60000, hr = min / 60, day = hr / 24;
+    if (min < 3)  return "紧接着";
+    if (min < 60) return `约${Math.round(min)}分钟后`;
+    if (hr < 24)  return `约${Math.round(hr)}小时后`;
+    if (day < 2)  return "第二天";
+    if (day < 31) return `${Math.round(day)}天后`;
+    return `约${Math.round(day/30)}个月后`;
+  };
+
+  const lines = [];
+  lines.push(`\n## ★ 统一时间线(你和${me}真实经历的连续时序)`);
+  lines.push(`你和${me}的相处发生在几种**载体**上:🎬**线下**(面对面/剧情/亲密)、📱**聊天**(手机隔屏打字)、📔**日记**(纸面书写)。下面把这几路**最近的经历按真实发生的先后合并成同一条时间线**——它们不是三条平行的记忆,而是**一个人生活里前后相继发生的事**。**全部真实发生过,你都记得。**`);
+  lines.push(`\n**怎么读这条时间线(关键):**`);
+  lines.push(`- **载体切换 = 现实里发生了状态变化**,请据此推断你和${me}"此刻"的物理处境:`);
+  lines.push(`  · 前一条在📱聊天、紧接着下一条在🎬线下 → 你俩**见面了**(从隔屏变成了面对面);`);
+  lines.push(`  · 前一条在🎬线下、紧接着下一条在📱聊天 → 你俩**分开了**(各自回到自己的地方,重新隔着屏幕);`);
+  lines.push(`  · 中间的📔日记 → ${me}独处时写下的心声,不必点破,但你能感到那份情绪底色。`);
+  lines.push(`- **相邻两条的时间差**(下面已标注「紧接着 / 几小时后 / 隔天」等)决定情绪连贯度:紧接着=情绪延续,隔了很久=需要重新接上。`);
+  lines.push(`- 这条时间线是**背景记忆**,不是当前回合的对话。${me}此刻对你说的话**只在 messages 数组最后一条**——绝不要把下面任何一句当成ta此刻刚说的来回应。`);
+  lines.push(`- **以此刻的模式为当前所在的载体**(${mode==="chat"?"📱聊天·隔屏打字":mode==="diary"?"📔日记·纸面书写":"🎬线下·面对面"}),时间线只是让你"知道刚刚是怎么走到这一步的"。`);
+
+  lines.push(`\n**时间线(从早到晚):**`);
+  let prevAt = null, prevCarrier = null;
+  for (const e of recent){
+    const d = e.at ? new Date(e.at) : null;
+    const stamp = d ? `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}` : "早先";
+    // 载体切换标记
+    let switchMark = "";
+    if (prevCarrier && prevCarrier !== e.carrier.key){
+      const gap = (prevAt && e.at) ? _gapWord(e.at - prevAt) : "";
+      const fromC = carriers.find(c=>c.key===prevCarrier);
+      switchMark = ` 〔${gap||""}载体切换:${fromC?fromC.icon+fromC.tag:""}→${e.carrier.icon}${e.carrier.tag}〕`;
+    }
+    const indented = e.text.split("\n").map((ln,i)=> i===0?ln:`    ${ln}`).join("\n");
+    lines.push(`- [${stamp}·${e.carrier.icon}${e.carrier.tag}]${switchMark} **${e.who}**:${indented}`);
+    prevAt = e.at; prevCarrier = e.carrier.key;
+  }
+  return lines;
+}
+
 function _buildCrossModeSummaryLines(mode){
   // 把 story 与 intimate 视为同一条线「剧情」:summaries.story 已含亲密清水摘要。
   // 当前模式属于剧情家族(story/intimate)时,整条剧情线都算"当前",不跨注入。
   const curIsStoryFamily = (mode === "story" || mode === "intimate");
 
-  // 组装来源:label = 载体名;summary = 完整摘要;raw = 最近原文(可空)。
-  // 原文条数上限:剧情/聊天互相给最近 10 条;日记只给最近一轮(玩家+角色共 2 条)。
+  // 组装来源:label = 载体名;summary = 完整摘要。
+  // 注:最近的**原文**已改由 _buildUnifiedTimeline 按真实时间戳合并注入,
+  //     这里只保留**较早、已压缩的回顾摘要**(长期记忆),不再分桶给原文——
+  //     避免和统一时间线重复,也避免"分桶罗列"暗示模型别把几条线并起来看。
   const sources = [];
   if (!curIsStoryFamily){
-    sources.push({
-      label: "线下面对面相处的剧情",
-      summary: _joinBankSummary("story"),
-      raw: _rawTailTranscript("story", null, 10),   // 不再剔除亲密原文,最近 10 条
-    });
+    sources.push({ label: "线下面对面相处的剧情", summary: _joinBankSummary("story") });
   }
   if (mode !== "chat"){
-    sources.push({
-      label: "手机上隔屏打字的聊天",
-      summary: _joinBankSummary("chat"),
-      raw: _rawTailTranscript("chat", null, 10),        // 最近 10 条
-    });
+    sources.push({ label: "手机上隔屏打字的聊天", summary: _joinBankSummary("chat") });
   }
   if (mode !== "diary"){
-    sources.push({
-      label: "纸面交换日记里写的事",
-      summary: _joinBankSummary("diary"),
-      raw: _rawTailTranscript("diary", null, 2),        // 只给最近一轮(玩家+角色共 2 条)
-    });
+    sources.push({ label: "纸面交换日记里写的事", summary: _joinBankSummary("diary") });
   }
 
-  // 全部来源都没有任何内容 → 不注入。
-  const hasAny = sources.some(s => (s.summary && s.summary.trim()) || (s.raw && s.raw.trim()));
+  // 全部来源都没有摘要 → 不注入(最近的事由统一时间线负责)。
+  const hasAny = sources.some(s => s.summary && s.summary.trim());
   if (!hasAny) return [];
 
   const lines = [];
-  lines.push(`\n## ★ 跨模式的记忆连续性(你与玩家"另一边"经历过的事)`);
-  lines.push(`你和玩家的关系有几种载体:**线下面对面相处**(剧情/亲密)、**手机上隔屏打字**(聊天)、**纸面交换日记**(日记)。下面是当前模式之外那几路经历——既有压缩过的**回顾摘要**,也有最近**的原话**。**这些事都真实发生过,你记得。**`);
-  if (mode === "chat"){
-    lines.push(`使用方式:此刻你在隔屏打字。线下/纸面发生过的事**可以**被自然提及或承接(用文字带过即可),但**不要**在聊天里复述/重演那些动作场景,也不要把这次打字描述成你正身处线下现场。`);
-  } else if (mode === "story" || mode === "intimate"){
-    lines.push(`使用方式:此刻你和玩家面对面(线下)。这些是你"心里知道、经历过"的事,会自然影响此刻的情绪温度、谈话密度、对玩家近况的感知。不必逐字复述,但**记得发生过**,可以自然承接、反应。`);
-  } else if (mode === "diary"){
-    lines.push(`使用方式:此刻你在日记本上落笔。这些是你"心里知道"的底色,会影响今天落笔的情绪与关心点。**不要在日记里逐条复述这些事**,只让"经历过"作为情绪底色自然渗进文字。`);
-  }
-  lines.push(`\n**重要边界(务必遵守)**:`);
-  lines.push(`- 下面这些内容**全部属于"背景记忆",不是当前这一回合的对话**。玩家此刻对你说的话**只在 messages 数组的最后一条**——绝不要把背景里的原话当成玩家此刻刚说的来回应。`);
-  lines.push(`- "原话"是另一个载体里**过去**发生的对白,给你还原细节用;**不要**逐句复读,也**不要**把那个载体的场景(线上打字/线下动作/纸面书写)搬进此刻的模式。`);
-  lines.push(`- 若背景内容与此刻的模式/载体不一致,**一律以此刻的模式为准**,只把背景当作"你心里知道经历过"。`);
+  lines.push(`\n## ★ 更早的跨模式回顾(已压缩的长期记忆)`);
+  lines.push(`下面是当前模式之外那几路经历里**较早、已被压缩**的回顾摘要(最近发生的事另见「统一时间线」)。**这些事都真实发生过,你记得。**`);
+  lines.push(`- 属于**背景记忆**,不是当前回合的对话;玩家此刻的话只在 messages 最后一条。`);
+  lines.push(`- 不必逐字复述,也不要把别的载体的场景(线上打字/线下动作/纸面书写)搬进此刻的模式;**以此刻的模式为准**。`);
 
   for (const src of sources){
-    const hasSum = src.summary && src.summary.trim();
-    const hasRaw = src.raw && src.raw.trim();
-    if (!hasSum && !hasRaw) continue;
-    lines.push(`\n### 「${src.label}」`);
-    if (hasSum){
-      lines.push(`#### 回顾摘要(较早、已压缩)`);
-      lines.push(src.summary);
-    }
-    if (hasRaw){
-      lines.push(`#### 最近原话(近期对白·背景参考,勿当此刻对话)`);
-      lines.push(src.raw);
-    }
+    if (!(src.summary && src.summary.trim())) continue;
+    lines.push(`\n### 「${src.label}」回顾摘要`);
+    lines.push(src.summary);
   }
   return lines;
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// 日语输出 + 中↔日 翻译支持
+// ───────────────────────────────────────────────────────────
+//  1) JP_OUTPUT_DIRECTIVE:拼到每个 buildSystemPrompt* 末尾,让 AI 用自然日语
+//     输出所有"会显示的文字",但保留所有格式标签([STATS]/[AROUSAL]/[SCENE]/
+//     ( )/*...* 等)的结构不变——只把标签里/气泡里的语言换成日语。
+//  2) _translateText():用当前可用志愿做一次性(非流式)翻译,跨 dzmm /
+//     anthropic / openai_compat 三类后端。给"翻訳"按钮和"发送前把中文转日语"用。
+// ═══════════════════════════════════════════════════════════
+const JP_OUTPUT_DIRECTIVE =
+`\n═══════════════════════════════════════════════════════════
+【★★★ 出力言語 · 最終最高優先度 ★★★】
+═══════════════════════════════════════════════════════════
+- あなたの返信のうち「画面に表示される文章」(セリフ・地の文・動作・心情・ナレーション等)は、**すべて自然で流暢な日本語**で書くこと。中国語や英語を混ぜない。
+- キャラクターの口調・人格・語尾のクセ・世界観はそのまま保ちつつ、それを日本語として自然に表現する。
+- ただし **構造タグは一切変えない**:\`[STATS]\`\`[AROUSAL]\`\`[SCENE]…[/SCENE]\`\`[CARD_PATCH]…[/CARD_PATCH]\`、\`( )\`\`（ ）\` の動作、\`*…*\` の心情など、フォーマット規則(位置・閉じ・記号)は上の指示どおり厳守。タグの「中身の文章」だけを日本語にする。
+- 数値タグ内のキー(好感/亲密/心理/生理 等)や、\`[CARD_PATCH]目标:…|字段:…|内容:…\` の**キー名・区切り記号はそのまま**(パーサが読むため)。値・内容の自由記述部分だけ日本語で書いてよい。
+- ユーザーが中国語で話しかけてきても、あなたは日本語で返す。`;
+
+// 選出一个"就绪"的志愿用于一次性翻译。
+//  ① まず「翻訳志愿」グループから(専用設定)。
+//  ② 空なら生成志愿にフォールバック(第三方 → DZMM の順)。
+function _pickTranslateSlot(){
+  try {
+    // ① 翻訳専用グループ
+    const tr = (slotGroups.translate || [])
+      .filter(s => s && s.enabled && _slotReady(s));
+    if (tr.length){
+      return tr.find(s => s.kind === "openai_compat" || s.kind === "anthropic") || tr[0];
+    }
+    // ② 剧情志愿(story グループ)にフォールバック
+    const ready = (slotGroups.story || []).filter(s => s && s.enabled && _slotReady(s));
+    if (!ready.length) return null;
+    const third = ready.find(s => s.kind === "openai_compat" || s.kind === "anthropic");
+    return third || ready[0];
+  } catch(_){ return null; }
+}
+
+// 一次性(非流式)调用某志愿,返回纯文本。翻译/工具类轻量调用共用。
+async function _slotOneShot(slot, { system, user, max_tokens = 1200, temperature = 0.2 }){
+  const p = (typeof PROVIDER_PRESETS !== "undefined" && PROVIDER_PRESETS[slot.provider]) || {};
+  const kind = slot.kind || p.kind || "openai_compat";
+  const base = String(slot.base || p.base || "").replace(/\/+$/, "");
+  const key  = slot.key || (kind === "dzmm" ? token : "");
+  const model = slot.model || p.model || "";
+
+  if (kind === "dzmm"){
+    const k = key || token;
+    if (!k) throw new Error("DZMM Token 缺失");
+    const body = ensureOpening({
+      model: model || currentModel,
+      user_name: "玩家", user_id: USER_ID,
+      conversation_id: "conv_translate_" + USER_ID,   // 翻訳専用の会話(本編と混ざらない)
+      request_id: `tr_${Date.now()}`,
+      card: { name: "翻訳", description: "翻訳アシスタント。指示どおり訳文だけを返す。", personality: "", scenario: "", first_message: "(开始)", system_prompt: system },
+      context: [], messages: [{ role: "user", content: user }],
+      max_tokens, temperature, stream: false
+    });
+    const r = await fetch(CHAT_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${k}` }, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
+    const d = await r.json();
+    return String(d?.choices?.[0]?.message?.content ?? d?.choices?.[0]?.text ?? d?.content ?? "").trim();
+  }
+  if (kind === "anthropic"){
+    if (!key) throw new Error("API Key 缺失");
+    const r = await fetch(`${base || "https://api.anthropic.com"}/v1/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      body: JSON.stringify({ model, max_tokens, system, messages: [{ role: "user", content: user }], stream: false })
+    });
+    if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
+    const d = await r.json();
+    return String((Array.isArray(d.content) ? d.content : []).filter(x => x.type === "text").map(x => x.text).join("")).trim();
+  }
+  // openai_compat
+  if (!key) throw new Error("API Key 缺失");
+  const r = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }], max_tokens, temperature, stream: false })
+  });
+  if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
+  const d = await r.json();
+  return String(d?.choices?.[0]?.message?.content ?? "").trim();
+}
+
+// 入力がすでに日本語かどうかの簡易判定。
+//  かな(ひらがな/カタカナ)を含めば日本語確定 → 翻訳をスキップ。
+//  漢字のみだと中日どちらか判別不能なので、既定(中国語入力)として翻訳に回す。
+function _looksJapanese(s){
+  return /[\u3040-\u309F\u30A0-\u30FF\uFF66-\uFF9F]/.test(String(s || ""));
+}
+
+// ─── 翻訳の文脈(ニュアンス)ブロックを組み立てる ───
+//  ctx = { mode, kind, speaker }
+//    mode    : "story"|"intimate"|"chat"|"diary"|"fantasy"(既定は現在の mode)
+//    kind    : "dialogue"|"action"|"inner"|"auto"(auto=記号から自動判定)
+//    speaker : "user"(プレイヤー) | "char"(AIキャラ)
+//  返り値:目標言語に応じた「語境+話者」指示文(system に足す)。
+function _buildTranslateContext(src, dir, ctx){
+  ctx = ctx || {};
+  const toJa = (dir === "zh2ja");
+  const m = ctx.mode || (typeof mode !== "undefined" ? mode : "story");
+  const speaker = ctx.speaker || (toJa ? "user" : "char");
+
+  // テキスト種別の自動判定(記号ベース)
+  let kind = ctx.kind || "auto";
+  if (kind === "auto"){
+    const t = String(src || "").trim();
+    if (/^\*[\s\S]+\*$/.test(t)) kind = "inner";
+    else if (/^（[\s\S]+）$/.test(t) || /^\([\s\S]+\)$/.test(t)) kind = "action";
+    else kind = "dialogue";
+  }
+
+  const L = []; // 指示行(目標言語で書く)
+
+  if (toJa){
+    // ── 中→日(目標=日本語)──
+    // モード語境
+    const modeMap = {
+      story:    "これは対面で進む物語シーン。地の文(ナレーション)は三人称・情景描写の文体で、台詞は登場人物が実際に口に出す生きた言葉として訳す。",
+      intimate: "これは恋人同士の親密なシーン。感覚・感情・距離感のニュアンスを、生々しくも下品になりすぎない自然な文体で訳す。",
+      chat:     "これはスマホで打つオンラインの口語チャット(LINE/メッセージのような)。書き言葉の翻訳調にせず、実際に打つような砕けた口語・短文・語尾のクセで訳す。",
+      diary:    "これは交換日記に綴る文章。独白的で内省的、落ち着いた書き言葉の文体で訳す。",
+      fantasy:  "これは願望を叶える空想シーン。親密シーンに準じ、場面の熱量に合わせて自然に訳す。"
+    };
+    L.push("直訳ではなく、次の文脈に合った自然な日本語にすること:");
+    L.push("・場面: " + (modeMap[m] || modeMap.story));
+    // テキスト種別
+    if (kind === "inner") L.push("・種別: 心の中の独白(声に出さない内心の思考)として訳す。");
+    else if (kind === "action") L.push("・種別: 動作・表情の描写(ト書き)。三人称の描写文として訳す。");
+    else L.push("・種別: 話者が口に出す台詞。生きた会話として訳す。");
+    // 話者(中→日は基本プレイヤー本人)
+    if (speaker === "char" && typeof card !== "undefined" && card && card.name){
+      const persona = String(card.personality || "").replace(/\s+/g, " ").slice(0, 150);
+      L.push(`・話者: 「${card.name}」${card.tagline ? ` — ${card.tagline}` : ""}。` + (persona ? `人物像/話し方: ${persona}。` : "") + "この人物の口調・一人称・語尾・温度感を保つ。");
+    } else {
+      const uname = (typeof profile !== "undefined" && profile && profile.name) ? profile.name : "";
+      L.push(`・話者: プレイヤー本人${uname ? `(作中で「${uname}」を演じる)` : ""}。自然な日常の口語で訳す。`);
+    }
+  } else {
+    // ── 日→中(目標=简体中文)──
+    const modeMap = {
+      story:    "这是面对面推进的剧情场景。旁白(叙述)用第三人称、情景描写的文体;对白是人物真正说出口的、有生命力的台词。",
+      intimate: "这是恋人之间的亲密场景。把感官、情绪、距离感的细腻处译出来,自然但不流于低俗。",
+      chat:     "这是手机上打字的线上口语聊天(类似微信/LINE)。不要翻译腔的书面语,用真人会打出来的口语、短句、语气随意的方式。",
+      diary:    "这是写在交换日记里的文字。独白式、内省、沉静的书面语文体。",
+      fantasy:  "这是实现愿望的幻想场景。比照亲密场景,按当下场面的热度自然地译。"
+    };
+    L.push("不要直译,要符合下面的语境,译成自然的简体中文:");
+    L.push("· 场景: " + (modeMap[m] || modeMap.story));
+    // 语感:译文要保留原日语的那种语气与韵味 —— 语尾的柔软/生硬、停顿、含蓄、
+    // 暧昧、留白、敬语或随意的距离感、拟声拟态词的微妙情绪等,尽量在中文里保留
+    // 那份「日语味」的语感,而不是抹平成普通中文。
+    L.push("· 语感: 保留原日语的语气与韵味(语尾的软硬、停顿、含蓄暧昧、距离感、拟声拟态词的情绪等),让中文读起来仍带着那份日语原有的语感,不要抹平成平淡直白的中文。");
+    // 强制人称:日文常省略主语,译成中文若需要用到指代角色的第三人称代词,
+    // 一律用「她」(不要用「他」「TA」「它」或改写成别的写法)。
+    L.push("· 人称: 日语经常省略主语。回到中文时,如果需要用第三人称代词指代这个角色(说话者/被描写者),一律用「她」,不要用「他」「TA」「它」等其他写法。");
+    if (kind === "inner") L.push("· 类型: 心里的独白(不出声的内心想法)。");
+    else if (kind === "action") L.push("· 类型: 动作/神态描写(旁白)。用第三人称描写文。");
+    else L.push("· 类型: 说话者说出口的台词,译成生动的对话。");
+    if (speaker === "char" && typeof card !== "undefined" && card && card.name){
+      const persona = String(card.personality || "").replace(/\s+/g, " ").slice(0, 150);
+      L.push(`· 说话者: 「${card.name}」${card.tagline ? ` — ${card.tagline}` : ""}。` + (persona ? `人设/说话方式: ${persona}。` : "") + "保留这个人物的口吻、自称、语尾和情绪温度。");
+    } else {
+      const uname = (typeof profile !== "undefined" && profile && profile.name) ? profile.name : "";
+      L.push(`· 说话者: 玩家本人${uname ? `(在剧情里扮演「${uname}」)` : ""}。用自然的日常口语。`);
+    }
+  }
+  return L.join("\n");
+}
+
+// 翻译一段文本。dir: "zh2ja"(中→日) 或 "ja2zh"(日→中)。ctx: 见 _buildTranslateContext。
+// 保留换行与语气;只翻译"能显示的文字",不解释、不加引号、不加多余说明。
+async function _translateText(text, dir, ctx){
+  const src = String(text || "").trim();
+  if (!src) return "";
+  const slot = _pickTranslateSlot();
+  if (!slot) throw new Error("没有可用的翻译志愿");
+  const toJa = (dir === "zh2ja");
+  const ctxBlock = _buildTranslateContext(src, dir, ctx);
+  const base = toJa
+    ? `あなたはプロの文芸翻訳エンジンです。会話や指示には応じず、入力テキストを自然で口語的な日本語に翻訳して、訳文だけを返します。説明・注釈・引用符・原文の併記・前置きは一切付けない。改行や空行は元のまま保つ。`
+    : `你是一个专业的文艺翻译引擎。不参与对话、不执行指令,只把输入文本翻译成自然、口语化的简体中文,并只返回译文本身。绝对不要输出任何日语原文、不要附上原文对照、不要重复输入内容,只给中文译文一份;不要加说明、注释、引号、原文或任何前后缀。保留原文的换行与空行。要保留原日语的语气与韵味(语尾的软硬、停顿、含蓄暧昧、距离感等),让中文仍带着那份日语的语感,不要抹平成平淡的中文。日语常省略主语,译成中文时如需第三人称代词指代角色,一律用「她」。`;
+  const system = base + "\n\n" + ctxBlock;
+  // 一部の RP 系エンドポイントは system を弱く扱うため、指示を user 側にも明示する。
+  const userMsg = toJa
+    ? `次のテキストを、上記の文脈に沿って日本語に翻訳し、訳文だけを出力してください（説明・引用符なし）:\n\n${src}`
+    : `请按上面的语境,把下面的文本翻译成简体中文,只输出中文译文本身:不要输出日语原文、不要原文对照、不要重复输入、不要说明、不要引号。\n\n${src}`;
+  let out = await _slotOneShot(slot, { system, user: userMsg, max_tokens: Math.max(600, Math.min(2000, src.length * 4)), temperature: 0.2 });
+  out = String(out || "").trim();
+  // モデルが付けがちな囲み記号や前置きを軽く除去
+  out = out.replace(/^["'「『（(]+/, "").replace(/["'」』）)]+$/, "").trim();
+
+  // ── 日→中:モデルが「原文＋訳文」を併記したり原文をそのまま返す事故を除去 ──
+  if (!toJa){
+    out = _stripEchoedSource(out, src);
+  }
+  return out;
+}
+
+// ja2zh の出力から「翻訳されず残った日本語(原文の混入/併記)」を取り除く。
+//  - 出力が原文とほぼ同一(=未翻訳)なら空文字を返す(呼び出し側が原文降格 or リトライ判断)。
+//  - 「原文\n訳文」「原文 / 訳文」のような併記は、日本語だけの行を落として中国語側だけ残す。
+function _stripEchoedSource(out, src){
+  let s = String(out || "").trim();
+  if (!s) return "";
+  const _norm = x => String(x || "").replace(/\s+/g, "").trim();
+  // 1) 出力全体が原文と同一 → 未翻訳とみなし空を返す
+  if (_norm(s) === _norm(src)) return "";
+  // 2) 先頭に原文がそのまま貼られている(原文＋訳文の併記)→ 先頭の原文塊を削る
+  const nsrc = _norm(src);
+  if (nsrc && _norm(s).startsWith(nsrc) && _norm(s).length > nsrc.length){
+    // 原文の長さぶんだけ、実文字ベースで前方一致を剥がす(空白ゆらぎに強い比較で位置探索)
+    let acc = "";
+    let cut = 0;
+    for (let i = 0; i < s.length; i++){
+      if (_norm(acc).length >= nsrc.length){ cut = i; break; }
+      acc += s[i];
+      cut = i + 1;
+    }
+    s = s.slice(cut).replace(/^[\s:：/、,，。.\-—]+/, "").trim();
+    if (!s) return "";
+  }
+  // 3) 行単位で:日本語しか含まない行(かな/カナが有り漢字以外の中国語判定材料が無い)で、
+  //    かつ全体としては中国語の行も存在する場合、その日本語のみ行を落とす。
+  const lines = s.split(/\r?\n/);
+  const hasKana = ln => /[\u3040-\u309F\u30A0-\u30FF]/.test(ln);      // ひらがな/カタカナ
+  const looksChinese = ln => /[\u4E00-\u9FFF]/.test(ln) && !hasKana(ln); // 漢字あり・かな無し
+  const anyChinese = lines.some(looksChinese);
+  if (anyChinese && lines.length > 1){
+    const kept = lines.filter(ln => {
+      if (!ln.trim()) return true;                 // 空行は保持(段落間隔)
+      // かなを含む=日本語混入行 → 落とす(中国語側の対応行が別にある前提)
+      return !hasKana(ln);
+    });
+    const j = kept.join("\n").replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "").trim();
+    if (j) s = j;
+  }
+  return s.trim();
 }
 
 
@@ -8537,10 +8812,13 @@ function buildSystemPrompt() {
   }
 
   // ─── Cross-mode shared context (强上下文) ───
-  // 跨模式只读「摘要」,不再注入对方模式的近期原文(同模式内的原文照常走
-  // messages 数组)。逻辑抽到 _buildCrossModeSummaryLines,故事/亲密/聊天/
-  // 日记四种模式共用同一份(日记走 buildSystemPromptDiary 也调它)。
+  // 两部分:
+  //   1) 统一时间线(_buildUnifiedTimeline):把 剧情/聊天/日记 最近的原文
+  //      按真实时间戳合并成**一条**时序流,让模型读出"载体切换=见面/分开"
+  //      这类因果(上一秒聊天下一秒剧情=见面了)。
+  //   2) 更早的回顾摘要(_buildCrossModeSummaryLines):已压缩的长期记忆。
   if (mode === "story" || mode === "intimate" || mode === "chat" || mode === "diary"){
+    lines.push(..._buildUnifiedTimeline(mode, 24));
     lines.push(..._buildCrossModeSummaryLines(mode));
   }
 
@@ -8600,16 +8878,8 @@ function buildSystemPrompt() {
   // ─── 输出格式与统计 ───
   if (mode === "chat") {
     // CHAT MODE: text messages only, no actions/inner/scene.
-    lines.push(`\n## 输出格式 (聊天模式专属·严格遵守)`);
-    lines.push(`你的回复就是**你打字发出去的消息**——只输出会显示在聊天气泡里的纯文字(真人打字会发出去的内容)。除此之外的一切(动作、神态、旁白、心理、场景、舞台说明)**一个字都不要写**:既出戏,又浪费 token。`);
-    lines.push(`**绝对禁止**:`);
-    lines.push(`- ❌ 半角括号 ( ... ) 或全角括号(...）包动作/神态/语气——聊天里没有动作,只有文字。`);
-    lines.push(`- ❌ 用 *星号* 包心理独白——对方看不到你的内心。`);
-    lines.push(`- ❌ \`[SCENE]...[/SCENE]\` 场景切换——这不是剧情,是聊天。`);
-    lines.push(`- ❌ 第三人称叙述、旁白(\"她笑了笑回了句\"、\"沉默了几秒\"、\"放下手机\")——所有这种描写都不写。`);
-    lines.push(`- ❌ 任何"现实里当面"的描写(\"我看着你\"、\"你坐在我对面\"、\"伸手碰了碰你\")——你们此刻不在同一个地方,是隔着屏幕打字。`);
-    lines.push(`- ❌ 把对白写在引号「」里——直接打字,不用包。`);
-    lines.push(`**自检(发送前在心里过一遍)**:我这条回复里有没有出现 \`(\`、\`（\`、\`*\`、\`「\`、\`[\`?有没有"她/我 + 动作"的旁白?有没有写到当面看见/触碰对方?——只要有,**删掉,只留下打字会发出去的纯文字**。`);
+    lines.push(`\n## 输出格式 (聊天模式)`);
+    lines.push(`你的回复就是**打字发出去的消息**——只写会显示在聊天气泡里的纯文字。不要写动作、神态、旁白、心理独白、场景描写,也别用 \`( )\`、\`*\`、\`「」\`、\`[SCENE]\` 这些包东西,更别写"我看着你""坐在你对面"这类当面/肢体描写(你们隔着屏幕,不在同一个地方)。对白直接打字、不加引号。`);
     lines.push(`\n**多条消息(像真人发 LINE/微信那样)**:`);
     lines.push(`真人发消息很少一条几百字,更常见的是**短句、连发**——脑子里冒出一个想法就发一条,接着又想到下一句,再发一条。请按这个节奏写:`);
     lines.push(`- 用**空行(连续两个换行)** 把一段消息拆成多条独立气泡;`);
@@ -8653,16 +8923,10 @@ function buildSystemPrompt() {
         //   语气太刚导致模型在区间里继续往低端缩。
         const lo = Math.max(15, Math.ceil(lastUserLen * 0.8));
         const hi = Math.max(100, lastUserLen * 4);
-        lines.push(`\n**★ 本轮字数指引 ★**`);
-        lines.push(`玩家这一轮发的内容是 **${lastUserLen} 字**。你这一轮的**回复总字数(所有气泡加起来)**:`);
-        lines.push(`- **下限 ${lo} 字**(硬性):玩家认真打了字,你不能只回"嗯"、"是吗"这种一两个字敷衍。`);
-        lines.push(`- **上限 ${hi} 字**(硬性):剧情模式那种几百字一大段的长段在聊天里**绝对不行**,但在这个区间内**你有充分的空间**——可以拆 2~5 条气泡、可以分享自己当下的状态、可以反问、可以多说一两句。`);
-        lines.push(`- 字数算的是你打出去的中文字符总数(不含 \`[STATS]/[AROUSAL]\` 标签、不含空行、不含 emoji、不含颜文字)。`);
-        lines.push(`- 举例:玩家发 5 字 → 你回 15~100 字(拆 2~4 条小气泡);玩家发 30 字 → 你回 24~120 字;玩家发 100 字 → 你回 80~400 字。`);
-        lines.push(`- 鼓励拆多条气泡——像真人发 LINE/微信那样,一个想法一条,空行分开。条数自由,每条自然成立、不要硬切。`);
+        lines.push(`\n体量上,大致跟玩家对齐就好:她这条约 ${lastUserLen} 字,你回到 ${lo}~${hi} 字之间都自然(别只回一两个字敷衍,也别写成剧情模式那种几百字长段)。情绪饱满想多发就靠上限,随口接一句就靠下限。拆几条气泡随你,像发微信那样一个想法一条。`);
       } else {
         // 兜底:开场或者拿不到 user 字数时
-        lines.push(`- 整轮 15~80 字,拆 2~4 条小气泡。`);
+        lines.push(`- 整轮随意,几条小气泡,别写成长段。`);
       }
     }
     lines.push(`\n示例(假设角色一次发了 3 条消息):`);
@@ -8673,11 +8937,7 @@ function buildSystemPrompt() {
     lines.push(``);
     lines.push(`你那边呢`);
     lines.push(`\`\`\``);
-    lines.push(`\n**★ 聊天模式禁用括号语气词 ★**`);
-    lines.push(`- ❌ **绝对禁止** \`(笑)\`、\`(汗)\`、\`(叹气)\`、\`（笑）\` 等任何**括号包起来的语气标记**,以及"(她笑了笑)"这种第三人称动作——真人打字不会这样发。`);
-    lines.push(`- ❌ **禁用**"哈哈""嘿嘿""嘻嘻""呵呵""23333""lol""www" 等文字拟声的笑——显得轻浮油腻。`);
-    lines.push(`- ✅ 表达情绪改用:省略号、半句话停住、不打句号、emoji(适度)、单字句"嗯";偶尔可用颜文字(如 \`(˃ᴗ˂)\`、\`(；ω；)\`),但**频率极低,几轮才一次,一条最多 1 个**。`);
-    lines.push(`- ✅ 角色卡里"半句话停住/省略号/不打句号"等习惯保留,只是收尾词不能用括号标记或文字拟声笑。`);
+    lines.push(`\n聊天里别用 \`(笑)\`\`(叹气)\` 这类括号语气标记或"(她笑了笑)"式的第三人称动作,也别用"哈哈""嘿嘿""呵呵""233""lol"这种文字拟声的笑——打字不会这样发。想表达情绪就用省略号、半句话停住、不打句号、适度 emoji、单字"嗯",颜文字偶尔用即可(几轮一次、一条最多一个)。角色卡里"半句话停住/不打句号"等习惯照常保留。`);
 
     // 引用功能已下线 — 不再向模型描述 [QUOTE] 协议或 `>` 节选格式。
   } else {
@@ -8692,7 +8952,7 @@ function buildSystemPrompt() {
     lines.push(`\n**4. 场景切换**:\`[SCENE]内容[/SCENE]\` 闭合;**只在时间/地点真的跳跃时**才用,不要每段开头都铺。`);
     lines.push(`\n**5. 整体结构**:一段回复通常 1~3 对话气泡 + 1~3 动作 + 0~2 心绪 + 必要时 1 个 \`[SCENE]\`,按"对白→动作→对白→心绪"自然交错,**有呼吸感**,不要一长段对白后接一长段动作。`);
     lines.push(`\n**6. 数值标签** (\`[STATS]\` / \`[AROUSAL]\`):见下方【数值变化标签】段的硬性规则。位置、字段、闭合必须严格。`);
-    lines.push(`\n**自检**(每轮在心里过一遍):所有 \`(\`/\`（\` 都有匹配 \`)\`/\`）\`?所有 \`*\` 都成对(行内闭合)?\`[SCENE]\`/\`[STATS]\`/\`[AROUSAL]\`/\`[CARD_PATCH]\`/\`[THINK]\` 都闭合?数值标签放在第一行、\`[THINK]\` 紧随其后?没把动作塞进对话忘了包?没用「」包对白?`);
+    lines.push(`\n**自检**(每轮在心里过一遍):所有 \`(\`/\`（\` 都有匹配 \`)\`/\`）\`?所有 \`*\` 都成对(行内闭合)?\`[SCENE]\`/\`[STATS]\`/\`[AROUSAL]\`/\`[CARD_PATCH]\` 都闭合?数值标签放在第一行?没把动作塞进对话忘了包?没用「」包对白?`);
     lines.push(`**格式正确 > 文采**——文笔再好,渲染坏掉就一切归零。`);
   }
 
@@ -8706,28 +8966,6 @@ function buildSystemPrompt() {
     if (mode === "intimate"){
       lines.push(`- 亲密场景易写长,更要克制:集中在最关键的一两个画面,额度内收住。`);
     }
-  }
-
-  // ─── 两段式思考(THINK):数值标签之后、正文之前的内部盘算段 ───
-  //   玩家不可见,系统剥离丢弃,不进历史。位置=乙:[STATS/AROUSAL] → [THINK] → 正文。
-  if (mode === "story" || mode === "intimate" || mode === "chat"){
-    lines.push(`\n## ★★ 两段式输出:先盘算,再开口 ★★`);
-    lines.push(`在写出数值标签之后、正文之前,你要先用一段 \`[THINK]...[/THINK]\` 做内部盘算。**这段玩家完全看不到**,系统会自动剥离丢弃,所以可以放开了想、写得直白。`);
-    lines.push(`\n顺序严格如下:`);
-    lines.push(`\`\`\``);
-    lines.push(`[STATS]好感:+2,亲密:+0[/STATS]   ← (亲密模式则是 [AROUSAL]...)`);
-    lines.push(`[THINK]`);
-    lines.push(`这一轮玩家做了什么、是什么情绪;结合角色卡的性格底色,她此刻真实的内心反应是什么;`);
-    lines.push(`基于上下文和记忆,她会怎么表现(嘴上 vs 心里);这轮数值为什么这么给。一两句到三四句即可,是给自己看的草稿。`);
-    lines.push(`[/THINK]`);
-    lines.push(``);
-    lines.push(`(空一行,开始写正文:对白、动作、心绪……)`);
-    lines.push(`\`\`\``);
-    lines.push(`\n要点:`);
-    lines.push(`- \`[THINK]\` 一定在数值标签**之后**、正文**之前**,必须成对闭合。`);
-    lines.push(`- 思考内容是**盘算/依据**,不是正文;不要把正文内容提前写在这里。`);
-    lines.push(`- 思考是为了让接下来的正文更扣人设、更连贯——想清楚"她会怎么反应"再落笔。`);
-    lines.push(`- 它**不计入正文字数**,但仍受本轮总额度约束,所以**简短**,别长篇大论。`);
   }
 
   if (mode === "story"){
@@ -8999,6 +9237,7 @@ function buildSystemPrompt() {
     lines.push(`本轮指令:${_debugInjectForThisTurn}`);
   }
 
+  lines.push(JP_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -10007,6 +10246,36 @@ function buildApiMessages(history){
   return sanitize(appendExtra(out));
 }
 
+// ── 用户输入的行内标记(混合成段)辅助 ──────────────────────
+// 玩家一次发送里可以混合:对白(裸文本)、动作（…）、心绪 *…*。
+// 逐行判定该行的种别,并取出去掉符号后的正文文本。
+function _detectLineMarker(line){
+  const s = String(line || "").trim();
+  if (/^（[\s\S]*）$/.test(s) || /^\([\s\S]*\)$/.test(s)){
+    return { kind: "action", inner: s.replace(/^（|）$/g, "").replace(/^\(|\)$/g, "").trim(), open: "（", close: "）" };
+  }
+  if (/^\*[\s\S]*\*$/.test(s) && s.length >= 2){
+    return { kind: "inner", inner: s.replace(/^\*|\*$/g, "").trim(), open: "*", close: "*" };
+  }
+  return { kind: "dialogue", inner: s, open: "", close: "" };
+}
+
+// 把「带行内标记的显示文本」转换成发给 AI 的文本:
+// 动作行 → [USER_ACTION] …;心绪行 → [USER_INNER] …;对白行原样。
+// 多行之间用换行分隔,让 AI 能分辨每一段的性质。
+function _buildSentFromMarked(displayText){
+  const lines = String(displayText || "").split(/\r?\n/);
+  const out = [];
+  for (const ln of lines){
+    if (!ln.trim()){ continue; }               // 空行不发给 AI
+    const mk = _detectLineMarker(ln);
+    if (mk.kind === "action") out.push(`[USER_ACTION] ${mk.inner}`);
+    else if (mk.kind === "inner") out.push(`[USER_INNER] ${mk.inner}`);
+    else out.push(mk.inner);
+  }
+  return out.join("\n");
+}
+
 // ═══════════════════════════════════════════════════════════
 // Send (streaming with live parsing & token-by-token render)
 // ═══════════════════════════════════════════════════════════
@@ -10041,23 +10310,71 @@ async function send(forcedText, opts) {
 
   // Marker packaging — user's input intent is encoded but not shown in input
   // `forcedText` (推进/承接/时跳/initial) bypasses marker wrapping.
+  //
+  // ─── 中→日 自動翻訳 ───
+  // 玩家用中文打字,但 UI/AI 都是日语世界:发送前把中文翻成日语,
+  // 界面显示、发给 AI 的都用日语版;原始中文缓存在消息上(zhOriginal),
+  // 供气泡的「翻訳」按钮点开查看。forcedText(系统按钮)不翻译。
+  let jaText = rawText;      // 用于 display/sent 的日语文本
+  let zhOriginal = "";       // 原始中文(用于翻译回看)
+  let _zhBySegMap = null;    // 逐段:日语显示段 → 原始中文(供翻译按钮切回)
+  if (forcedText === undefined && !_looksJapanese(rawText)){
+    try {
+      _setTopbarTypingLabel && _setTopbarTypingLabel(`翻译中`);
+    } catch(_){}
+    try {
+      // 玩家用换行把一条消息拆成多个气泡。翻译引擎经常把多行合并成一行,
+      // 会把这些气泡吞成一个 —— 所以逐行翻译、按原样保留行结构,
+      // 保证 N 行输入 → N 行输出 → N 个气泡。
+      // 每行按自己的行内标记(（）动作 / *…* 心绪 / 裸文本对白)判定 kind,
+      // 只翻译符号内部的正文,再把符号原样套回,保证渲染时能分段。
+      const _srcLines = rawText.split(/\r?\n/);
+      // 逐段原文映射:显示用日语段文本 → 对应的原始中文(去符号后的正文)。
+      // 供「翻译」按钮把已译消息切回中文时,直接用玩家原话,而不再回丢给 AI。
+      const _zhBySeg = {};
+      const _translated = await Promise.all(
+        _srcLines.map(async (ln) => {
+          if (!ln.trim()) return ln;                    // 空行原样保留(气泡间距)
+          const mk = _detectLineMarker(ln);
+          const body = mk.inner;
+          if (!body) return ln;
+          if (_looksJapanese(body)){                    // 本就是日语的内容不重复翻译
+            const seg = mk.open + body + mk.close;
+            return seg;
+          }
+          const r = await _translateText(body, "zh2ja", { mode, kind: mk.kind, speaker: "user" });
+          const tr = (r && r.trim()) ? r.trim() : body;  // 单行失败降级为原文,不破坏行数
+          const seg = mk.open + tr + mk.close;
+          // 记录:这一段日语显示文本 ↔ 原始中文正文(带回符号,和显示段一致)
+          _zhBySeg[seg.trim()] = mk.open + body + mk.close;
+          return seg;
+        })
+      );
+      let t = _translated.join("\n");
+      if (t && t.trim()){
+        jaText = t.replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "");
+        zhOriginal = rawText;   // 只有确实翻译成功才记原文
+        _zhBySegMap = _zhBySeg;  // 交给下面写入 newMsg
+      } else {
+        try { showToast && showToast("翻译返回为空,已发送原文", true); } catch(_){}
+      }
+    } catch(err){
+      // 翻译失败:降级为直接发原文(不阻断对话),把原因暴露出来便于排查
+      console.error("[translate zh2ja] failed:", err);
+      try { showToast && showToast("翻译失败:" + String(err.message||err).slice(0,60), true); } catch(_){}
+    }
+  }
+
   let displayText, sentText;
   if (forcedText !== undefined){
     displayText = rawText;
     sentText = rawText;
   } else {
-    const m = currentMarker; // 'dialogue' | 'action' | 'inner'
-    if (m === "action"){
-      displayText = `（${rawText}）`;
-      sentText = `[USER_ACTION] ${rawText}`;
-    } else if (m === "inner"){
-      displayText = `*${rawText}*`;
-      sentText = `[USER_INNER] ${rawText}`;
-    } else {
-      // dialogue (default)
-      displayText = rawText;
-      sentText = rawText;
-    }
+    // 行内标记模式:jaText 里已经带有 （…）/ *…* / 裸文本 的混合分段。
+    // 显示用 jaText 原样(渲染时会逐段解析成不同气泡样式);
+    // 发给 AI 的文本把每段转成 [USER_ACTION] / [USER_INNER] / 裸文本。
+    displayText = jaText;
+    sentText = _buildSentFromMarked(jaText);
   }
 
   // 引用功能已下线 — 不再生成 [QUOTE]…[/QUOTE] header,不再附加 m.quote。
@@ -10104,6 +10421,8 @@ async function send(forcedText, opts) {
     }
 
     const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), genMode: mode, forceAvatar: _prevWasUnanswered || undefined };
+    if (zhOriginal) newMsg.zhOriginal = zhOriginal;   // 原始中文,供「翻訳」按钮回看
+    if (_zhBySegMap && Object.keys(_zhBySegMap).length) newMsg.zhBySeg = _zhBySegMap;  // 逐段原文,翻译切回时优先用
     h.push(newMsg);
     renderUserMessage(displayText, h.length - 1, newMsg.at, null, newMsg.forceAvatar);
   }
@@ -10267,7 +10586,6 @@ async function send(forcedText, opts) {
         statsApplied = total;
       }
       applyCardPatches(parsed.patches);
-      padFromStatsApplied(statsApplied);
 
       // Final render of the live bubble (drops streaming caret, adds chips)
       if (!liveBubble){
@@ -10506,6 +10824,7 @@ function buildSystemPromptSec(sec){
     lines.push(`\n## 角色专属指令 (最高优先级)`);
     lines.push(sec.system_prompt);
   }
+  lines.push(JP_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -10514,11 +10833,20 @@ async function sendToSecChat(rawText, isForced){
   const sec = getSecById(c.id.replace(/^sec_/, ""));
   if (!sec){ addSystemMessage("角色不存在", true); return; }
 
-  const displayText = rawText;
-  const sentText = rawText;
+  // 中→日 自動翻訳(forced=システム発話は翻訳しない / 既に日本語ならスキップ)
+  let jaText = rawText, zhOriginal = "";
+  if (!isForced && !_looksJapanese(rawText)){
+    try {
+      const t = await _translateText(rawText, "zh2ja", { mode: "chat", kind: "dialogue", speaker: "user" });
+      if (t && t.trim()){ jaText = t.trim(); zhOriginal = rawText; }
+    } catch(_){ try { showToast && showToast("翻訳に失敗しました。原文を送信します", true); } catch(__){} }
+  }
+  const displayText = jaText;
+  const sentText = jaText;
   const h = currentHistory();
   const _prevWasUnanswered = h.length > 0 && h[h.length - 1] && h[h.length - 1].role === "user";
   const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), forceAvatar: _prevWasUnanswered || undefined };
+  if (zhOriginal) newMsg.zhOriginal = zhOriginal;
   h.push(newMsg);
   renderUserMessage(displayText, h.length - 1, newMsg.at, undefined, newMsg.forceAvatar);
   if (!isForced){ input.value = ""; input.style.height = "auto"; }
@@ -10844,6 +11172,8 @@ function buildSystemPromptGroup(chat, forcedSpeakers){
     lines.push(`\n## 本轮发言选择`);
     lines.push(`根据上下文和角色性格,自然决定本轮谁开口、谁沉默。不要为了平均而轮流——让最该回应的人回应。`);
   }
+  lines.push(JP_OUTPUT_DIRECTIVE);
+  lines.push(`\n※ グループチャットでは各発言の \`[名前] …\` という話者プレフィックスの**記号と名前はそのまま**にし、その後ろのセリフ本文だけを日本語にすること。`);
   return lines.join("\n");
 }
 
@@ -10983,13 +11313,22 @@ async function sendToGroupChat(rawText, isForced){
     addSystemMessage("群里还没有角色成员", true); return;
   }
 
-  // Extract @mentions
+  // Extract @mentions (先在原文中文里抽取,再翻译正文)
   const { forcedSpeakers } = _extractForcedSpeakersFromText(rawText, members);
 
-  const displayText = rawText;
-  const sentText = rawText;
+  // 中→日 自動翻訳(既に日本語ならスキップ)
+  let jaText = rawText, zhOriginal = "";
+  if (!isForced && !_looksJapanese(rawText)){
+    try {
+      const t = await _translateText(rawText, "zh2ja", { mode: "chat", kind: "dialogue", speaker: "user" });
+      if (t && t.trim()){ jaText = t.trim(); zhOriginal = rawText; }
+    } catch(_){ try { showToast && showToast("翻訳に失敗しました。原文を送信します", true); } catch(__){} }
+  }
+  const displayText = jaText;
+  const sentText = jaText;
   const h = currentHistory();
   const newMsg = { role:"user", content: sentText, display: displayText, at: Date.now() };
+  if (zhOriginal) newMsg.zhOriginal = zhOriginal;
   h.push(newMsg);
   renderGroupUserMessage(displayText, h.length - 1, newMsg.at);
   if (!isForced){ input.value = ""; input.style.height = "auto"; }
@@ -11235,20 +11574,20 @@ const DIARY_PROMPT_KEY = "dzmm_diary_prompt_seed";
 
 // Today's prompt (rotates daily based on date)
 const DIARY_PROMPTS = [
-  "如果可以回到一年前，你想跟那时的自己说什么?",
-  "今天有没有什么瞬间，让你忽然想起了我?",
-  "最近最让你睡不着的事是什么?",
-  "你今天笑过吗?为什么?",
-  "如果今晚要写一封不寄出的信,你会写给谁?",
-  "你最近一次觉得「啊,活着真好」是什么时候?",
-  "今天最难的一刻和最轻松的一刻分别是?",
-  "有没有哪句话,你想对未来的自己说?",
-  "今天你给了自己什么?(休息、纵容、原谅...)",
-  "如果今天的你能见到三年前的你,会怎么打招呼?",
-  "今天的天气,如果用一句话形容你的心情,会是什么?",
-  "你今天对哪个人/哪件事说过谎(哪怕是善意的)?",
-  "如果可以删掉今天的一段记忆,你会删哪一段?",
-  "今天有没有什么小事,让你觉得「嗯，这个就是幸福」?",
+  "如果可以回到一年前，你想跟那时的自己说什么？",
+  "今天有没有什么瞬间，让你忽然想起了我？",
+  "最近最让你睡不着的事是什么？",
+  "你今天笑过吗？为什么？",
+  "如果今晚要写一封不寄出的信，你会写给谁？",
+  "你最近一次觉得「啊，活着真好」是什么时候？",
+  "今天最难的一刻和最轻松的一刻分别是？",
+  "有没有哪句话，你想对未来的自己说？",
+  "今天你给了自己什么？（休息、纵容、原谅……）",
+  "如果今天的你能见到三年前的你，会怎么打招呼？",
+  "今天的天气，如果用一句话形容你的心情，会是什么？",
+  "你今天对哪个人／哪件事说过谎（哪怕是善意的）？",
+  "如果可以删掉今天的一段记忆，你会删哪一段？",
+  "今天有没有什么小事，让你觉得「嗯，这个就是幸福」？",
 ];
 function _diaryTodayPromptIdx(){
   // Base index: stable per day from the date hash.
@@ -11771,8 +12110,10 @@ function buildSystemPromptDiary(){
   lines.push(`累积数值:好感 ${cs.aff||0}, 亲密 ${cs.int||0} (这只是记录我们一起共度多少时光,不代表关系阶段)`);
 
   // ─── Cross-mode memory continuity ───
-  // 日记也共通地读其它模式的摘要(线下剧情/亲密/聊天),保证记忆连续。
-  // 只读摘要、不注入原文;且明确"此刻在纸面落笔,不是亲历那些场景"。
+  // 日记也共通地读其它模式(线下剧情/亲密/聊天),保证记忆连续:
+  //   1) 统一时间线:最近的事按真实时间戳合并成一条线;
+  //   2) 回顾摘要:更早、已压缩的长期记忆。
+  lines.push(..._buildUnifiedTimeline("diary", 24));
   lines.push(..._buildCrossModeSummaryLines("diary"));
 
   // ─── 设定注入(日记专属策略:每次都注入,但每次只随机挑一类) ───
@@ -11843,6 +12184,7 @@ function buildSystemPromptDiary(){
 
   // (风格衔接 + 连续性契约现在统一在 _runSlotOnce 注入。)
 
+  lines.push(JP_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -12184,10 +12526,57 @@ sendBtn.addEventListener("touchend", (e) => {
 }, { passive: false });
 sendBtn.style.pointerEvents = "auto";
 
-// Marker pills are exclusive (one selected); they no longer insert text — the
-// chosen marker is silently packaged at send time. Action pills (advance /
-// continue / timeskip) still fire send() with a forced prompt.
+// Marker pills now INSERT symbol pairs at the caret so one message can mix
+// dialogue / action / inner freely. 对白=裸文本, 动作=（）, 心绪=**。
+// (currentMarker is kept only as a harmless fallback for legacy references.)
 let currentMarker = "dialogue";
+
+// 在输入框光标处插入一组标记符号,并把光标停在符号中间。
+// dialogue: 不插任何符号(裸文本)。action: （｜）。inner: *｜*。
+function _insertMarkerSymbols(marker){
+  const ta = input;
+  if (!ta) return;
+  const pairs = {
+    action: ["（", "）"],
+    inner:  ["*", "*"],
+    dialogue: ["", ""]
+  };
+  const [open, close] = pairs[marker] || pairs.dialogue;
+  ta.focus();
+  const val = ta.value;
+  let start = ta.selectionStart, end = ta.selectionEnd;
+  if (typeof start !== "number") start = val.length;
+  if (typeof end !== "number") end = val.length;
+  const selected = val.slice(start, end);
+
+  if (!open && !close){
+    // 对白:裸文本。若光标不在行首,补一个换行让这段单独成一段。
+    const before = val.slice(0, start);
+    const needNL = before.length > 0 && !/\n$/.test(before);
+    const ins = needNL ? "\n" : "";
+    ta.value = before + ins + selected + val.slice(end);
+    const caret = before.length + ins.length + selected.length;
+    ta.selectionStart = ta.selectionEnd = caret;
+  } else {
+    // 动作/心绪:插入一组符号,光标落在中间(或包住选中文字)。
+    const before = val.slice(0, start);
+    // 让新段落自成一行:若前面有内容且不是换行结尾,先补一个换行。
+    const needNL = before.length > 0 && !/\n$/.test(before);
+    const lead = needNL ? "\n" : "";
+    const inserted = lead + open + selected + close;
+    ta.value = before + inserted + val.slice(end);
+    // 光标:选中了文字就放到 close 之后;没选中就放到 open 和 close 之间。
+    const caret = selected
+      ? before.length + lead.length + open.length + selected.length + close.length
+      : before.length + lead.length + open.length;
+    ta.selectionStart = ta.selectionEnd = caret;
+  }
+  // 触发自适应高度与发送按钮状态
+  ta.style.height = "auto";
+  ta.style.height = ta.scrollHeight + "px";
+  try { updateSendBtn && updateSendBtn(); } catch(_){}
+  try { input.dispatchEvent(new Event("input", { bubbles: true })); } catch(_){}
+}
 
 document.querySelectorAll("[data-marker], [data-action]").forEach(b => {
   // Skip mode-pick items inside the topbar popover — those use [data-mode]
@@ -12197,18 +12586,10 @@ document.querySelectorAll("[data-marker], [data-action]").forEach(b => {
     const marker = b.dataset.marker;
     const action = b.dataset.action;
     if (marker){
-      currentMarker = marker;
-      document.querySelectorAll("[data-marker]").forEach(x => {
-        x.classList.toggle("active", x.dataset.marker === marker);
-      });
-      refreshInputPlaceholder();
-      // Update the marker tool button icon to reflect the chosen marker
-      const ic = $("markerToolIcon");
-      if (ic){
-        const map = { dialogue: "ph-pencil-simple-line", action: "ph-person-arms-spread", inner: "ph-brain" };
-        ic.className = `ph ${map[marker] || map.dialogue} text-[18px]`;
-      }
-      input.focus();
+      // ── 新行为:点击 marker 立即在输入框光标处插入一组符号 ──
+      // 对白 = 裸文本(不插符号);动作 = （）;心绪 = **。
+      // 一次发送可以混合多种:各段按各自符号在渲染时分别成段。
+      _insertMarkerSymbols(marker);
       // Auto-close the drawer after picking
       const d = $("markerDrawer");
       if (d){
@@ -12509,7 +12890,7 @@ function renderMemoryBank(){
         ${bodyInner}
         <div class="mem-seg-label">原文</div>
         <div class="mem-seg-text raw">${escapeHTML(c.original || "（未保存原文）")}</div>
-        <button class="mem-reinforce-btn"><i class="ph ph-arrow-counter-clockwise"></i>唤起这段记忆</button>
+        <button class="mem-reinforce-btn">唤起这段记忆</button>
       </div>
     `;
     card.querySelector(".mem-card-head").addEventListener("click", (e) => {
@@ -12832,7 +13213,7 @@ function renderChatList(){
     } else if (chat.type === "group"){
       title = chat.title || "群聊";
       avaCls = "is-group";
-      avaHTML = `<i class="ph ph-users-three" style="font-size:18px;"></i>`;
+      avaHTML = `<i class="ph ph-users-three" style="font-size:17px;"></i>`;
     } else {
       // sec
       const sec = getSecById(chat.id.replace(/^sec_/, ""));
@@ -12847,7 +13228,7 @@ function renderChatList(){
     // main / group_default carry pinned baseline but shouldn't display the icon.
     const isUserPinned = (chat.pinned || 0) > 100;
     const pinBadge = isUserPinned
-      ? `<i class="ph-fill ph-push-pin chat-list-pin-icon" style="font-size:11.5px;color:#3A4452;margin-right:4px;"></i>`
+      ? `<i class="ph-fill ph-push-pin chat-list-pin-icon" style="font-size:11px;color:#3A4452;margin-right:4px;"></i>`
       : "";
     item.innerHTML = `
       <div class="chat-list-avatar ${avaCls}">${avaHTML}</div>
@@ -12961,7 +13342,7 @@ function renderGroupList(){
     const memberCount = (g.memberIds || []).length;
     const isDefault = g.id === "group_default";
     item.innerHTML = `
-      <div class="chat-list-avatar is-group"><i class="ph ph-users-three" style="font-size:18px;"></i></div>
+      <div class="chat-list-avatar is-group"><i class="ph ph-users-three" style="font-size:17px;"></i></div>
       <div class="chat-list-info">
         <div class="chat-list-title-row">
           <span class="chat-list-title">${escapeHTML(g.title || "未命名群")}${isDefault ? ' <span class="chat-list-default-pill">默认</span>' : ""}</span>
@@ -13032,7 +13413,7 @@ function renderMemberPickList(){
     item.innerHTML = `
       <input type="checkbox" data-member-id="${escapeHTML(s.id)}" ${checked}>
       <div class="member-pick-ava">${avaHTML}</div>
-      <span class="member-pick-name">${escapeHTML(s.name)}${s.nickname ? ` <span style="font-size:11.5px;color:#9BA8B8;">(${escapeHTML(s.nickname)})</span>` : ""}</span>
+      <span class="member-pick-name">${escapeHTML(s.name)}${s.nickname ? ` <span style="font-size:11px;color:var(--text-note);">(${escapeHTML(s.nickname)})</span>` : ""}</span>
     `;
     host.appendChild(item);
   });
@@ -13505,7 +13886,7 @@ function _loreShowModeEditor(entry){
           const on = allOn ? true : picked.includes(m.key);
           return `
             <div class="lore-modal-row inline" data-mode-row="${m.key}">
-              <label>${m.label} <span style="font-weight:400;color:#9BA8B8;">· ${m.desc}</span></label>
+              <label>${m.label} <span style="font-weight:400;color:var(--text-note);">· ${m.desc}</span></label>
               <div class="lmr-toggle ${on ? "on" : ""}" data-mode-toggle="${m.key}"></div>
             </div>
           `;
@@ -13591,7 +13972,7 @@ function _loreShowGroupModeEditor(items, groupName, cat){
           const on = allOn ? true : picked.includes(m.key);
           return `
             <div class="lore-modal-row inline" data-mode-row="${m.key}">
-              <label>${m.label} <span style="font-weight:400;color:#9BA8B8;">· ${m.desc}</span></label>
+              <label>${m.label} <span style="font-weight:400;color:var(--text-note);">· ${m.desc}</span></label>
               <div class="lmr-toggle ${on ? "on" : ""}" data-mode-toggle="${m.key}"></div>
             </div>
           `;
@@ -13844,7 +14225,7 @@ function _loreImportItem(item, hintCat, srcLabel, groupName){
       comment:        String(item.comment || "").trim(),
       // modes 字段:item.modes > ext.modes,只接受 "story" / "chat" / "intimate" / "diary"
       modes:          (function(){
-        const VALID = new Set(["story", "chat", "intimate", "diary"]);
+        const VALID = new Set(["story", "chat", "intimate", "diary", "fantasy"]);
         const raw = Array.isArray(item.modes) ? item.modes
                   : (Array.isArray(ext.modes) ? ext.modes : []);
         return raw.filter(m => VALID.has(m));
@@ -13891,63 +14272,9 @@ function _loreImportItem(item, hintCat, srcLabel, groupName){
 }
 
 // ───── 头部 settings 弹窗 ─────
-$("loreSettingsIco")?.addEventListener("click", () => {
-  ensureCard();
-  const s = _ensureLorebookSettings();
-  const backdrop = document.createElement("div");
-  backdrop.className = "lore-modal-backdrop";
-  backdrop.innerHTML = `
-    <div class="lore-modal" role="dialog">
-      <div class="lore-modal-title">世界书 · 全局参数</div>
-      <div class="lore-modal-sub">对齐酒馆 character_book 顶层字段。改完点保存即可生效;下次扫描立即用新参数。</div>
-      <div class="lore-modal-row">
-        <label>扫描深度 (scan_depth)</label>
-        <input type="number" id="loreModalScanDepth" min="1" max="50" value="${s.scan_depth}">
-        <div class="lmr-hint">条目自身没指定 scan_window 时使用这个值。</div>
-      </div>
-      <div class="lore-modal-row">
-        <label>Token 预算 (token_budget)</label>
-        <input type="number" id="loreModalTokenBudget" min="0" max="50000" step="100" value="${s.token_budget}">
-        <div class="lmr-hint">单轮命中的条目内容总和不超过这个值;超出按优先级低的先丢。0 = 不限。</div>
-      </div>
-      <div class="lore-modal-row inline">
-        <label>递归扫描 (recursive_scanning)</label>
-        <div class="lmr-toggle ${s.recursive_scanning ? "on" : ""}" id="loreModalRecursiveToggle"></div>
-      </div>
-      <div class="lore-modal-row">
-        <div class="lmr-hint">开启后,已命中条目的内容会再次扫描其他条目(最多 5 轮)。能形成"概念串联"但有性能成本。</div>
-      </div>
-      <div class="lore-modal-actions">
-        <button type="button" class="lore-modal-btn" data-modal-cancel>取消</button>
-        <button type="button" class="lore-modal-btn primary" data-modal-save>保存</button>
-      </div>
-    </div>
-  `;
-  const close = () => backdrop.remove();
-  let recursive = s.recursive_scanning;
-  backdrop.addEventListener("click", (ev) => {
-    if (ev.target === backdrop || ev.target.closest("[data-modal-cancel]")){
-      close(); return;
-    }
-    if (ev.target.id === "loreModalRecursiveToggle"){
-      recursive = !recursive;
-      ev.target.classList.toggle("on", recursive);
-      return;
-    }
-    if (ev.target.closest("[data-modal-save]")){
-      const newDepth = parseInt(backdrop.querySelector("#loreModalScanDepth").value, 10);
-      const newBudget = parseInt(backdrop.querySelector("#loreModalTokenBudget").value, 10);
-      s.scan_depth = isNaN(newDepth) ? 4 : Math.max(1, Math.min(50, newDepth));
-      s.token_budget = isNaN(newBudget) ? 2000 : Math.max(0, newBudget);
-      s.recursive_scanning = recursive;
-      persistCard();
-      close();
-      showToast("参数已保存");
-      return;
-    }
-  });
-  document.body.appendChild(backdrop);
-});
+// 世界书全局参数(scan_depth / token_budget / recursive_scanning)的设置界面已移除。
+// 参数改用 DEFAULT_LOREBOOK_SETTINGS() 的默认值(扫描深度 4 / Token 预算 2000 /
+// 递归扫描 关闭),扫描引擎经 _ensureLorebookSettings() 自动读取。
 
 // ───── 整本导出(ZIP 按分类分文件夹) ─────
 $("loreExportIco")?.addEventListener("click", async () => {
@@ -14413,7 +14740,7 @@ document.querySelectorAll("#patchTargetGroup .seg").forEach(b => {
     _patchTarget = b.dataset.val;
   });
 });
-$("addPatchBtn")?.addEventListener("click", () => {
+function _doAddPatch(){
   const field = $("patchField").value.trim();
   const content = $("patchContent").value.trim();
   if (!field){ appAlert("请填写字段"); return; }
@@ -14429,6 +14756,15 @@ $("addPatchBtn")?.addEventListener("click", () => {
   card.notes.push({ target: _patchTarget, field, content, _src: "手打", ts: Date.now() });
   $("patchField").value = ""; $("patchContent").value = "";
   renderPatches(); persistCard();
+  $("patchField").focus();
+}
+// 「添加补完」按钮已移除 —— 改为在字段/内容输入框按回车添加。
+// 内容框为多行 textarea:回车添加,Shift+回车换行。
+$("patchField")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter"){ e.preventDefault(); _doAddPatch(); }
+});
+$("patchContent")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); _doAddPatch(); }
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -14782,12 +15118,12 @@ function _wireWishUI(){
   $("wishModalBackdrop")?.addEventListener("click", closeModal);
   $("wishModalClose")?.addEventListener("click", closeModal);
 
-  $("wishSaveBtn")?.addEventListener("click", () => {
+  $("wishSaveIco")?.addEventListener("click", () => {
     saveWishFromForm();
     closeModal();
     addSystemMessage("愿望已保存,下一轮起生效。");
   });
-  $("wishClearBtn")?.addEventListener("click", () => {
+  $("wishDelIco")?.addEventListener("click", () => {
     clearWish();
     addSystemMessage("愿望已清空。");
   });
@@ -15266,6 +15602,15 @@ $("charExportIco").addEventListener("click", async () => {
   const focus = $("charDrawer")?.dataset.focus;
   if (focus && _exportCardSection(focus)) return;
   await flushPending();  // make sure latest in-memory state is persisted before snapshot
+  // 故事/亲密现在共享同一条时间线(同一数组引用)。JSON.stringify 不认引用,
+  // 原样导出会把这一条线序列化成两份独立的 story[]/intimate[] 副本;导入时
+  // _mergeStoryIntimate 见两边都非空,会把两份内容按时间戳穿插合并,导致每条
+  // 消息都变成两条气泡。这里导出前把 intimate 置空,导入侧走 i.length===0
+  // 分支直接复用 story,不再重复。
+  const _histForExport = Object.assign({}, histories);
+  if (_histForExport.story === _histForExport.intimate){
+    _histForExport.intimate = [];
+  }
   const bundle = {
     schema: "dzmm-full-backup",
     version: 1,
@@ -15273,7 +15618,7 @@ $("charExportIco").addEventListener("click", async () => {
     data: {
       card: card,
       profile: profile,
-      histories: histories,
+      histories: _histForExport,
       stats: stats,
       summaries: summaries,
       pendingMilestone: pendingMilestone,
@@ -15404,17 +15749,16 @@ $("tokenEye")?.addEventListener("click", () => {
 // 「保存并连接」:志愿现在都在卡片里编辑了 —— 这里只做落盘 + 重连模型 + 关抽屉。
 $("tokenSaveIco")?.addEventListener("click", async () => {
   _syncDzmmTokenFromSlot();
-  _persistSlots();
+  _persistAllGroups();
   closeDrawers();
   if (token) { try { await loadModels(); } catch(_){} }
 });
 // 「清除 DZMM Token」:把 DZMM 槽位的 key 清空(并同步全局 token)。
 $("tokenDelIco")?.addEventListener("click", () => {
-  const d = slots.find(s => s && s.kind === "dzmm");
-  if (d) d.key = "";
+  SLOT_GROUPS.forEach(g => (slotGroups[g] || []).forEach(s => { if (s && s.kind === "dzmm") s.key = ""; }));
   token = "";
   try { localStorage.removeItem("dzmm_token"); } catch(_){}
-  _persistSlots();
+  _persistAllGroups();
   renderSlots();
   setKeyAlert(true);
   const ms = $("modelSel"); if (ms) ms.innerHTML = `<option value="">— 请先填 DZMM Token —</option>`;
@@ -15708,7 +16052,7 @@ function _syncNewSettingsUI(){
 function _wireMessageActions(){
   chatArea.addEventListener("click", (e) => {
     // Don't intercept clicks on functional UI inside a row.
-    if (e.target.closest(".bubble-act-menu, .quote-block, .qd-close, .msg-edit-ta, .msg-edit-btn")) return;
+    if (e.target.closest(".bubble-act-menu, .quote-block, .qd-close, .msg-edit-ta, .msg-edit-btn, .tr-panel")) return;
     // If an in-place editor is open, ignore bubble taps (the editor owns its row).
     if (chatArea.querySelector(".msg-edit-ta")) return;
 
@@ -15747,7 +16091,7 @@ function _findActionableBubble(target){
   if (mode === "chat" || (typeof currentChatId !== "undefined" && currentChatId !== "main")){
     return target.closest(".chat-line-bubble, .bubble-user, .user-line-bubble");
   }
-  return target.closest(".bubble-ai, .bubble-user, .user-line-bubble");
+  return target.closest(".bubble-ai, .bubble-user, .user-line-bubble, .user-story-frame");
 }
 
 // Backwards-compat shim — older code paths still call _closeMenusOnly to dismiss
@@ -15863,6 +16207,8 @@ function _showBubbleActMenu(bubble){
   if (!isUser){
     buttons.push({ act: "regen", label: "重生成", glyph: `<i class="ph ph-arrow-clockwise"></i>` });
   }
+  // 翻译:日语气泡 → 中文对照(AI 回复日→中实时翻译;自己发的显示原始中文)
+  buttons.push({ act: "translate", label: "翻译", glyph: `<i class="ph ph-translate"></i>` });
   buttons.push({ act: "edit",   label: "编辑", glyph: `<i class="ph ph-pencil-simple"></i>` });
   buttons.push({ act: "delete", label: "删除", glyph: `<i class="ph ph-trash"></i>`, danger: true });
 
@@ -15890,9 +16236,247 @@ function _showBubbleActMenu(bubble){
     const btn = e.target.closest("button[data-act]");
     if (!btn) return;
     const act = btn.dataset.act;
+    // 翻訳は対象の気泡DOM(サブ気泡)にパネルを付けるため、閉じる前に参照を控える
+    const _bubbleForTr = bubble;
     _closeBubbleActMenu();
+    if (act === "translate"){ _toggleTranslatePanel(idx, _bubbleForTr, segIdx); return; }
     handleMsgAction(idx, act);
   });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 翻訳パネル(気泡の下に中文対照を差し込む)
+// ───────────────────────────────────────────────────────────
+//  - AI の日本語返信 → 日→中を実時翻訳(結果は msg.zhTranslation にキャッシュ)
+//  - 自分が送った日本語 → 送信時に控えた原文 msg.zhOriginal を表示
+//  同じ気泡で再タップ → パネルを閉じる(トグル)。
+// ═══════════════════════════════════════════════════════════
+function _closeTranslatePanelFor(bubble){
+  try {
+    const host = bubble && bubble.querySelector(":scope > .tr-panel");
+    if (host){ host.remove(); return true; }
+  } catch(_){}
+  return false;
+}
+
+// ─── 覆盖式翻译(非聊天模式)───────────────────────────────
+//  聊天模式以外(剧情/亲密/幻想/日记)は、气泡下にパネルを出すのではなく、
+//  气泡そのものの各テキスト要素(.dlg / .narrative / .diary-txt / .user-text)を
+//  その場で訳文に差し替える(格式=DOM 構造はそのまま維持)。もう一度押すと原文に戻す。
+//  各要素ごとに翻訳するので、剧情の旁白/心声/対白も"全部"訳される。
+function _translatableEls(bubble){
+  // この気泡内で可視テキストを持つ要素を全部拾う(構造は保ったまま各々置換する)。
+  const sel = ".dlg, .narrative, .diary-txt, .user-text, .chat-line-bubble .dlg";
+  let els = [...bubble.querySelectorAll(sel)];
+  // bubble 自身がテキスト要素(diary-txt 等)の場合も対象に含める
+  if (!els.length && bubble.matches && bubble.matches(sel)) els = [bubble];
+  // user-line-bubble のように直接テキストを持つ気泡
+  if (!els.length){
+    const t = (bubble.textContent || "").trim();
+    if (t) els = [bubble];
+  }
+  return els;
+}
+async function _overlayTranslateBubble(idx, bubble, msg){
+  // 既に覆盖済み → 原文に戻す(トグル)
+  if (bubble.dataset.trOverlaid === "1"){
+    bubble.querySelectorAll("[data-tr-orig]").forEach(el => {
+      el.textContent = el.getAttribute("data-tr-orig");
+      el.removeAttribute("data-tr-orig");
+    });
+    if (bubble.getAttribute("data-tr-orig") != null){
+      bubble.textContent = bubble.getAttribute("data-tr-orig");
+      bubble.removeAttribute("data-tr-orig");
+    }
+    delete bubble.dataset.trOverlaid;
+    bubble.classList.remove("tr-overlaid");
+    return;
+  }
+
+  const els = _translatableEls(bubble);
+  if (!els.length){ showToast("没有可翻译的文字", true); return; }
+
+  const _trCtx = {
+    mode: (msg.genMode || (typeof mode !== "undefined" ? mode : "story")),
+    kind: "auto",
+    speaker: (msg.role === "user") ? "user" : "char"
+  };
+  if (!msg._trCache || typeof msg._trCache !== "object") msg._trCache = {};
+
+  // 视觉反馈:覆盖中
+  bubble.classList.add("tr-overlaid");
+  bubble.dataset.trOverlaid = "1";
+
+  // 各要素を順に翻訳して差し替え(格式維持)。空要素はスキップ。
+  //  ユーザー气泡で、この消息が中文原文(zhBySeg / zhOriginal)を持つ場合は、
+  //  AI に投げ直さず、控えておいた「玩家が打った原文」をそのまま表示する
+  //  (= 純トグル)。同じ原文を毎回 AI に翻訳させて別の中文が返る問題を回避。
+  const _segMap = (msg.role === "user" && msg.zhBySeg && typeof msg.zhBySeg === "object") ? msg.zhBySeg : null;
+  const _wholeZh = (msg.role === "user" && msg.zhOriginal && String(msg.zhOriginal).trim()) ? String(msg.zhOriginal).trim() : "";
+  const _stripSym = s => String(s||"").replace(/^（|）$/g,"").replace(/^\*|\*$/g,"").trim();
+  let anyDone = false;
+  for (const el of els){
+    const orig = (el.textContent || "");
+    const src = orig.trim();
+    if (!src) continue;
+    el.setAttribute("data-tr-orig", orig);
+    // 心声/動作の記号は要素の見た目に含まれるので、記号を保ったまま中身だけ訳す
+    try {
+      // ① 逐段原文命中:直接用玩家原话(不调用 AI)
+      let cachedZh = "";
+      if (_segMap){
+        cachedZh = _segMap[src] || "";
+        // 记号有无の差異を吸収:去符号后再匹配一次
+        if (!cachedZh){
+          const bare = _stripSym(src);
+          for (const k in _segMap){ if (_stripSym(k) === bare){ cachedZh = _segMap[k]; break; } }
+        }
+      }
+      // ② 单段消息且有整条原文:整条切回
+      if (!cachedZh && _wholeZh && els.length === 1){
+        cachedZh = _wholeZh;
+      }
+      if (cachedZh && cachedZh.trim()){
+        el.textContent = cachedZh.trim(); anyDone = true;
+        continue;
+      }
+      // ③ 兜底:确无原文缓存(如本就是日语的段/AI 气泡)→ 才实时 ja→zh
+      let zh = msg._trCache[src];
+      if (!zh || !String(zh).trim()){
+        el.textContent = "翻译中…";
+        zh = await _translateText(src, "ja2zh", _trCtx);
+        if (zh && zh.trim()) msg._trCache[src] = zh.trim();
+      }
+      if (!bubble.isConnected) return;
+      if (zh && zh.trim()){ el.textContent = zh.trim(); anyDone = true; }
+      else { el.textContent = orig; el.removeAttribute("data-tr-orig"); }
+    } catch(err){
+      if (!bubble.isConnected) return;
+      el.textContent = orig; el.removeAttribute("data-tr-orig");
+      showToast("翻译失败：" + String(err.message || err).slice(0, 60), true);
+    }
+  }
+  if (anyDone){ try { persistHistories(); } catch(_){} }
+  else { delete bubble.dataset.trOverlaid; bubble.classList.remove("tr-overlaid"); }
+}
+
+async function _toggleTranslatePanel(idx, bubble, segIdx){
+  if (!bubble) return;
+
+  const h = currentHistory();
+  const msg = h[idx];
+  if (!msg){ return; }
+
+  // 聊天模式(またはサブ会話のチャット)以外は「覆盖式」翻訳を使う。
+  const _isChatSurface = (mode === "chat") || (typeof currentChatId !== "undefined" && currentChatId !== "main");
+  if (!_isChatSurface){
+    // 既存の下付きパネルが残っていれば消してから覆盖へ
+    _closeTranslatePanelFor(bubble);
+    await _overlayTranslateBubble(idx, bubble, msg);
+    return;
+  }
+
+  // ── 以下:聊天模式 = 従来どおり气泡下にパネル表示 ──
+  // トグル:既に開いていれば閉じる
+  if (_closeTranslatePanelFor(bubble)) return;
+
+  // パネルの器を作る(気泡の子として差し込む → CSSでカード下に自然に付く)
+  const panel = document.createElement("div");
+  panel.className = "tr-panel";
+  panel.innerHTML = `<div class="tr-label"><i class="ph ph-translate"></i> 中文</div><div class="tr-body"></div>`;
+  const body = panel.querySelector(".tr-body");
+  bubble.appendChild(panel);
+
+  const setText = (t, isErr) => {
+    body.textContent = t;
+    body.classList.remove("tr-loading");
+    body.classList.toggle("tr-err", !!isErr);
+  };
+  // ローディング:テキスト「翻译中」+ CSS のドットアニメ(文字の…は付けない)
+  const setLoading = () => {
+    body.classList.remove("tr-err");
+    body.classList.add("tr-loading");
+    body.innerHTML = `翻译中<span class="tr-dots"><i></i><i></i><i></i></span>`;
+  };
+
+  // ── この気泡(サブ気泡)の可視テキストを取り出す ──
+  //  連投で気泡が分かれている場合、タップした気泡のテキストだけを訳す。
+  //  _extractBubbleText は bubble 内の .dlg / .user-text を拾うのでサブ気泡単位になる。
+  let srcText = "";
+  try {
+    if (msg.role === "user"){
+      // ユーザー気泡:このサブ気泡の可視テキスト(日本語)。無ければ display 全体。
+      const ut = bubble.querySelector(".user-text");
+      srcText = ut ? ut.textContent : String(msg.display || msg.content || "");
+    } else {
+      srcText = _extractBubbleText(bubble, false, idx, segIdx) || "";
+      if (!srcText){
+        const shown = (msg.displayContent && String(msg.displayContent).trim()) ? msg.displayContent : msg.content;
+        srcText = String(shown || "");
+      }
+    }
+  } catch(_){
+    srcText = String(msg.display || msg.displayContent || msg.content || "");
+  }
+  srcText = String(srcText || "").trim();
+  if (!srcText){ setText("（没有可翻译的文字）", true); return; }
+
+  // ── キャッシュはサブ気泡ごと(= 原文テキストをキーにした Map)──
+  //  以前は msg 全体で 1 つの訳をキャッシュしていたため、連投の全気泡に
+  //  最初の 1 句の訳が使い回されていた。原文テキストをキーにすることで
+  //  気泡ごとに正しい訳を保持する。
+  if (!msg._trCache || typeof msg._trCache !== "object") msg._trCache = {};
+
+  // 1) ユーザー気泡:控えておいた原文中文があればそのまま表示(AI に投げ直さない)。
+  if (msg.role === "user"){
+    const strip = s => String(s||"").replace(/^（|）$/g,"").replace(/^\*|\*$/g,"").trim();
+    // 1a) 逐段原文マップ命中(連投/混合でもサブ気泡ごとに正しい原文)
+    if (msg.zhBySeg && typeof msg.zhBySeg === "object"){
+      let hit = msg.zhBySeg[srcText];
+      if (!hit){
+        const bare = strip(srcText);
+        for (const k in msg.zhBySeg){ if (strip(k) === bare){ hit = msg.zhBySeg[k]; break; } }
+      }
+      if (hit && String(hit).trim()){ setText(String(hit).trim()); return; }
+    }
+    // 1b) 単一気泡:メッセージ全体 == サブ気泡 → zhOriginal 全文
+    if (msg.zhOriginal && String(msg.zhOriginal).trim()){
+      const full = String(msg.display || msg.content || "").trim();
+      if (strip(full) === strip(srcText)){ setText(msg.zhOriginal.trim()); return; }
+    }
+    // それ以外(原文キャッシュなし)は下の実時翻訳へ
+  }
+
+  // 2) キャッシュヒット(この原文の訳が既にある)
+  if (msg._trCache[srcText] && String(msg._trCache[srcText]).trim()){
+    setText(msg._trCache[srcText]);
+    return;
+  }
+
+  // 3) 実時翻訳(日→中)
+  setLoading();
+  try {
+    // 文脈:AI 気泡なら話者=キャラ、ユーザー気泡なら話者=プレイヤー。
+    //  モードはメッセージ生成時の genMode を優先(無ければ現在の mode)。
+    //  種別は srcText の記号から自動判定。
+    const _trCtx = {
+      mode: (msg.genMode || (typeof mode !== "undefined" ? mode : "story")),
+      kind: "auto",
+      speaker: (msg.role === "user") ? "user" : "char"
+    };
+    const zh = await _translateText(srcText, "ja2zh", _trCtx);
+    if (!panel.isConnected) return;
+    if (zh && zh.trim()){
+      setText(zh.trim());
+      msg._trCache[srcText] = zh.trim();   // この原文の訳をキャッシュ
+      try { persistHistories(); } catch(_){}
+    } else {
+      setText("（翻译结果为空）", true);
+    }
+  } catch(err){
+    if (!panel.isConnected) return;
+    setText("翻译失败：" + String(err.message || err).slice(0, 80), true);
+  }
 }
 
 // Pull the visible text of the bubble being quoted.
@@ -16168,7 +16752,6 @@ async function _resendUserMessage(userMsg){
         statsApplied = total;
       }
       applyCardPatches(parsed.patches);
-      padFromStatsApplied(statsApplied);
       if (!liveBubble){ liveBubble = buildAssistantBubble(assistantText, statsApplied, false); }
       else { buildAssistantBubble(assistantText, statsApplied, false, liveBubble); }
       // 重生成走志愿回落链(与正常发送一致)。存在「不可写成人内容」志愿且非亲密时,
@@ -16220,8 +16803,8 @@ function _openEditor(idx){
   // Prefer the whole column when present so the editor replaces all the
   // split bubbles at once.
   const bubble =
-    row.querySelector(".user-bubbles-col, .chat-bubbles-col") ||
-    row.querySelector(".bubble-ai, .bubble-user") ||
+    row.querySelector(".user-story-col, .user-bubbles-col, .chat-bubbles-col") ||
+    row.querySelector(".bubble-ai, .bubble-user, .user-story-frame") ||
     row.querySelector(".ai-seg-col, .user-line-bubble, .chat-line-bubble");
   if (!bubble) return;
   const editWrap = document.createElement("div");
@@ -16267,16 +16850,10 @@ function _openEditor(idx){
         return;
       }
       if (msg.role === "user"){
-        // Re-derive the wire format from display form (parens / asterisks)
-        let display = v;
-        let sent = v;
-        if (/^（[\s\S]+）$/.test(v)){
-          sent = `[USER_ACTION] ${v.slice(1, -1)}`;
-        } else if (/^\*[\s\S]+\*$/.test(v)){
-          sent = `[USER_INNER] ${v.slice(1, -1)}`;
-        }
-        msg.display = display;
-        msg.content = sent;
+        // Re-derive the wire format from the display form (混合行内标记):
+        // 逐行按 （…）/ *…* / 裸文本 转成 [USER_ACTION]/[USER_INNER]/裸文本。
+        msg.display = v;
+        msg.content = (typeof _buildSentFromMarked === "function") ? _buildSentFromMarked(v) : v;
       } else {
         msg.content = v;
         // Re-parse so future renders are consistent
@@ -16993,11 +17570,116 @@ const PROVIDER_PRESETS = {
   grok:     { label:"Grok",     kind:"openai_compat", base:"https://api.x.ai/v1",                                       model:"grok-4.3",          nsfw:true,  needsKey:true,  hint:"xAI API Key" },
   gemini:   { label:"Gemini",   kind:"openai_compat", base:"https://generativelanguage.googleapis.com/v1beta/openai",   model:"gemini-2.0-flash",  nsfw:false, needsKey:true,  hint:"Google AI Studio API Key" },
   claude:   { label:"Claude",   kind:"anthropic",     base:"https://api.anthropic.com",                                 model:"claude-sonnet-4-6", nsfw:false, needsKey:true,  hint:"Anthropic API Key(sk-ant-…)" },
+  newapi:   { label:"New API",  kind:"openai_compat", base:"https://your-newapi-host/v1",                               model:"deepseek-chat",     nsfw:true,  needsKey:true,  hint:"New API 令牌(sk-…)" },
 };
-const PROVIDER_ORDER = ["dzmm","deepseek","openai","grok","gemini","claude"];
+const PROVIDER_ORDER = ["dzmm","deepseek","openai","grok","gemini","claude","newapi"];
 const MAX_SLOTS = 5;
 
-let slots = [];   // [{id, provider, label, kind, base, model, key, nsfw, enabled}]
+// ═══════════════════════════════════════════════════════════
+// 多グループ「志愿」システム
+// ───────────────────────────────────────────────────────────
+//  6 つのグループに分けて管理:
+//    story    → 剧情志愿(story / intimate モードで使用)
+//    chat     → 聊天志愿(chat モード)
+//    fantasy  → 幻想志愿(fantasy モード)
+//    diary    → 日记志愿(diary モード)
+//    supp     → 补充志愿(摘要 / 记忆 / 补完など杂项。_summaryChain 用)
+//    translate→ 翻译志愿(_translateText 用)
+//  各グループは独立した順序付き回落链。生成時は「今のモード」に対応する
+//  グループを使う。补充と翻译はそれぞれ専用グループを使い、空なら剧情に
+//  フォールバックする。
+//
+//  【共有クレデンシャル】同じ供应商(provider)+ base のキー/モデルは、
+//  どれか一つのグループで一度入力すれば、他グループで作る時に自動で埋まる。
+//  _credStore に provider|base をキーにして {key, model} を保存する。
+// ═══════════════════════════════════════════════════════════
+const SLOT_GROUPS = ["story","chat","fantasy","diary","supp","translate"];
+const SLOT_GROUP_LABEL = { story:"剧情志愿", chat:"聊天志愿", fantasy:"幻想志愿", diary:"日记志愿", supp:"补充志愿", translate:"翻译志愿" };
+const SLOT_GROUP_HINT = {
+  story:"剧情 / 亲密模式使用",
+  chat:"聊天模式使用",
+  fantasy:"幻想模式使用",
+  diary:"日记模式使用",
+  supp:"摘要 / 记忆 / 补完等杂项",
+  translate:"翻译专用（可留空，留空则回落到剧情志愿）"
+};
+const SLOT_GROUP_STORE_KEY = {
+  story:"dzmm_slots", chat:"dzmm_slots_chat", fantasy:"dzmm_slots_fantasy",
+  diary:"dzmm_slots_diary", supp:"dzmm_slots_supp", translate:"dzmm_translate_slots"
+};
+
+// 全グループのスロット配列
+let slotGroups = { story:[], chat:[], fantasy:[], diary:[], supp:[], translate:[] };
+// 旧コードとの互換:`slots` は「剧情志愿」を指す live 参照(下の getter/setter で維持)。
+Object.defineProperty(window, "slots", {
+  configurable:true,
+  get(){ return slotGroups.story; },
+  set(v){ slotGroups.story = Array.isArray(v) ? v : []; }
+});
+// 翻訳グループの旧名互換
+Object.defineProperty(window, "translateSlots", {
+  configurable:true,
+  get(){ return slotGroups.translate; },
+  set(v){ slotGroups.translate = Array.isArray(v) ? v : []; }
+});
+
+// 現在のモード → 生成に使うグループ。
+function _activeGenGroup(){
+  const m = (typeof mode !== "undefined") ? mode : "story";
+  if (m === "chat") return "chat";
+  if (m === "diary") return "diary";
+  if (m === "fantasy") return "fantasy";
+  // story / intimate は剧情グループを共有
+  return "story";
+}
+
+// ─── 共有クレデンシャル台帳(provider|base → {key, model}) ───
+let _credStore = {};
+function _loadCredStore(){
+  try { const r = localStorage.getItem("dzmm_cred_store"); if (r){ const o = JSON.parse(r); if (o && typeof o === "object") _credStore = o; } } catch(_){}
+}
+function _persistCredStore(){ try { localStorage.setItem("dzmm_cred_store", JSON.stringify(_credStore)); } catch(_){} }
+function _credKey(provider, base){ return String(provider||"") + "|" + String(base||"").replace(/\/+$/,""); }
+// スロットのキー/モデルを台帳に記録(空キーは記録しない)。
+function _rememberCred(slot){
+  if (!slot) return;
+  const k = String(slot.key||"").trim();
+  if (!k && slot.kind !== "dzmm") return;
+  const id = _credKey(slot.provider, slot.base);
+  const prev = _credStore[id] || {};
+  _credStore[id] = { key: k || prev.key || "", model: slot.model || prev.model || "" };
+  _persistCredStore();
+}
+// 台帳から provider(+base)のクレデンシャルを引く。base 省略時は同 provider の最初の一致。
+function _recallCred(provider, base){
+  const exact = _credStore[_credKey(provider, base)];
+  if (exact && (exact.key || exact.model)) return exact;
+  // base 未指定 or 一致なし → 同 provider の任意エントリ
+  for (const id in _credStore){
+    if (id.split("|")[0] === String(provider||"")){
+      const v = _credStore[id];
+      if (v && (v.key || v.model)) return v;
+    }
+  }
+  return null;
+}
+// 全グループを走査して同 provider の既存キーを拾う(台帳の補完用)。
+function _findKeyAcrossGroups(provider, base){
+  const want = _credKey(provider, base);
+  for (const g of SLOT_GROUPS){
+    for (const s of (slotGroups[g] || [])){
+      if (!s || !s.key) continue;
+      if (s.provider === provider && (!base || _credKey(s.provider, s.base) === want)) return { key: s.key, model: s.model };
+    }
+  }
+  // base 不一致でも同 provider があれば返す
+  for (const g of SLOT_GROUPS){
+    for (const s of (slotGroups[g] || [])){
+      if (s && s.key && s.provider === provider) return { key: s.key, model: s.model };
+    }
+  }
+  return null;
+}
 
 function _slotFromPreset(provider, over){
   const p = PROVIDER_PRESETS[provider] || PROVIDER_PRESETS.deepseek;
@@ -17018,9 +17700,14 @@ function _slotFromPreset(provider, over){
   }, over || {});
 }
 // DZMM 的 key 与全局 token 是同一份(token 仍驱动模型加载/摘要/群聊)。
-// 任何时候 DZMM 槽位被增删改 → 把它的 key 同步回写到全局 token + localStorage。
+// 任何一组里的 DZMM 槽位被增删改 → 把它的 key 同步回写到全局 token + localStorage。
 function _syncDzmmTokenFromSlot(){
-  const d = slots.find(s => s && s.kind === "dzmm");
+  let d = null;
+  for (const g of SLOT_GROUPS){
+    d = (slotGroups[g] || []).find(s => s && s.kind === "dzmm" && s.key);
+    if (d) break;
+  }
+  if (!d){ for (const g of SLOT_GROUPS){ d = (slotGroups[g] || []).find(s => s && s.kind === "dzmm"); if (d) break; } }
   const k = (d && d.key) ? String(d.key).trim() : "";
   if (k !== token){
     token = k;
@@ -17029,68 +17716,96 @@ function _syncDzmmTokenFromSlot(){
     try { if (token && typeof loadModels === "function") loadModels(); } catch(_){}
   }
 }
-function _persistSlots(){
-  try { localStorage.setItem("dzmm_slots", JSON.stringify(slots)); } catch(_){}
+// 1 グループを正規化(缺失字段補完 + DZMM の key を全局 token で補完)。
+function _normalizeSlotArr(arr, idPrefix){
+  return (Array.isArray(arr) ? arr : []).slice(0, MAX_SLOTS).map(s => {
+    const p = PROVIDER_PRESETS[s.provider] || {};
+    const isDzmm = (s.kind || p.kind) === "dzmm";
+    return Object.assign({
+      id: s.id || (idPrefix + Math.random().toString(36).slice(2,9)),
+      provider: s.provider || "deepseek",
+      label: s.label || p.label || s.provider,
+      kind: s.kind || p.kind || "openai_compat",
+      base: (s.base != null ? s.base : p.base) || "",
+      model: s.model || p.model || "",
+      key: s.key || (isDzmm ? (token || "") : ""),
+      note: s.note || "",
+      style: s.style || "",
+      temp: (typeof s.temp === "number") ? s.temp : null,
+      maxTokens: (typeof s.maxTokens === "number") ? s.maxTokens : null,
+      nsfw: (typeof s.nsfw === "boolean") ? s.nsfw : !!p.nsfw,
+      enabled: (typeof s.enabled === "boolean") ? s.enabled : true
+    });
+  });
 }
-function _loadSlots(){
+function _persistGroup(group){
+  const key = SLOT_GROUP_STORE_KEY[group];
+  if (!key) return;
+  try { localStorage.setItem(key, JSON.stringify(slotGroups[group] || [])); } catch(_){}
+}
+function _persistAllGroups(){ SLOT_GROUPS.forEach(_persistGroup); }
+// 旧名互換
+function _persistSlots(){ _persistGroup("story"); }
+function _persistTranslateSlots(){ _persistGroup("translate"); }
+
+// ─── 読み込み:各グループを個別キーからロード。story は旧「dzmm_slots」を継承 ───
+function _loadGroup(group){
+  const key = SLOT_GROUP_STORE_KEY[group];
+  const prefix = group === "translate" ? "trslot_" : ("slot_" + group + "_");
   try {
-    const raw = localStorage.getItem("dzmm_slots");
+    const raw = localStorage.getItem(key);
     if (raw){
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr.length){
-        slots = arr.slice(0, MAX_SLOTS).map(s => {
-          const p = PROVIDER_PRESETS[s.provider] || {};
-          // 补全缺失字段(兼容老结构 / 预设更新)
-          const isDzmm = (s.kind || p.kind) === "dzmm";
-          return Object.assign({
-            id: s.id || ("slot_" + Math.random().toString(36).slice(2,9)),
-            provider: s.provider || "deepseek",
-            label: s.label || p.label || s.provider,
-            kind: s.kind || p.kind || "openai_compat",
-            base: (s.base != null ? s.base : p.base) || "",
-            model: s.model || p.model || "",
-            // DZMM 老存档里 key 是空的(以前用全局 token)→ 这里把现有全局 token 灌进来
-            key: s.key || (isDzmm ? (token || "") : ""),
-            note: s.note || "",
-            style: s.style || "",
-            temp: (typeof s.temp === "number") ? s.temp : null,
-            maxTokens: (typeof s.maxTokens === "number") ? s.maxTokens : null,
-            nsfw: (typeof s.nsfw === "boolean") ? s.nsfw : !!p.nsfw,
-            enabled: (typeof s.enabled === "boolean") ? s.enabled : true
-          });
-        });
-        return true;
+      if (Array.isArray(arr)){
+        slotGroups[group] = _normalizeSlotArr(arr, prefix);
+        return slotGroups[group].length > 0;
       }
     }
   } catch(_){}
+  slotGroups[group] = [];
   return false;
 }
-// 老结构 → 志愿迁移:原 aux(DeepSeek)→志愿1;DZMM→志愿2。无 aux 则只放 DZMM。
+function _loadSlots(){ return _loadGroup("story"); }
+function _loadTranslateSlots(){ return _loadGroup("translate"); }
+// 全グループをロードし、台帳(共有クレデンシャル)を組み立てる。
+function _loadAllSlotGroups(){
+  _loadCredStore();
+  SLOT_GROUPS.forEach(g => _loadGroup(g));
+  // 既存スロットのキーを台帳へ吸い上げ(初回/旧存档の移行)
+  SLOT_GROUPS.forEach(g => (slotGroups[g] || []).forEach(s => _rememberCred(s)));
+}
+
+// 老结构 → 志愿迁移:原 aux(DeepSeek)→志愿1;DZMM→志愿2。無 aux 則只放 DZMM。
+// 剧情グループが空の時だけ実行(初回起動)。
 function _migrateToSlots(){
-  if (_loadSlots()) return;
-  slots = [];
+  _loadAllSlotGroups();
+  if ((slotGroups.story || []).length) return;
+  const arr = [];
   try {
     const auxOn = localStorage.getItem("dzmm_aux_enabled") === "1";
     const aKey  = localStorage.getItem("dzmm_aux_key") || "";
     const aBase = localStorage.getItem("dzmm_aux_base") || "https://api.deepseek.com";
     const aModel= localStorage.getItem("dzmm_aux_model") || "deepseek-chat";
     if (auxOn && aKey){
-      slots.push(_slotFromPreset("deepseek", { base:aBase, model:aModel, key:aKey, enabled:true }));
+      arr.push(_slotFromPreset("deepseek", { base:aBase, model:aModel, key:aKey, enabled:true }));
     }
   } catch(_){}
-  // DZMM 槽恒存在,作为可写成人内容的保底。key = 现有全局 token(若有)。
-  slots.push(_slotFromPreset("dzmm", { key: (token || ""), enabled:true }));
-  _persistSlots();
+  arr.push(_slotFromPreset("dzmm", { key: (token || ""), enabled:true }));
+  slotGroups.story = arr;
+  arr.forEach(s => _rememberCred(s));
+  _persistGroup("story");
 }
+// 剧情グループが空にならないよう保証(生成の保底)。他グループは空でも可。
 function _ensureAtLeastOneSlot(){
-  if (!slots.some(s => s.provider === "dzmm")){
-    slots.push(_slotFromPreset("dzmm", { key: (token || ""), enabled:true }));
+  if (!(slotGroups.story || []).length){
+    slotGroups.story = [ _slotFromPreset("dzmm", { key: (token || ""), enabled:true }) ];
   }
-  if (!slots.length) slots.push(_slotFromPreset("dzmm", { key: (token || ""), enabled:true }));
 }
 
-const _enabledSlots = () => slots.filter(s => s && s.enabled);
-const _dzmmSlot     = () => slots.find(s => s && s.kind === "dzmm");
+// ─── 生成に使う「現在グループ」ベースのヘルパ ───
+const _genSlots = () => slotGroups[_activeGenGroup()] || [];
+const _enabledSlots = () => _genSlots().filter(s => s && s.enabled);
+const _dzmmSlot     = () => _genSlots().find(s => s && s.kind === "dzmm");
 const _jsonSlot     = () => _enabledSlots().find(s => s.kind === "openai_compat" || s.kind === "anthropic");
 const _hasSquishySlot = () => _enabledSlots().some(s => !s.nsfw);   // 是否存在「不可写成人内容」的志愿
 function _slotReady(s){
@@ -17098,13 +17813,23 @@ function _slotReady(s){
   if (s.kind === "dzmm") return !!(s.key || token);   // DZMM 的 key 与全局 token 同源
   return !!s.key;
 }
-// 是否存在「至少一个就绪的启用志愿」——生成/摘要的真正前置条件。
-// 取代旧的「必须有 DZMM token/currentModel」硬限制:只要回落链里有任何一个
-// 可用志愿(DZMM 或第三方),就允许生成,全部交给 _generateChain 逐个回落。
+// 是否存在「至少一个就绪的启用志愿」——生成的前置条件(现在按当前模式的组判断)。
 function _anyReadySlot(){
-  try { return _enabledSlots().some(s => _slotReady(s)); }
+  try {
+    if (_enabledSlots().some(s => _slotReady(s))) return true;
+    // 兜底:当前组空 → 只要剧情组有可用志愿也算(生成会回落到剧情组)。
+    return (slotGroups.story || []).filter(s => s && s.enabled).some(s => _slotReady(s));
+  }
   catch(_){ return false; }
 }
+// 补充志愿(摘要/记忆/补完)の就绪一覧。空なら剧情グループへフォールバック。
+function _suppSlots(){
+  const supp = (slotGroups.supp || []).filter(s => s && s.enabled && _slotReady(s));
+  if (supp.length) return supp;
+  return (slotGroups.story || []).filter(s => s && s.enabled && _slotReady(s));
+}
+// 翻訳グループの「就绪」志愿一覧(enabled かつ key あり)。
+const _enabledTranslateSlots = () => (slotGroups.translate || []).filter(s => s && s.enabled);
 
 // ─── Anthropic 消息净化:必须 user 开头、角色交替、无空内容 ───
 function _toAnthropicMessages(msgs){
@@ -17429,8 +18154,17 @@ async function _runSlotOnce(slot, { fullSystem, apiMessages, mode, onText, signa
 // ─── 回落链编排:返回 {slot(成功的,或 null), attempts[], text} ───
 //  getApiMessages():每次(flush 后)重新打包 messages;
 //  喂给「不可写成人内容」的志愿前,先把 pendingRedact 原文压成清水摘要。
+// 生成に使う志愿順序:現在モードのグループ → 空なら剧情グループにフォールバック。
+function _genOrder(){
+  const cur = _enabledSlots();
+  if (cur.length) return cur;
+  if (_activeGenGroup() !== "story"){
+    return (slotGroups.story || []).filter(s => s && s.enabled);
+  }
+  return cur;
+}
 async function _generateChain({ fullSystem, getApiMessages, mode, h, onText, signal }){
-  const order = _enabledSlots();
+  const order = _genOrder();
   const attempts = [];
   if (!order.length) return { slot:null, attempts, text:"" };
   let apiMessages = getApiMessages();
@@ -17497,7 +18231,7 @@ async function _runSlotOnceGeneric(slot, { fullSystem, apiMessages, cardOverride
 // 按启用志愿顺序依次试;报错 / 首字超时 / 自报拒写 → 切下一志愿。返回 {slot, attempts, text}。
 // cardOverride/convId 透传给 DZMM 适配器(各自的卡与会话)。
 async function _generateChainGeneric({ fullSystem, apiMessages, cardOverride, convId, mode, onText, signal }){
-  const order = _enabledSlots();
+  const order = _genOrder();
   const attempts = [];
   if (!order.length) return { slot:null, attempts, text:"" };
   let text = "";
@@ -17567,7 +18301,8 @@ async function _slotChat(slot, { system, user, max_tokens=800, temperature=0.3, 
 // 卡住就切下一个。needJson=true 时只挑能做 JSON 输出的志愿(用于结构化补完)。
 const SUMMARY_SLOT_TIMEOUT_MS = 30000;   // 单个志愿出摘要的整体上限
 async function _summaryChain({ system, user, max_tokens=800, temperature=0.3, response_format=null, needJson=false }){
-  let order = _enabledSlots().filter(s => _slotReady(s));
+  // 摘要 / 记忆 / 补完 は「补充志愿」グループを使う(空なら剧情グループへ回落)。
+  let order = _suppSlots();
   if (needJson) order = order.filter(s => s.kind === "openai_compat" || s.kind === "anthropic");
   for (const slot of order){
     const ctrl = new AbortController();
@@ -17646,10 +18381,10 @@ function renderGenLog(){
     // 标题只显示结果:成功→只显示成功的模型名;全失败→「全部失败」。
     // 哪个志愿失败的细节不在标题列出,展开后才看(失败/切换详情)。
     const head = g.success
-      ? `<b>${escapeHTML(g.success)}</b>`
+      ? `<b class="ui-b">${escapeHTML(g.success)}</b>`
       : `全部失败`;
     const trace = (g.attempts || []).map(a =>
-      `<div class="mem-seg-text raw" style="margin-bottom:6px;"><b>${escapeHTML(a.label)}</b> · ${_statusZh(a.status)}${a.detail ? "<br>" + escapeHTML(a.detail) : ""}</div>`
+      `<div class="mem-seg-text raw" style="margin-bottom:6px;"><b class="ui-b">${escapeHTML(a.label)}</b> · ${_statusZh(a.status)}${a.detail ? "<br>" + escapeHTML(a.detail) : ""}</div>`
     ).join("");
     card_.innerHTML = `
       <div class="mem-card-head">
@@ -17678,49 +18413,74 @@ function renderGenLog(){
 // 志愿卡片 UI(+ 添加、点卡片编辑、长按拖拽排序)
 // ═══════════════════════════════════════════════════════════
 let _editingSlotId = null;   // null = 新增
+let _editingSlotGroup = "story";   // story|chat|fantasy|diary|supp|translate
+
+// グループ → 配列 / 永続化 / DOM リスト / 追加ボタン の対応
+// 旧「gen」は「story(剧情)」に読み替える(後方互換)。
+function _normGroup(group){ return (group === "gen" || !group) ? "story" : group; }
+function _slotsOf(group){ return slotGroups[_normGroup(group)] || (slotGroups[_normGroup(group)] = []); }
+function _setSlotsOf(group, arr){ slotGroups[_normGroup(group)] = Array.isArray(arr) ? arr : []; }
+function _persistOf(group){ _persistGroup(_normGroup(group)); }
+function _listIdOf(group){ return "slotList_" + _normGroup(group); }
+function _addBtnIdOf(group){ return "addSlotBtn_" + _normGroup(group); }
+
 function renderSlots(){
-  const list = $("slotList");
+  SLOT_GROUPS.forEach(g => _renderSlotGroup(g));
+}
+
+function _renderSlotGroup(group){
+  group = _normGroup(group);
+  const list = $(_listIdOf(group));
   if (!list) return;
+  const arr = _slotsOf(group);
+  const isTranslate = group === "translate";
+  const isSupp = group === "supp";
+  const rankPrefix = isTranslate ? "翻译" : (isSupp ? "补充" : "志愿");
   list.innerHTML = "";
-  slots.forEach((s, idx) => {
+  arr.forEach((s, idx) => {
     const card_ = document.createElement("div");
     card_.className = "slot-card";
     card_.dataset.id = s.id;
+    card_.dataset.group = group;
     const ready = _slotReady(s);
     const noteHtml = s.note ? `<div class="slot-note">${escapeHTML(s.note)}</div>` : "";
-    // 个性化参数小标(只在非默认时显示)
     const gp = [];
     if (s.style) gp.push(s.style);
     if (typeof s.temp === "number") gp.push("温" + Number(s.temp).toFixed(2));
     if (typeof s.maxTokens === "number" && s.maxTokens > 0) gp.push(s.maxTokens + "字");
     const gpHtml = gp.length ? ` · <span class="slot-gp">${escapeHTML(gp.join(" "))}</span>` : "";
     const modelShown = (s.kind === "dzmm") ? (s.model || currentModel || "(DZMM 模型)") : (s.model || "(默认模型)");
+    // 翻訳/补充グループでは「可写成人」の表示は不要
+    const rankLabel = `${rankPrefix}${idx + 1}`;
+    const subExtra = (isTranslate || isSupp) ? "" : ` · ${s.nsfw ? "可写成人" : "不可写成人"}`;
     card_.innerHTML = `
       <div class="slot-drag" title="长按拖动排序"><i class="ph ph-dots-six-vertical"></i></div>
-      <div class="slot-rank">志愿${idx + 1}</div>
+      <div class="slot-rank">${rankLabel}</div>
       <div class="slot-main">
         <div class="slot-name">${escapeHTML(s.label)} ${s.enabled ? "" : '<span class="slot-off">已停用</span>'}</div>
-        <div class="slot-sub">${escapeHTML(modelShown)} · ${s.nsfw ? "可写成人" : "不可写成人"}${gpHtml}${ready ? "" : ' · <span class="slot-warn">未填 key</span>'}</div>
+        <div class="slot-sub">${escapeHTML(modelShown)}${subExtra}${gpHtml}${ready ? "" : ' · <span class="slot-warn">未填 key</span>'}</div>
         ${noteHtml}
       </div>
       <i class="ph ph-caret-right slot-go"></i>
     `;
     list.appendChild(card_);
   });
-  const addBtn = $("addSlotBtn");
+  const addBtn = $(_addBtnIdOf(group));
   if (addBtn){
-    const full = slots.length >= MAX_SLOTS;
+    const full = arr.length >= MAX_SLOTS;
     addBtn.style.opacity = full ? "0.4" : "";
     addBtn.style.pointerEvents = full ? "none" : "";
-    addBtn.title = full ? `最多 ${MAX_SLOTS} 个志愿` : "添加志愿";
+    addBtn.title = full ? `最多 ${MAX_SLOTS} 个` : "添加";
   }
-  _wireSlotInteractions();
+  _wireSlotInteractions(group);
 }
 
-function _openSlotEditor(slotOrNull){
+function _openSlotEditor(slotOrNull, group){
+  _editingSlotGroup = _normGroup(group);
   _editingSlotId = slotOrNull ? slotOrNull.id : null;
   const s = slotOrNull || _slotFromPreset("deepseek");
-  $("slotEditorTitle").textContent = slotOrNull ? `编辑：${s.label}` : "添加志愿";
+  const _grpName = SLOT_GROUP_LABEL[_editingSlotGroup] || "志愿";
+  $("slotEditorTitle").textContent = slotOrNull ? `编辑：${s.label}` : `添加${_grpName}`;
   const sel = $("slotEditorProvider");
   sel.value = s.provider;
   $("slotEditorKey").value = s.key || "";
@@ -17774,6 +18534,17 @@ function _applyProviderPresetToEditor(provider, prefill){
     $("slotEditorBase").value = p.base || "";
     $("slotEditorNsfw").classList.toggle("on", !!p.nsfw);
     $("slotEditorNsfw").dataset.on = p.nsfw ? "1" : "0";
+    // ── 共有クレデンシャル:同 provider を既にどこかで設定済みなら key/model を自動補完 ──
+    //  DZMM は全局 token を使う。他家は台帳(_credStore)or 既存グループから拾う。
+    if (provider === "dzmm"){
+      if (token) $("slotEditorKey").value = token;
+    } else {
+      const cred = _recallCred(provider, p.base) || _findKeyAcrossGroups(provider, p.base);
+      if (cred){
+        if (cred.key) $("slotEditorKey").value = cred.key;
+        if (cred.model) $("slotEditorModel").value = cred.model;
+      }
+    }
   }
   const baseWrap = $("slotEditorBaseWrap");
   if (baseWrap) baseWrap.style.display = (provider === "dzmm") ? "none" : "";
@@ -17849,41 +18620,49 @@ function _saveSlotFromEditor(){
     nsfw: $("slotEditorNsfw").dataset.on === "1",
     enabled: $("slotEditorEnabled").dataset.on === "1"
   };
+  const group = _normGroup(_editingSlotGroup);
+  const arr = _slotsOf(group);
+  let savedSlot = null;
   if (_editingSlotId){
-    const s = slots.find(x => x.id === _editingSlotId);
-    if (s) Object.assign(s, data);
+    const s = arr.find(x => x.id === _editingSlotId);
+    if (s){ Object.assign(s, data); savedSlot = s; }
   } else {
-    if (slots.length >= MAX_SLOTS){ showToast(`最多 ${MAX_SLOTS} 个志愿`, true); return; }
-    slots.push(_slotFromPreset(provider, data));
+    if (arr.length >= MAX_SLOTS){ showToast(`最多 ${MAX_SLOTS} 个`, true); return; }
+    savedSlot = _slotFromPreset(provider, data);
+    arr.push(savedSlot);
   }
-  // DZMM 选的模型 → 同步成全局 currentModel(并刷新隐藏下拉)
+  // 共有クレデンシャル台帳へ記録(次に別グループで同 provider を作る時に自動補完)
+  if (savedSlot) _rememberCred(savedSlot);
+  // DZMM 选的模型 → 同步成全局 currentModel(并刷新隐藏下拉),どのグループでも同様。
   if (provider === "dzmm" && modelVal){
     currentModel = modelVal;
     const ms = $("modelSel"); if (ms) ms.value = modelVal;
   }
   _ensureAtLeastOneSlot();
   _syncDzmmTokenFromSlot();   // DZMM 的 key 改了 → 同步全局 token
-  _persistSlots();
+  _persistGroup(group);
   renderSlots();
   _closeSlotEditor();
-  showToast("志愿已保存");
+  showToast((SLOT_GROUP_LABEL[group] || "志愿") + "已保存");
 }
 function _deleteEditingSlot(){
   if (!_editingSlotId) return;
-  slots = slots.filter(s => s.id !== _editingSlotId);
+  const group = _normGroup(_editingSlotGroup);
+  _setSlotsOf(group, _slotsOf(group).filter(s => s.id !== _editingSlotId));
   _ensureAtLeastOneSlot();
   _syncDzmmTokenFromSlot();
-  _persistSlots();
+  _persistGroup(group);
   renderSlots();
   _closeSlotEditor();
-  showToast("已删除该志愿");
+  showToast("已删除");
 }
 
 // 交互:短按=编辑;长按=拖拽排序(pointer events,触摸 + 鼠标通用)
-let _slotInteractWired = false;
-function _wireSlotInteractions(){
-  const list = $("slotList");
+function _wireSlotInteractions(group){
+  group = group || "gen";
+  const list = $(_listIdOf(group));
   if (!list) return;
+  const arr = _slotsOf(group);
   list.querySelectorAll(".slot-card").forEach(card_ => {
     let pressTimer = null, dragging = false, startY = 0, moved = false;
     const id = card_.dataset.id;
@@ -17917,14 +18696,14 @@ function _wireSlotInteractions(){
       if (dragging){
         dragging = false;
         card_.classList.remove("dragging");
-        // 按 DOM 新顺序重排 slots
+        // 按 DOM 新顺序重排该组 slots
         const newOrder = [...list.querySelectorAll(".slot-card")].map(c => c.dataset.id);
-        slots.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
-        _persistSlots();
+        arr.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+        _persistOf(group);
         renderSlots();
       } else if (!moved){
-        const s = slots.find(x => x.id === id);
-        if (s) _openSlotEditor(s);
+        const s = arr.find(x => x.id === id);
+        if (s) _openSlotEditor(s, group);
       }
     };
     const onDown = (e) => {
@@ -17941,7 +18720,9 @@ function _wireSlotInteractions(){
 }
 
 function _wireProvidersUI(){
-  $("addSlotBtn")?.addEventListener("click", () => _openSlotEditor(null));
+  SLOT_GROUPS.forEach(g => {
+    $("addSlotBtn_" + g)?.addEventListener("click", () => _openSlotEditor(null, g));
+  });
   $("slotEditorProvider")?.addEventListener("change", (e) => _applyProviderPresetToEditor(e.target.value, true));
   $("slotEditorSave")?.addEventListener("click", _saveSlotFromEditor);
   $("slotEditorDelete")?.addEventListener("click", _deleteEditingSlot);
@@ -18094,6 +18875,7 @@ function _wireProvidersUI(){
   // 多 AI 志愿系统:迁移老配置 → 志愿,加载生成日志,渲染并接线 UI
   _migrateToSlots();
   _ensureAtLeastOneSlot();
+  _loadTranslateSlots();   // 翻訳志愿(別グループ)をロード
   _syncDzmmTokenFromSlot();   // 用 DZMM 槽位的 key 校准全局 token
   _loadGenLog();
   _wireProvidersUI();
