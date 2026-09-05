@@ -8549,6 +8549,21 @@ const JP_OUTPUT_DIRECTIVE =
 - 数値タグ内のキー(好感/亲密/心理/生理 等)や、\`[CARD_PATCH]目标:…|字段:…|内容:…\` の**キー名・区切り記号はそのまま**(パーサが読むため)。値・内容の自由記述部分だけ日本語で書いてよい。
 - ユーザーが中国語で話しかけてきても、あなたは日本語で返す。`;
 
+// 模型偶尔会把角色卡占位符原样吐到正文或译文里。所有可见输出统一在
+// 保存/渲染前换成玩家填写的名字；只匹配占位符，不误伤普通英文 user。
+function _playerFilledName(){
+  const fromCard = (typeof card !== "undefined" && card && card.user_name) ? String(card.user_name).trim() : "";
+  const fromProfile = (typeof profile !== "undefined" && profile && profile.name) ? String(profile.name).trim() : "";
+  return fromCard || fromProfile || "玩家";
+}
+function _fillUserPlaceholder(text){
+  const name = _playerFilledName();
+  return String(text == null ? "" : text)
+    .replace(/<\s*user\s*>/gi, () => name)
+    .replace(/&lt;\s*user\s*&gt;/gi, () => name)
+    .replace(/＜\s*user\s*＞/gi, () => name);
+}
+
 // 選出一个"就绪"的志愿用于一次性翻译。
 //  ① まず「翻訳志愿」グループから(専用設定)。
 //  ② 空なら生成志愿にフォールバック(第三方 → DZMM の順)。
@@ -8927,7 +8942,7 @@ async function _translateText(text, dir, ctx){
       else if (out2 && out2.trim() && (!out || !out.trim())) out = out2;
     } catch(_){ /* リトライ失敗時は初回結果を使う */ }
   }
-  return out;
+  return _fillUserPlaceholder(out);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -8999,7 +9014,7 @@ async function _translatePassage(text, dir, ctx){
     } catch(_){ /* リトライ失敗 → 初回結果を使う */ }
   }
   if (!out) return "";
-  return out;
+  return _fillUserPlaceholder(out);
 }
 
 // ja2zh の出力から「翻訳されず残った日本語(原文の混入/併記)」を取り除く。
@@ -16823,10 +16838,12 @@ async function _overlayTranslateBubble(idx, bubble, msg){
     const _clearTrBar = () => { if (_trBarShown){ try { _clearTopbarTypingLabel && _clearTopbarTypingLabel(); } catch(_){} _trBarShown = false; } };
     try {
       let ok = false;
+      let wholeZh = "";
       if (_pending.length){
         // 全要素を改行で連結して必ず 1 回だけ訳し、行位置で戻す。
         const passage = _pending.map(p => p.src).join("\n");
         const t = await _translatePassage(passage, "ja2zh", _trCtx);
+        wholeZh = String(t || "").trim();
         if (!bubble.isConnected){ _clearTrBar(); return; }
         const outLines = String(t || "").split(/\r?\n/).filter((_, i, a) => true);
         // 行数が一致すれば位置対応、ズレたら個別翻訳にフォールバック
@@ -16841,14 +16858,27 @@ async function _overlayTranslateBubble(idx, bubble, msg){
         }
       }
       if (!ok){
-        // 行结构不一致时不再逐元素发起多次翻译；保留完整日文原稿，避免
-        // 出现“对白先到、动作后到”的乱序和额外 API 调用。
-        for (const { el } of _pending){
-          const orig = el.getAttribute("data-tr-orig");
-          if (orig != null) el.textContent = orig;
-          el.removeAttribute("data-tr-orig");
+        // 分段数不同也接受：把有效整段译文保存为 zhText，再用统一消息解析器
+        // 按裸对白/括号动作/星号心理重新渲染，不再比较日中 DOM 数量。
+        if (wholeZh && msg.role === "assistant"){
+          msg.zhText = wholeZh;
+          msg._trCache = {};
+          try { persistHistories(); } catch(_){}
+          if (_isZhDisplay()){
+            renderMessages();
+            return;
+          }
         }
-        showToast("整段译文结构与原文不一致，已保留日文原稿", true);
+        // 日语显示模式下的手动翻译：无法逐段对齐时仍展示完整译文，
+        // 而不是弹错或退回原稿。
+        if (wholeZh && _pending.length){
+          const first = _pending[0].el;
+          first.textContent = wholeZh;
+          for (let i = 1; i < _pending.length; i++) _pending[i].el.textContent = "";
+          anyDone = true;
+        } else {
+          throw new Error("翻译结果为空");
+        }
       }
     } catch(err){
       _clearTrBar();
@@ -18803,7 +18833,7 @@ async function _runSlotOnce(slot, { fullSystem, apiMessages, mode, onText, signa
   if (!slot.nsfw) sys += _nsfwSelfEvalRider();
 
   const g = _firstTokenGuard(signal);
-  const wrappedOnText = (full) => { g.mark(full); if (onText) onText(full); };
+  const wrappedOnText = (full) => { g.mark(full); if (onText) onText(_fillUserPlaceholder(full)); };
   try {
     if (slot.kind === "dzmm"){
       return await _streamDZMM(slot, { fullSystem: sys, apiMessages, mode }, wrappedOnText, g.signal);
@@ -18866,7 +18896,7 @@ async function _generateChain({ fullSystem, getApiMessages, mode, h, onText, sig
       _setSwitchThinkingLabel();
       continue;
     }
-    return { slot, attempts, text };
+    return { slot, attempts, text: _fillUserPlaceholder(text) };
   }
   return { slot:null, attempts, text:"" };
 }
@@ -18880,7 +18910,7 @@ async function _runSlotOnceGeneric(slot, { fullSystem, apiMessages, cardOverride
   let sys = fullSystem;
   if (!slot.nsfw) sys += _nsfwSelfEvalRider();   // ❌ 槽仍注入自评估,遇露骨发切换信号
   const g = _firstTokenGuard(signal);
-  const wrappedOnText = (full) => { g.mark(full); if (onText) onText(full); };
+  const wrappedOnText = (full) => { g.mark(full); if (onText) onText(_fillUserPlaceholder(full)); };
   try {
     if (slot.kind === "dzmm"){
       return await _streamDZMM(slot, { fullSystem: sys, apiMessages, mode, cardOverride, convId }, wrappedOnText, g.signal);
@@ -18928,7 +18958,7 @@ async function _generateChainGeneric({ fullSystem, apiMessages, cardOverride, co
       _setSwitchThinkingLabel();
       continue;
     }
-    return { slot, attempts, text };
+    return { slot, attempts, text: _fillUserPlaceholder(text) };
   }
   return { slot:null, attempts, text:"" };
 }
