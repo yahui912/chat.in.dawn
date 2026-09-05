@@ -16895,7 +16895,15 @@ async function _overlayTranslateBubble(idx, bubble, msg){
           for (let i = 1; i < _pending.length; i++) _pending[i].el.textContent = "";
           anyDone = true;
         } else {
-          throw new Error("翻译结果为空");
+          // 空结果不覆盖现有内容，也不弹出误导性错误。
+          for (const { el } of _pending){
+            const orig = el.getAttribute("data-tr-orig");
+            if (orig != null) el.textContent = orig;
+            el.removeAttribute("data-tr-orig");
+          }
+          delete bubble.dataset.trOverlaid;
+          bubble.classList.remove("tr-overlaid");
+          return;
         }
       }
     } catch(err){
@@ -16941,6 +16949,20 @@ async function _applyZhToRenderedMsg(idx){
     // renderAssistantStored 已直接用整条中文重新解析并渲染，无需再做 DOM 覆盖。
     if (row.dataset.renderedZh === "1") return;
     const bubbles = _bubblesInRow(row);
+
+    // 玩家消息不进入翻译请求。中文输入的 zhText 就是原文；玩家输入日文时，
+    // 若已有后台译文，也只在本地用 zhText 覆盖，不再启动气泡翻译流程。
+    if (msg.role === "user"){
+      const zh = String(msg.zhText || msg.zhOriginal || "").trim();
+      if (!zh) return;
+      const els = bubbles.flatMap(b => _translatableEls(b));
+      if (els.length === 1 && String(els[0].textContent || "").trim() !== zh){
+        els[0].setAttribute("data-tr-orig", els[0].textContent || "");
+        els[0].textContent = zh;
+      }
+      for (const b of bubbles){ b.dataset.trOverlaid = "1"; b.classList.add("tr-overlaid"); }
+      return;
+    }
 
     // 角色回复已经按整条生成了 zhText：一次性解析日文原稿和中文译文，
     // 再按原有段落顺序同步覆盖全部可见元素。这里绝不逐气泡重新请求翻译，
@@ -17141,7 +17163,8 @@ async function _toggleTranslatePanel(idx, bubble, segIdx){
       msg._trCache[srcText] = zh.trim();   // この原文の訳をキャッシュ
       try { persistHistories(); } catch(_){}
     } else {
-      setText("（翻译结果为空）", true);
+      // 空结果不覆盖已经可见的内容，也不留下错误面板。
+      panel.remove();
     }
   } catch(err){
     if (!panel.isConnected) return;
@@ -17228,7 +17251,7 @@ async function handleMsgAction(idx, kind){
         speaker: "char",
         history: h
       });
-      if (!msg.zhText || !String(msg.zhText).trim()) throw new Error("翻译结果为空");
+      if (!msg.zhText || !String(msg.zhText).trim()) throw new Error("未获得新的译文");
       persistHistories();
       if (_isZhDisplay()) await _applyZhToRenderedMsg(idx);
       showToast("已重新翻译");
