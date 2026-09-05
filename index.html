@@ -8564,6 +8564,24 @@ function _fillUserPlaceholder(text){
     .replace(/＜\s*user\s*＞/gi, () => name);
 }
 
+// 任何请求离开浏览器前，都把玩家填写的真实名字遮蔽为 <user>。
+// 使用 JSON.stringify 的 replacer 只处理字符串值，不改字段名、数字或结构。
+function _maskPlayerNameForAI(text){
+  let out = String(text == null ? "" : text);
+  const names = [];
+  const cardName = (typeof card !== "undefined" && card && card.user_name) ? String(card.user_name).trim() : "";
+  const profileName = (typeof profile !== "undefined" && profile && profile.name) ? String(profile.name).trim() : "";
+  if (cardName) names.push(cardName);
+  if (profileName && !names.includes(profileName)) names.push(profileName);
+  names.sort((a, b) => b.length - a.length).forEach(name => { out = out.split(name).join("<user>"); });
+  return out;
+}
+function _serializeAIPayload(payload){
+  // 只遮蔽真正发给模型阅读的文本字段，避免玩家名字很短时误改 model 等协议字段。
+  const textKeys = new Set(["content", "text", "system", "system_prompt", "description", "personality", "scenario", "first_message", "user_name"]);
+  return JSON.stringify(payload, (key, value) => (typeof value === "string" && textKeys.has(key)) ? _maskPlayerNameForAI(value) : value);
+}
+
 // 選出一个"就绪"的志愿用于一次性翻译。
 //  ① まず「翻訳志愿」グループから(専用設定)。
 //  ② 空なら生成志愿にフォールバック(第三方 → DZMM の順)。
@@ -8603,7 +8621,7 @@ async function _slotOneShot(slot, { system, user, max_tokens = 1200, temperature
       context: [], messages: [{ role: "user", content: user }],
       max_tokens, temperature, stream: false
     });
-    const r = await fetch(CHAT_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${k}` }, body: JSON.stringify(body) });
+    const r = await fetch(CHAT_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${k}` }, body: _serializeAIPayload(body) });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
     const d = await r.json();
     return String(d?.choices?.[0]?.message?.content ?? d?.choices?.[0]?.text ?? d?.content ?? "").trim();
@@ -8613,7 +8631,7 @@ async function _slotOneShot(slot, { system, user, max_tokens = 1200, temperature
     const r = await fetch(`${base || "https://api.anthropic.com"}/v1/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model, max_tokens, system, messages: [{ role: "user", content: user }], stream: false })
+      body: _serializeAIPayload({ model, max_tokens, system, messages: [{ role: "user", content: user }], stream: false })
     });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
     const d = await r.json();
@@ -8624,7 +8642,7 @@ async function _slotOneShot(slot, { system, user, max_tokens = 1200, temperature
   const r = await fetch(`${base}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }], max_tokens, temperature, stream: false })
+    body: _serializeAIPayload({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }], max_tokens, temperature, stream: false })
   });
   if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
   const d = await r.json();
@@ -9781,7 +9799,7 @@ async function auxChat({ system, user, max_tokens=800, temperature=0.3, response
       "Content-Type": "application/json",
       "Authorization": `Bearer ${auxKey}`
     },
-    body: JSON.stringify(body)
+    body: _serializeAIPayload(body)
   });
   if (!r.ok){
     const txt = await r.text().catch(()=>"");
@@ -9810,7 +9828,7 @@ async function mainChatMini({ system, user, max_tokens=16, temperature=0 }){
   const r = await fetch(CHAT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body)
+    body: _serializeAIPayload(body)
   });
   if (!r.ok){
     const txt = await r.text().catch(()=>"");
@@ -10119,7 +10137,7 @@ async function auxGenerateStream({ system, messages, max_tokens, temperature, si
       "Content-Type": "application/json",
       "Authorization": `Bearer ${auxKey}`
     },
-    body: JSON.stringify(body),
+    body: _serializeAIPayload(body),
     signal
   });
   if (!r.ok || !r.body){
@@ -18571,7 +18589,7 @@ async function _testSlotConnection({ provider, kind, base, key, model }){
       context: [], messages: [{ role:"user", content:"在吗" }],
       max_tokens: 8, temperature: 0, stream: false
     });
-    const r = await fetch(CHAT_URL, { method:"POST", headers:{ "Content-Type":"application/json", Authorization:`Bearer ${k}` }, body: JSON.stringify(body) });
+    const r = await fetch(CHAT_URL, { method:"POST", headers:{ "Content-Type":"application/json", Authorization:`Bearer ${k}` }, body: _serializeAIPayload(body) });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
     const d = await r.json();
     return String(d?.choices?.[0]?.message?.content ?? d?.choices?.[0]?.text ?? d?.content ?? "OK").slice(0,40);
@@ -18581,7 +18599,7 @@ async function _testSlotConnection({ provider, kind, base, key, model }){
     const r = await fetch(`${b || "https://api.anthropic.com"}/v1/messages`, {
       method:"POST",
       headers:{ "Content-Type":"application/json", "x-api-key":key, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-      body: JSON.stringify({ model: model, max_tokens: 8, system:"你是连接测试。只回复两个字:在的", messages:[{ role:"user", content:"在吗" }], stream:false })
+      body: _serializeAIPayload({ model: model, max_tokens: 8, system:"你是连接测试。只回复两个字:在的", messages:[{ role:"user", content:"在吗" }], stream:false })
     });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
     const d = await r.json();
@@ -18592,7 +18610,7 @@ async function _testSlotConnection({ provider, kind, base, key, model }){
   const r = await fetch(`${b}/chat/completions`, {
     method:"POST",
     headers:{ "Content-Type":"application/json", Authorization:`Bearer ${key}` },
-    body: JSON.stringify({ model, messages:[{ role:"system", content:"你是连接测试。只回复两个字:在的" },{ role:"user", content:"在吗" }], max_tokens: 8, temperature: 0, stream:false })
+    body: _serializeAIPayload({ model, messages:[{ role:"system", content:"你是连接测试。只回复两个字:在的" },{ role:"user", content:"在吗" }], max_tokens: 8, temperature: 0, stream:false })
   });
   if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
   const d = await r.json();
@@ -18652,7 +18670,7 @@ async function _streamOpenAICompat(slot, { system, messages }, onText, signal){
   const r = await fetch(url, {
     method:"POST",
     headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${slot.key}` },
-    body: JSON.stringify(body),
+    body: _serializeAIPayload(body),
     signal
   });
   if (!r.ok || !r.body){ const t = await r.text().catch(()=> ""); throw new Error(`${r.status} ${t.slice(0,200)}`); }
@@ -18703,7 +18721,7 @@ async function _streamAnthropic(slot, { system, messages }, onText, signal){
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true"
     },
-    body: JSON.stringify(body),
+    body: _serializeAIPayload(body),
     signal
   });
   if (!r.ok || !r.body){ const t = await r.text().catch(()=> ""); throw new Error(`${r.status} ${t.slice(0,200)}`); }
@@ -18762,7 +18780,7 @@ async function _streamDZMM(slot, { fullSystem, apiMessages, mode, cardOverride, 
   const r = await fetch(CHAT_URL, {
     method:"POST",
     headers:{ "Content-Type":"application/json", Authorization:`Bearer ${slot.key || token}` },
-    body: JSON.stringify(body),
+    body: _serializeAIPayload(body),
     signal
   });
   if (!r.ok || !r.body) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,120)}`);
@@ -18973,7 +18991,7 @@ async function _slotChat(slot, { system, user, max_tokens=800, temperature=0.3, 
     const r = await fetch(`${base}/v1/messages`, {
       method:"POST",
       headers:{ "Content-Type":"application/json", "x-api-key":slot.key, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-      body: JSON.stringify({ model:slot.model, max_tokens, system, messages:[{ role:"user", content:user }], temperature:Math.min(1,temperature), stream:false }),
+      body: _serializeAIPayload({ model:slot.model, max_tokens, system, messages:[{ role:"user", content:user }], temperature:Math.min(1,temperature), stream:false }),
       signal
     });
     if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,200)}`);
@@ -18987,7 +19005,7 @@ async function _slotChat(slot, { system, user, max_tokens=800, temperature=0.3, 
   const r = await fetch(`${base}/chat/completions`, {
     method:"POST",
     headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${slot.key}` },
-    body: JSON.stringify(body),
+    body: _serializeAIPayload(body),
     signal
   });
   if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,200)}`);
