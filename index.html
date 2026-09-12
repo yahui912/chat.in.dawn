@@ -499,51 +499,6 @@
   /* highlight on the bubble whose action menu is currently open */
   .act-menu-target{ outline:2px solid var(--accent-soft); outline-offset:1px; }
 
-  /* ── 翻訳パネル(気泡下の中文対照) ── */
-  .tr-panel{
-    margin-top:6px;
-    padding:7px 10px;
-    border-radius:10px;
-    background:var(--chip-fill-faint);
-    border:1px solid var(--hairline);
-    animation:fadeUp 0.2s ease;
-    cursor:default;
-  }
-  .tr-panel .tr-label{
-    font-size:10.5px;
-    font-weight:600;
-    letter-spacing:0.04em;
-    color:var(--chip-ink-soft);
-    display:flex; align-items:center; gap:4px;
-    margin-bottom:3px;
-    opacity:0.85;
-  }
-  .tr-panel .tr-label i{ font-size:12px; }
-  .tr-panel .tr-body{
-    font-size:13px;
-    line-height:1.5;
-    color:var(--text-body);
-    white-space:pre-wrap;
-    word-break:break-word;
-  }
-  .tr-panel .tr-body.tr-err{ color:var(--err); font-size:12px; }
-  /* 翻译中 のドットアニメ(文字の … は使わずこれで表現) */
-  .tr-panel .tr-body.tr-loading{ color:var(--chip-ink-soft); }
-  .tr-panel .tr-dots{ display:inline-flex; gap:2px; margin-left:3px; vertical-align:baseline; }
-  .tr-panel .tr-dots i{
-    width:3px; height:3px; border-radius:50%;
-    background:currentColor; opacity:0.35;
-    animation:trDot 1s infinite ease-in-out;
-  }
-  .tr-panel .tr-dots i:nth-child(2){ animation-delay:0.15s; }
-  .tr-panel .tr-dots i:nth-child(3){ animation-delay:0.3s; }
-  @keyframes trDot{ 0%,60%,100%{ opacity:0.25; } 30%{ opacity:0.9; } }
-
-  /* 覆盖式翻译:被覆盖的气泡不再显示右上角「译」角标(按需求移除)。 */
-  .tr-overlaid{
-    position:relative;
-  }
-
   /* Quote draft chip — sits above the input bar showing what the user
      is replying to before they hit send. */
   .quote-draft{
@@ -3989,15 +3944,6 @@
         </div>
         <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_supp" title="添加补充志愿"><i class="ph ph-plus"></i>添加</button>
         <div id="slotList_supp" class="slot-list"></div>
-      </div>
-
-      <!-- ─── 翻译志愿(翻译专用 API,可单独设定) ───────────── -->
-      <div class="gen-box">
-        <div class="field-head" style="display:block;">
-          <span class="field-label">翻译志愿（翻译专用，可留空）</span>
-        </div>
-        <button type="button" class="btn ghost slot-add-btn slot-add-btn-wide" id="addSlotBtn_translate" title="添加翻译志愿"><i class="ph ph-plus"></i>添加</button>
-        <div id="slotList_translate" class="slot-list"></div>
       </div>
 
       <!-- ─── 生成日志(仅记失败/切换) ─────────────────────── -->
@@ -8423,247 +8369,19 @@ function _buildCrossModeSummaryLines(mode){
 
 
 // ═══════════════════════════════════════════════════════════
-// 日语输出 + 中↔日 翻译支持
-// ───────────────────────────────────────────────────────────
-//  1) JP_OUTPUT_DIRECTIVE:拼到每个 buildSystemPrompt* 末尾,让 AI 用自然日语
-//     输出所有"会显示的文字",但保留所有格式标签([STATS]/[AROUSAL]/[SCENE]/
-//     ( )/*...* 等)的结构不变——只把标签里/气泡里的语言换成日语。
-//  2) _translateText():用当前可用志愿做一次性(非流式)翻译,跨 dzmm /
-//     anthropic / openai_compat 三类后端。给"翻訳"按钮和"发送前把中文转日语"用。
 // ═══════════════════════════════════════════════════════════
-const JP_OUTPUT_DIRECTIVE =
+// 简体中文输出规则
+// 此规则追加在各模式提示词末尾，作为最终最高优先级语言约束。
+// ═══════════════════════════════════════════════════════════
+const ZH_OUTPUT_DIRECTIVE =
 `\n═══════════════════════════════════════════════════════════
-【★★★ 出力言語 · 最終最高優先度 ★★★】
+【★★★ 输出语言 · 最终最高优先级 ★★★】
 ═══════════════════════════════════════════════════════════
-- あなたの返信のうち「画面に表示される文章」(セリフ・地の文・動作・心情・ナレーション等)は、**すべて自然で流暢な日本語**で書くこと。中国語や英語を混ぜない。
-- キャラクターの口調・人格・語尾のクセ・世界観はそのまま保ちつつ、それを日本語として自然に表現する。
-- ただし **構造タグは一切変えない**:\`[STATS]\`\`[AROUSAL]\`\`[SCENE]…[/SCENE]\`\`[CARD_PATCH]…[/CARD_PATCH]\`、\`( )\`\`（ ）\` の動作、\`*…*\` の心情など、フォーマット規則(位置・閉じ・記号)は上の指示どおり厳守。タグの「中身の文章」だけを日本語にする。
-- 数値タグ内のキー(好感/亲密/心理/生理 等)や、\`[CARD_PATCH]目标:…|字段:…|内容:…\` の**キー名・区切り記号はそのまま**(パーサが読むため)。値・内容の自由記述部分だけ日本語で書いてよい。
-- ユーザーが中国語で話しかけてきても、あなたは日本語で返す。`;
-
-// 選出一个"就绪"的志愿用于一次性翻译。
-//  ① まず「翻訳志愿」グループから(専用設定)。
-//  ② 空なら生成志愿にフォールバック(第三方 → DZMM の順)。
-function _pickTranslateSlot(){
-  try {
-    // ① 翻訳専用グループ
-    const tr = (slotGroups.translate || [])
-      .filter(s => s && s.enabled && _slotReady(s));
-    if (tr.length){
-      return tr.find(s => s.kind === "openai_compat" || s.kind === "anthropic") || tr[0];
-    }
-    // ② 剧情志愿(story グループ)にフォールバック
-    const ready = (slotGroups.story || []).filter(s => s && s.enabled && _slotReady(s));
-    if (!ready.length) return null;
-    const third = ready.find(s => s.kind === "openai_compat" || s.kind === "anthropic");
-    return third || ready[0];
-  } catch(_){ return null; }
-}
-
-// 一次性(非流式)调用某志愿,返回纯文本。翻译/工具类轻量调用共用。
-async function _slotOneShot(slot, { system, user, max_tokens = 1200, temperature = 0.2 }){
-  const p = (typeof PROVIDER_PRESETS !== "undefined" && PROVIDER_PRESETS[slot.provider]) || {};
-  const kind = slot.kind || p.kind || "openai_compat";
-  const base = String(slot.base || p.base || "").replace(/\/+$/, "");
-  const key  = slot.key || (kind === "dzmm" ? token : "");
-  const model = slot.model || p.model || "";
-
-  if (kind === "dzmm"){
-    const k = key || token;
-    if (!k) throw new Error("DZMM Token 缺失");
-    const body = ensureOpening({
-      model: model || currentModel,
-      user_name: "玩家", user_id: USER_ID,
-      conversation_id: "conv_translate_" + USER_ID,   // 翻訳専用の会話(本編と混ざらない)
-      request_id: `tr_${Date.now()}`,
-      card: { name: "翻訳", description: "翻訳アシスタント。指示どおり訳文だけを返す。", personality: "", scenario: "", first_message: "(开始)", system_prompt: system },
-      context: [], messages: [{ role: "user", content: user }],
-      max_tokens, temperature, stream: false
-    });
-    const r = await fetch(CHAT_URL, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${k}` }, body: JSON.stringify(body) });
-    if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
-    const d = await r.json();
-    return String(d?.choices?.[0]?.message?.content ?? d?.choices?.[0]?.text ?? d?.content ?? "").trim();
-  }
-  if (kind === "anthropic"){
-    if (!key) throw new Error("API Key 缺失");
-    const r = await fetch(`${base || "https://api.anthropic.com"}/v1/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-      body: JSON.stringify({ model, max_tokens, system, messages: [{ role: "user", content: user }], stream: false })
-    });
-    if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
-    const d = await r.json();
-    return String((Array.isArray(d.content) ? d.content : []).filter(x => x.type === "text").map(x => x.text).join("")).trim();
-  }
-  // openai_compat
-  if (!key) throw new Error("API Key 缺失");
-  const r = await fetch(`${base}/chat/completions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }], max_tokens, temperature, stream: false })
-  });
-  if (!r.ok) throw new Error(`${r.status} ${(await r.text().catch(()=> "")).slice(0,140)}`);
-  const d = await r.json();
-  return String(d?.choices?.[0]?.message?.content ?? "").trim();
-}
-
-// 入力がすでに日本語かどうかの簡易判定。
-//  かな(ひらがな/カタカナ)を含めば日本語確定 → 翻訳をスキップ。
-//  漢字のみだと中日どちらか判別不能なので、既定(中国語入力)として翻訳に回す。
-function _looksJapanese(s){
-  return /[\u3040-\u309F\u30A0-\u30FF\uFF66-\uFF9F]/.test(String(s || ""));
-}
-
-// ─── 翻訳の文脈(ニュアンス)ブロックを組み立てる ───
-//  ctx = { mode, kind, speaker }
-//    mode    : "story"|"intimate"|"chat"|"diary"|"fantasy"(既定は現在の mode)
-//    kind    : "dialogue"|"action"|"inner"|"auto"(auto=記号から自動判定)
-//    speaker : "user"(プレイヤー) | "char"(AIキャラ)
-//  返り値:目標言語に応じた「語境+話者」指示文(system に足す)。
-function _buildTranslateContext(src, dir, ctx){
-  ctx = ctx || {};
-  const toJa = (dir === "zh2ja");
-  const m = ctx.mode || (typeof mode !== "undefined" ? mode : "story");
-  const speaker = ctx.speaker || (toJa ? "user" : "char");
-
-  // テキスト種別の自動判定(記号ベース)
-  let kind = ctx.kind || "auto";
-  if (kind === "auto"){
-    const t = String(src || "").trim();
-    if (/^\*[\s\S]+\*$/.test(t)) kind = "inner";
-    else if (/^（[\s\S]+）$/.test(t) || /^\([\s\S]+\)$/.test(t)) kind = "action";
-    else kind = "dialogue";
-  }
-
-  const L = []; // 指示行(目標言語で書く)
-
-  if (toJa){
-    // ── 中→日(目標=日本語)──
-    // モード語境
-    const modeMap = {
-      story:    "これは対面で進む物語シーン。地の文(ナレーション)は三人称・情景描写の文体で、台詞は登場人物が実際に口に出す生きた言葉として訳す。",
-      intimate: "これは恋人同士の親密なシーン。感覚・感情・距離感のニュアンスを、生々しくも下品になりすぎない自然な文体で訳す。",
-      chat:     "これはスマホで打つオンラインの口語チャット(LINE/メッセージのような)。書き言葉の翻訳調にせず、実際に打つような砕けた口語・短文・語尾のクセで訳す。",
-      diary:    "これは交換日記に綴る文章。独白的で内省的、落ち着いた書き言葉の文体で訳す。",
-      fantasy:  "これは願望を叶える空想シーン。親密シーンに準じ、場面の熱量に合わせて自然に訳す。"
-    };
-    L.push("直訳ではなく、次の文脈に合った自然な日本語にすること:");
-    L.push("・場面: " + (modeMap[m] || modeMap.story));
-    // テキスト種別
-    if (kind === "inner") L.push("・種別: 心の中の独白(声に出さない内心の思考)として訳す。");
-    else if (kind === "action") L.push("・種別: 動作・表情の描写(ト書き)。三人称の描写文として訳す。");
-    else L.push("・種別: 話者が口に出す台詞。生きた会話として訳す。");
-    // 話者(中→日は基本プレイヤー本人)
-    if (speaker === "char" && typeof card !== "undefined" && card && card.name){
-      const persona = String(card.personality || "").replace(/\s+/g, " ").slice(0, 150);
-      L.push(`・話者: 「${card.name}」${card.tagline ? ` — ${card.tagline}` : ""}。` + (persona ? `人物像/話し方: ${persona}。` : "") + "この人物の口調・一人称・語尾・温度感を保つ。");
-    } else {
-      const uname = (typeof profile !== "undefined" && profile && profile.name) ? profile.name : "";
-      L.push(`・話者: プレイヤー本人${uname ? `(作中で「${uname}」を演じる)` : ""}。自然な日常の口語で訳す。`);
-    }
-  } else {
-    // ── 日→中(目標=简体中文)──
-    const modeMap = {
-      story:    "这是面对面推进的剧情场景。旁白(叙述)用第三人称、情景描写的文体;对白是人物真正说出口的、有生命力的台词。",
-      intimate: "这是恋人之间的亲密场景。把感官、情绪、距离感的细腻处译出来,自然但不流于低俗。",
-      chat:     "这是手机上打字的线上口语聊天(类似微信/LINE)。不要翻译腔的书面语,用真人会打出来的口语、短句、语气随意的方式。",
-      diary:    "这是写在交换日记里的文字。独白式、内省、沉静的书面语文体。",
-      fantasy:  "这是实现愿望的幻想场景。比照亲密场景,按当下场面的热度自然地译。"
-    };
-    L.push("不要直译,要符合下面的语境,译成自然的简体中文:");
-    L.push("· 场景: " + (modeMap[m] || modeMap.story));
-    // 语感:译文要保留原日语的那种语气与韵味 —— 语尾的柔软/生硬、停顿、含蓄、
-    // 暧昧、留白、敬语或随意的距离感、拟声拟态词的微妙情绪等,尽量在中文里保留
-    // 那份「日语味」的语感,而不是抹平成普通中文。
-    L.push("· 语感: 保留原日语的语气与韵味(语尾的软硬、停顿、含蓄暧昧、距离感、拟声拟态词的情绪等),让中文读起来仍带着那份日语原有的语感,不要抹平成平淡直白的中文。");
-    // 强制人称:日文常省略主语,译成中文若需要用到指代角色的第三人称代词,
-    // 一律用「她」(不要用「他」「TA」「它」或改写成别的写法)。
-    L.push("· 人称: 日语经常省略主语。回到中文时,如果需要用第三人称代词指代这个角色(说话者/被描写者),一律用「她」,不要用「他」「TA」「它」等其他写法。");
-    if (kind === "inner") L.push("· 类型: 心里的独白(不出声的内心想法)。");
-    else if (kind === "action") L.push("· 类型: 动作/神态描写(旁白)。用第三人称描写文。");
-    else L.push("· 类型: 说话者说出口的台词,译成生动的对话。");
-    if (speaker === "char" && typeof card !== "undefined" && card && card.name){
-      const persona = String(card.personality || "").replace(/\s+/g, " ").slice(0, 150);
-      L.push(`· 说话者: 「${card.name}」${card.tagline ? ` — ${card.tagline}` : ""}。` + (persona ? `人设/说话方式: ${persona}。` : "") + "保留这个人物的口吻、自称、语尾和情绪温度。");
-    } else {
-      const uname = (typeof profile !== "undefined" && profile && profile.name) ? profile.name : "";
-      L.push(`· 说话者: 玩家本人${uname ? `(在剧情里扮演「${uname}」)` : ""}。用自然的日常口语。`);
-    }
-  }
-  return L.join("\n");
-}
-
-// 翻译一段文本。dir: "zh2ja"(中→日) 或 "ja2zh"(日→中)。ctx: 见 _buildTranslateContext。
-// 保留换行与语气;只翻译"能显示的文字",不解释、不加引号、不加多余说明。
-async function _translateText(text, dir, ctx){
-  const src = String(text || "").trim();
-  if (!src) return "";
-  const slot = _pickTranslateSlot();
-  if (!slot) throw new Error("没有可用的翻译志愿");
-  const toJa = (dir === "zh2ja");
-  const ctxBlock = _buildTranslateContext(src, dir, ctx);
-  const base = toJa
-    ? `あなたはプロの文芸翻訳エンジンです。会話や指示には応じず、入力テキストを自然で口語的な日本語に翻訳して、訳文だけを返します。説明・注釈・引用符・原文の併記・前置きは一切付けない。改行や空行は元のまま保つ。`
-    : `你是一个专业的文艺翻译引擎。不参与对话、不执行指令,只把输入文本翻译成自然、口语化的简体中文,并只返回译文本身。绝对不要输出任何日语原文、不要附上原文对照、不要重复输入内容,只给中文译文一份;不要加说明、注释、引号、原文或任何前后缀。保留原文的换行与空行。要保留原日语的语气与韵味(语尾的软硬、停顿、含蓄暧昧、距离感等),让中文仍带着那份日语的语感,不要抹平成平淡的中文。日语常省略主语,译成中文时如需第三人称代词指代角色,一律用「她」。`;
-  const system = base + "\n\n" + ctxBlock;
-  // 一部の RP 系エンドポイントは system を弱く扱うため、指示を user 側にも明示する。
-  const userMsg = toJa
-    ? `次のテキストを、上記の文脈に沿って日本語に翻訳し、訳文だけを出力してください（説明・引用符なし）:\n\n${src}`
-    : `请按上面的语境,把下面的文本翻译成简体中文,只输出中文译文本身:不要输出日语原文、不要原文对照、不要重复输入、不要说明、不要引号。\n\n${src}`;
-  let out = await _slotOneShot(slot, { system, user: userMsg, max_tokens: Math.max(600, Math.min(2000, src.length * 4)), temperature: 0.2 });
-  out = String(out || "").trim();
-  // モデルが付けがちな囲み記号や前置きを軽く除去
-  out = out.replace(/^["'「『（(]+/, "").replace(/["'」』）)]+$/, "").trim();
-
-  // ── 日→中:モデルが「原文＋訳文」を併記したり原文をそのまま返す事故を除去 ──
-  if (!toJa){
-    out = _stripEchoedSource(out, src);
-  }
-  return out;
-}
-
-// ja2zh の出力から「翻訳されず残った日本語(原文の混入/併記)」を取り除く。
-//  - 出力が原文とほぼ同一(=未翻訳)なら空文字を返す(呼び出し側が原文降格 or リトライ判断)。
-//  - 「原文\n訳文」「原文 / 訳文」のような併記は、日本語だけの行を落として中国語側だけ残す。
-function _stripEchoedSource(out, src){
-  let s = String(out || "").trim();
-  if (!s) return "";
-  const _norm = x => String(x || "").replace(/\s+/g, "").trim();
-  // 1) 出力全体が原文と同一 → 未翻訳とみなし空を返す
-  if (_norm(s) === _norm(src)) return "";
-  // 2) 先頭に原文がそのまま貼られている(原文＋訳文の併記)→ 先頭の原文塊を削る
-  const nsrc = _norm(src);
-  if (nsrc && _norm(s).startsWith(nsrc) && _norm(s).length > nsrc.length){
-    // 原文の長さぶんだけ、実文字ベースで前方一致を剥がす(空白ゆらぎに強い比較で位置探索)
-    let acc = "";
-    let cut = 0;
-    for (let i = 0; i < s.length; i++){
-      if (_norm(acc).length >= nsrc.length){ cut = i; break; }
-      acc += s[i];
-      cut = i + 1;
-    }
-    s = s.slice(cut).replace(/^[\s:：/、,，。.\-—]+/, "").trim();
-    if (!s) return "";
-  }
-  // 3) 行単位で:日本語しか含まない行(かな/カナが有り漢字以外の中国語判定材料が無い)で、
-  //    かつ全体としては中国語の行も存在する場合、その日本語のみ行を落とす。
-  const lines = s.split(/\r?\n/);
-  const hasKana = ln => /[\u3040-\u309F\u30A0-\u30FF]/.test(ln);      // ひらがな/カタカナ
-  const looksChinese = ln => /[\u4E00-\u9FFF]/.test(ln) && !hasKana(ln); // 漢字あり・かな無し
-  const anyChinese = lines.some(looksChinese);
-  if (anyChinese && lines.length > 1){
-    const kept = lines.filter(ln => {
-      if (!ln.trim()) return true;                 // 空行は保持(段落間隔)
-      // かなを含む=日本語混入行 → 落とす(中国語側の対応行が別にある前提)
-      return !hasKana(ln);
-    });
-    const j = kept.join("\n").replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "").trim();
-    if (j) s = j;
-  }
-  return s.trim();
-}
-
+- 回复中所有会显示给用户的文字，包括对白、叙述、动作、心理、旁白及聊天内容，都必须使用自然流畅的简体中文。
+- 不得改用日文、英文或其他语言；即使用户输入或角色卡使用其他语言，也必须用简体中文回复。
+- 保持角色的人格、语气、措辞习惯和世界观，并将其自然地用简体中文表达。
+- 结构标签必须保持不变：\`[STATS]\`、\`[AROUSAL]\`、\`[SCENE]…[/SCENE]\`、\`[CARD_PATCH]…[/CARD_PATCH]\`、\`( )\`、\`（ ）\`、\`*…*\` 等格式仍须严格遵守。
+- 数值标签与 \`[CARD_PATCH]目标:…|字段:…|内容:…\` 的键名和分隔符不得改动，自由文本内容必须使用简体中文。`;
 
 function buildSystemPrompt() {
   if (!card) return "";
@@ -9237,7 +8955,7 @@ function buildSystemPrompt() {
     lines.push(`本轮指令:${_debugInjectForThisTurn}`);
   }
 
-  lines.push(JP_OUTPUT_DIRECTIVE);
+  lines.push(ZH_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -10311,70 +10029,14 @@ async function send(forcedText, opts) {
   // Marker packaging — user's input intent is encoded but not shown in input
   // `forcedText` (推进/承接/时跳/initial) bypasses marker wrapping.
   //
-  // ─── 中→日 自動翻訳 ───
-  // 玩家用中文打字,但 UI/AI 都是日语世界:发送前把中文翻成日语,
-  // 界面显示、发给 AI 的都用日语版;原始中文缓存在消息上(zhOriginal),
-  // 供气泡的「翻訳」按钮点开查看。forcedText(系统按钮)不翻译。
-  let jaText = rawText;      // 用于 display/sent 的日语文本
-  let zhOriginal = "";       // 原始中文(用于翻译回看)
-  let _zhBySegMap = null;    // 逐段:日语显示段 → 原始中文(供翻译按钮切回)
-  if (forcedText === undefined && !_looksJapanese(rawText)){
-    try {
-      _setTopbarTypingLabel && _setTopbarTypingLabel(`翻译中`);
-    } catch(_){}
-    try {
-      // 玩家用换行把一条消息拆成多个气泡。翻译引擎经常把多行合并成一行,
-      // 会把这些气泡吞成一个 —— 所以逐行翻译、按原样保留行结构,
-      // 保证 N 行输入 → N 行输出 → N 个气泡。
-      // 每行按自己的行内标记(（）动作 / *…* 心绪 / 裸文本对白)判定 kind,
-      // 只翻译符号内部的正文,再把符号原样套回,保证渲染时能分段。
-      const _srcLines = rawText.split(/\r?\n/);
-      // 逐段原文映射:显示用日语段文本 → 对应的原始中文(去符号后的正文)。
-      // 供「翻译」按钮把已译消息切回中文时,直接用玩家原话,而不再回丢给 AI。
-      const _zhBySeg = {};
-      const _translated = await Promise.all(
-        _srcLines.map(async (ln) => {
-          if (!ln.trim()) return ln;                    // 空行原样保留(气泡间距)
-          const mk = _detectLineMarker(ln);
-          const body = mk.inner;
-          if (!body) return ln;
-          if (_looksJapanese(body)){                    // 本就是日语的内容不重复翻译
-            const seg = mk.open + body + mk.close;
-            return seg;
-          }
-          const r = await _translateText(body, "zh2ja", { mode, kind: mk.kind, speaker: "user" });
-          const tr = (r && r.trim()) ? r.trim() : body;  // 单行失败降级为原文,不破坏行数
-          const seg = mk.open + tr + mk.close;
-          // 记录:这一段日语显示文本 ↔ 原始中文正文(带回符号,和显示段一致)
-          _zhBySeg[seg.trim()] = mk.open + body + mk.close;
-          return seg;
-        })
-      );
-      let t = _translated.join("\n");
-      if (t && t.trim()){
-        jaText = t.replace(/\n{3,}/g, "\n\n").replace(/^\n+|\n+$/g, "");
-        zhOriginal = rawText;   // 只有确实翻译成功才记原文
-        _zhBySegMap = _zhBySeg;  // 交给下面写入 newMsg
-      } else {
-        try { showToast && showToast("翻译返回为空,已发送原文", true); } catch(_){}
-      }
-    } catch(err){
-      // 翻译失败:降级为直接发原文(不阻断对话),把原因暴露出来便于排查
-      console.error("[translate zh2ja] failed:", err);
-      try { showToast && showToast("翻译失败:" + String(err.message||err).slice(0,60), true); } catch(_){}
-    }
-  }
-
+  // 用户输入直接以中文原文显示并发送，不再进行任何语言转换。
   let displayText, sentText;
   if (forcedText !== undefined){
     displayText = rawText;
     sentText = rawText;
   } else {
-    // 行内标记模式:jaText 里已经带有 （…）/ *…* / 裸文本 的混合分段。
-    // 显示用 jaText 原样(渲染时会逐段解析成不同气泡样式);
-    // 发给 AI 的文本把每段转成 [USER_ACTION] / [USER_INNER] / 裸文本。
-    displayText = jaText;
-    sentText = _buildSentFromMarked(jaText);
+    displayText = rawText;
+    sentText = _buildSentFromMarked(rawText);
   }
 
   // 引用功能已下线 — 不再生成 [QUOTE]…[/QUOTE] header,不再附加 m.quote。
@@ -10421,8 +10083,6 @@ async function send(forcedText, opts) {
     }
 
     const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), genMode: mode, forceAvatar: _prevWasUnanswered || undefined };
-    if (zhOriginal) newMsg.zhOriginal = zhOriginal;   // 原始中文,供「翻訳」按钮回看
-    if (_zhBySegMap && Object.keys(_zhBySegMap).length) newMsg.zhBySeg = _zhBySegMap;  // 逐段原文,翻译切回时优先用
     h.push(newMsg);
     renderUserMessage(displayText, h.length - 1, newMsg.at, null, newMsg.forceAvatar);
   }
@@ -10824,7 +10484,7 @@ function buildSystemPromptSec(sec){
     lines.push(`\n## 角色专属指令 (最高优先级)`);
     lines.push(sec.system_prompt);
   }
-  lines.push(JP_OUTPUT_DIRECTIVE);
+  lines.push(ZH_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -10833,20 +10493,12 @@ async function sendToSecChat(rawText, isForced){
   const sec = getSecById(c.id.replace(/^sec_/, ""));
   if (!sec){ addSystemMessage("角色不存在", true); return; }
 
-  // 中→日 自動翻訳(forced=システム発話は翻訳しない / 既に日本語ならスキップ)
-  let jaText = rawText, zhOriginal = "";
-  if (!isForced && !_looksJapanese(rawText)){
-    try {
-      const t = await _translateText(rawText, "zh2ja", { mode: "chat", kind: "dialogue", speaker: "user" });
-      if (t && t.trim()){ jaText = t.trim(); zhOriginal = rawText; }
-    } catch(_){ try { showToast && showToast("翻訳に失敗しました。原文を送信します", true); } catch(__){} }
-  }
-  const displayText = jaText;
-  const sentText = jaText;
+  // 用户输入直接以中文原文显示并发送。
+  const displayText = rawText;
+  const sentText = rawText;
   const h = currentHistory();
   const _prevWasUnanswered = h.length > 0 && h[h.length - 1] && h[h.length - 1].role === "user";
   const newMsg = { role: "user", content: sentText, display: displayText, at: Date.now(), forceAvatar: _prevWasUnanswered || undefined };
-  if (zhOriginal) newMsg.zhOriginal = zhOriginal;
   h.push(newMsg);
   renderUserMessage(displayText, h.length - 1, newMsg.at, undefined, newMsg.forceAvatar);
   if (!isForced){ input.value = ""; input.style.height = "auto"; }
@@ -11172,8 +10824,8 @@ function buildSystemPromptGroup(chat, forcedSpeakers){
     lines.push(`\n## 本轮发言选择`);
     lines.push(`根据上下文和角色性格,自然决定本轮谁开口、谁沉默。不要为了平均而轮流——让最该回应的人回应。`);
   }
-  lines.push(JP_OUTPUT_DIRECTIVE);
-  lines.push(`\n※ グループチャットでは各発言の \`[名前] …\` という話者プレフィックスの**記号と名前はそのまま**にし、その後ろのセリフ本文だけを日本語にすること。`);
+  lines.push(ZH_OUTPUT_DIRECTIVE);
+  lines.push(`\n群聊中每条发言的 \`[名字] …\` 说话者前缀必须保持其符号和角色名字不变，前缀后的正文必须使用简体中文。`);
   return lines.join("\n");
 }
 
@@ -11313,22 +10965,14 @@ async function sendToGroupChat(rawText, isForced){
     addSystemMessage("群里还没有角色成员", true); return;
   }
 
-  // Extract @mentions (先在原文中文里抽取,再翻译正文)
+  // 从中文原文中提取 @ 提及。
   const { forcedSpeakers } = _extractForcedSpeakersFromText(rawText, members);
 
-  // 中→日 自動翻訳(既に日本語ならスキップ)
-  let jaText = rawText, zhOriginal = "";
-  if (!isForced && !_looksJapanese(rawText)){
-    try {
-      const t = await _translateText(rawText, "zh2ja", { mode: "chat", kind: "dialogue", speaker: "user" });
-      if (t && t.trim()){ jaText = t.trim(); zhOriginal = rawText; }
-    } catch(_){ try { showToast && showToast("翻訳に失敗しました。原文を送信します", true); } catch(__){} }
-  }
-  const displayText = jaText;
-  const sentText = jaText;
+  // 用户输入直接以中文原文显示并发送。
+  const displayText = rawText;
+  const sentText = rawText;
   const h = currentHistory();
   const newMsg = { role:"user", content: sentText, display: displayText, at: Date.now() };
-  if (zhOriginal) newMsg.zhOriginal = zhOriginal;
   h.push(newMsg);
   renderGroupUserMessage(displayText, h.length - 1, newMsg.at);
   if (!isForced){ input.value = ""; input.style.height = "auto"; }
@@ -12184,7 +11828,7 @@ function buildSystemPromptDiary(){
 
   // (风格衔接 + 连续性契约现在统一在 _runSlotOnce 注入。)
 
-  lines.push(JP_OUTPUT_DIRECTIVE);
+  lines.push(ZH_OUTPUT_DIRECTIVE);
   return lines.join("\n");
 }
 
@@ -16207,8 +15851,6 @@ function _showBubbleActMenu(bubble){
   if (!isUser){
     buttons.push({ act: "regen", label: "重生成", glyph: `<i class="ph ph-arrow-clockwise"></i>` });
   }
-  // 翻译:日语气泡 → 中文对照(AI 回复日→中实时翻译;自己发的显示原始中文)
-  buttons.push({ act: "translate", label: "翻译", glyph: `<i class="ph ph-translate"></i>` });
   buttons.push({ act: "edit",   label: "编辑", glyph: `<i class="ph ph-pencil-simple"></i>` });
   buttons.push({ act: "delete", label: "删除", glyph: `<i class="ph ph-trash"></i>`, danger: true });
 
@@ -16236,248 +15878,11 @@ function _showBubbleActMenu(bubble){
     const btn = e.target.closest("button[data-act]");
     if (!btn) return;
     const act = btn.dataset.act;
-    // 翻訳は対象の気泡DOM(サブ気泡)にパネルを付けるため、閉じる前に参照を控える
-    const _bubbleForTr = bubble;
     _closeBubbleActMenu();
-    if (act === "translate"){ _toggleTranslatePanel(idx, _bubbleForTr, segIdx); return; }
     handleMsgAction(idx, act);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-// 翻訳パネル(気泡の下に中文対照を差し込む)
-// ───────────────────────────────────────────────────────────
-//  - AI の日本語返信 → 日→中を実時翻訳(結果は msg.zhTranslation にキャッシュ)
-//  - 自分が送った日本語 → 送信時に控えた原文 msg.zhOriginal を表示
-//  同じ気泡で再タップ → パネルを閉じる(トグル)。
-// ═══════════════════════════════════════════════════════════
-function _closeTranslatePanelFor(bubble){
-  try {
-    const host = bubble && bubble.querySelector(":scope > .tr-panel");
-    if (host){ host.remove(); return true; }
-  } catch(_){}
-  return false;
-}
-
-// ─── 覆盖式翻译(非聊天模式)───────────────────────────────
-//  聊天模式以外(剧情/亲密/幻想/日记)は、气泡下にパネルを出すのではなく、
-//  气泡そのものの各テキスト要素(.dlg / .narrative / .diary-txt / .user-text)を
-//  その場で訳文に差し替える(格式=DOM 構造はそのまま維持)。もう一度押すと原文に戻す。
-//  各要素ごとに翻訳するので、剧情の旁白/心声/対白も"全部"訳される。
-function _translatableEls(bubble){
-  // この気泡内で可視テキストを持つ要素を全部拾う(構造は保ったまま各々置換する)。
-  const sel = ".dlg, .narrative, .diary-txt, .user-text, .chat-line-bubble .dlg";
-  let els = [...bubble.querySelectorAll(sel)];
-  // bubble 自身がテキスト要素(diary-txt 等)の場合も対象に含める
-  if (!els.length && bubble.matches && bubble.matches(sel)) els = [bubble];
-  // user-line-bubble のように直接テキストを持つ気泡
-  if (!els.length){
-    const t = (bubble.textContent || "").trim();
-    if (t) els = [bubble];
-  }
-  return els;
-}
-async function _overlayTranslateBubble(idx, bubble, msg){
-  // 既に覆盖済み → 原文に戻す(トグル)
-  if (bubble.dataset.trOverlaid === "1"){
-    bubble.querySelectorAll("[data-tr-orig]").forEach(el => {
-      el.textContent = el.getAttribute("data-tr-orig");
-      el.removeAttribute("data-tr-orig");
-    });
-    if (bubble.getAttribute("data-tr-orig") != null){
-      bubble.textContent = bubble.getAttribute("data-tr-orig");
-      bubble.removeAttribute("data-tr-orig");
-    }
-    delete bubble.dataset.trOverlaid;
-    bubble.classList.remove("tr-overlaid");
-    return;
-  }
-
-  const els = _translatableEls(bubble);
-  if (!els.length){ showToast("没有可翻译的文字", true); return; }
-
-  const _trCtx = {
-    mode: (msg.genMode || (typeof mode !== "undefined" ? mode : "story")),
-    kind: "auto",
-    speaker: (msg.role === "user") ? "user" : "char"
-  };
-  if (!msg._trCache || typeof msg._trCache !== "object") msg._trCache = {};
-
-  // 视觉反馈:覆盖中
-  bubble.classList.add("tr-overlaid");
-  bubble.dataset.trOverlaid = "1";
-
-  // 各要素を順に翻訳して差し替え(格式維持)。空要素はスキップ。
-  //  ユーザー气泡で、この消息が中文原文(zhBySeg / zhOriginal)を持つ場合は、
-  //  AI に投げ直さず、控えておいた「玩家が打った原文」をそのまま表示する
-  //  (= 純トグル)。同じ原文を毎回 AI に翻訳させて別の中文が返る問題を回避。
-  const _segMap = (msg.role === "user" && msg.zhBySeg && typeof msg.zhBySeg === "object") ? msg.zhBySeg : null;
-  const _wholeZh = (msg.role === "user" && msg.zhOriginal && String(msg.zhOriginal).trim()) ? String(msg.zhOriginal).trim() : "";
-  const _stripSym = s => String(s||"").replace(/^（|）$/g,"").replace(/^\*|\*$/g,"").trim();
-  let anyDone = false;
-  for (const el of els){
-    const orig = (el.textContent || "");
-    const src = orig.trim();
-    if (!src) continue;
-    el.setAttribute("data-tr-orig", orig);
-    // 心声/動作の記号は要素の見た目に含まれるので、記号を保ったまま中身だけ訳す
-    try {
-      // ① 逐段原文命中:直接用玩家原话(不调用 AI)
-      let cachedZh = "";
-      if (_segMap){
-        cachedZh = _segMap[src] || "";
-        // 记号有无の差異を吸収:去符号后再匹配一次
-        if (!cachedZh){
-          const bare = _stripSym(src);
-          for (const k in _segMap){ if (_stripSym(k) === bare){ cachedZh = _segMap[k]; break; } }
-        }
-      }
-      // ② 单段消息且有整条原文:整条切回
-      if (!cachedZh && _wholeZh && els.length === 1){
-        cachedZh = _wholeZh;
-      }
-      if (cachedZh && cachedZh.trim()){
-        el.textContent = cachedZh.trim(); anyDone = true;
-        continue;
-      }
-      // ③ 兜底:确无原文缓存(如本就是日语的段/AI 气泡)→ 才实时 ja→zh
-      let zh = msg._trCache[src];
-      if (!zh || !String(zh).trim()){
-        el.textContent = "翻译中…";
-        zh = await _translateText(src, "ja2zh", _trCtx);
-        if (zh && zh.trim()) msg._trCache[src] = zh.trim();
-      }
-      if (!bubble.isConnected) return;
-      if (zh && zh.trim()){ el.textContent = zh.trim(); anyDone = true; }
-      else { el.textContent = orig; el.removeAttribute("data-tr-orig"); }
-    } catch(err){
-      if (!bubble.isConnected) return;
-      el.textContent = orig; el.removeAttribute("data-tr-orig");
-      showToast("翻译失败：" + String(err.message || err).slice(0, 60), true);
-    }
-  }
-  if (anyDone){ try { persistHistories(); } catch(_){} }
-  else { delete bubble.dataset.trOverlaid; bubble.classList.remove("tr-overlaid"); }
-}
-
-async function _toggleTranslatePanel(idx, bubble, segIdx){
-  if (!bubble) return;
-
-  const h = currentHistory();
-  const msg = h[idx];
-  if (!msg){ return; }
-
-  // 聊天模式(またはサブ会話のチャット)以外は「覆盖式」翻訳を使う。
-  const _isChatSurface = (mode === "chat") || (typeof currentChatId !== "undefined" && currentChatId !== "main");
-  if (!_isChatSurface){
-    // 既存の下付きパネルが残っていれば消してから覆盖へ
-    _closeTranslatePanelFor(bubble);
-    await _overlayTranslateBubble(idx, bubble, msg);
-    return;
-  }
-
-  // ── 以下:聊天模式 = 従来どおり气泡下にパネル表示 ──
-  // トグル:既に開いていれば閉じる
-  if (_closeTranslatePanelFor(bubble)) return;
-
-  // パネルの器を作る(気泡の子として差し込む → CSSでカード下に自然に付く)
-  const panel = document.createElement("div");
-  panel.className = "tr-panel";
-  panel.innerHTML = `<div class="tr-label"><i class="ph ph-translate"></i> 中文</div><div class="tr-body"></div>`;
-  const body = panel.querySelector(".tr-body");
-  bubble.appendChild(panel);
-
-  const setText = (t, isErr) => {
-    body.textContent = t;
-    body.classList.remove("tr-loading");
-    body.classList.toggle("tr-err", !!isErr);
-  };
-  // ローディング:テキスト「翻译中」+ CSS のドットアニメ(文字の…は付けない)
-  const setLoading = () => {
-    body.classList.remove("tr-err");
-    body.classList.add("tr-loading");
-    body.innerHTML = `翻译中<span class="tr-dots"><i></i><i></i><i></i></span>`;
-  };
-
-  // ── この気泡(サブ気泡)の可視テキストを取り出す ──
-  //  連投で気泡が分かれている場合、タップした気泡のテキストだけを訳す。
-  //  _extractBubbleText は bubble 内の .dlg / .user-text を拾うのでサブ気泡単位になる。
-  let srcText = "";
-  try {
-    if (msg.role === "user"){
-      // ユーザー気泡:このサブ気泡の可視テキスト(日本語)。無ければ display 全体。
-      const ut = bubble.querySelector(".user-text");
-      srcText = ut ? ut.textContent : String(msg.display || msg.content || "");
-    } else {
-      srcText = _extractBubbleText(bubble, false, idx, segIdx) || "";
-      if (!srcText){
-        const shown = (msg.displayContent && String(msg.displayContent).trim()) ? msg.displayContent : msg.content;
-        srcText = String(shown || "");
-      }
-    }
-  } catch(_){
-    srcText = String(msg.display || msg.displayContent || msg.content || "");
-  }
-  srcText = String(srcText || "").trim();
-  if (!srcText){ setText("（没有可翻译的文字）", true); return; }
-
-  // ── キャッシュはサブ気泡ごと(= 原文テキストをキーにした Map)──
-  //  以前は msg 全体で 1 つの訳をキャッシュしていたため、連投の全気泡に
-  //  最初の 1 句の訳が使い回されていた。原文テキストをキーにすることで
-  //  気泡ごとに正しい訳を保持する。
-  if (!msg._trCache || typeof msg._trCache !== "object") msg._trCache = {};
-
-  // 1) ユーザー気泡:控えておいた原文中文があればそのまま表示(AI に投げ直さない)。
-  if (msg.role === "user"){
-    const strip = s => String(s||"").replace(/^（|）$/g,"").replace(/^\*|\*$/g,"").trim();
-    // 1a) 逐段原文マップ命中(連投/混合でもサブ気泡ごとに正しい原文)
-    if (msg.zhBySeg && typeof msg.zhBySeg === "object"){
-      let hit = msg.zhBySeg[srcText];
-      if (!hit){
-        const bare = strip(srcText);
-        for (const k in msg.zhBySeg){ if (strip(k) === bare){ hit = msg.zhBySeg[k]; break; } }
-      }
-      if (hit && String(hit).trim()){ setText(String(hit).trim()); return; }
-    }
-    // 1b) 単一気泡:メッセージ全体 == サブ気泡 → zhOriginal 全文
-    if (msg.zhOriginal && String(msg.zhOriginal).trim()){
-      const full = String(msg.display || msg.content || "").trim();
-      if (strip(full) === strip(srcText)){ setText(msg.zhOriginal.trim()); return; }
-    }
-    // それ以外(原文キャッシュなし)は下の実時翻訳へ
-  }
-
-  // 2) キャッシュヒット(この原文の訳が既にある)
-  if (msg._trCache[srcText] && String(msg._trCache[srcText]).trim()){
-    setText(msg._trCache[srcText]);
-    return;
-  }
-
-  // 3) 実時翻訳(日→中)
-  setLoading();
-  try {
-    // 文脈:AI 気泡なら話者=キャラ、ユーザー気泡なら話者=プレイヤー。
-    //  モードはメッセージ生成時の genMode を優先(無ければ現在の mode)。
-    //  種別は srcText の記号から自動判定。
-    const _trCtx = {
-      mode: (msg.genMode || (typeof mode !== "undefined" ? mode : "story")),
-      kind: "auto",
-      speaker: (msg.role === "user") ? "user" : "char"
-    };
-    const zh = await _translateText(srcText, "ja2zh", _trCtx);
-    if (!panel.isConnected) return;
-    if (zh && zh.trim()){
-      setText(zh.trim());
-      msg._trCache[srcText] = zh.trim();   // この原文の訳をキャッシュ
-      try { persistHistories(); } catch(_){}
-    } else {
-      setText("（翻译结果为空）", true);
-    }
-  } catch(err){
-    if (!panel.isConnected) return;
-    setText("翻译失败：" + String(err.message || err).slice(0, 80), true);
-  }
-}
 
 // Pull the visible text of the bubble being quoted.
 function _extractBubbleText(bubble, isUser, idx, segIdx){
@@ -17578,51 +16983,57 @@ const MAX_SLOTS = 5;
 // ═══════════════════════════════════════════════════════════
 // 多グループ「志愿」システム
 // ───────────────────────────────────────────────────────────
-//  6 つのグループに分けて管理:
+//  5 つのグループに分けて管理:
 //    story    → 剧情志愿(story / intimate モードで使用)
 //    chat     → 聊天志愿(chat モード)
 //    fantasy  → 幻想志愿(fantasy モード)
 //    diary    → 日记志愿(diary モード)
 //    supp     → 补充志愿(摘要 / 记忆 / 补完など杂项。_summaryChain 用)
-//    translate→ 翻译志愿(_translateText 用)
 //  各グループは独立した順序付き回落链。生成時は「今のモード」に対応する
-//  グループを使う。补充と翻译はそれぞれ専用グループを使い、空なら剧情に
-//  フォールバックする。
+//  グループを使う。补充は専用グループを使い、空なら剧情にフォールバックする。
 //
 //  【共有クレデンシャル】同じ供应商(provider)+ base のキー/モデルは、
 //  どれか一つのグループで一度入力すれば、他グループで作る時に自動で埋まる。
 //  _credStore に provider|base をキーにして {key, model} を保存する。
 // ═══════════════════════════════════════════════════════════
-const SLOT_GROUPS = ["story","chat","fantasy","diary","supp","translate"];
-const SLOT_GROUP_LABEL = { story:"剧情志愿", chat:"聊天志愿", fantasy:"幻想志愿", diary:"日记志愿", supp:"补充志愿", translate:"翻译志愿" };
+const SLOT_GROUPS = ["story","chat","fantasy","diary","supp"];
+const SLOT_GROUP_LABEL = { story:"剧情志愿", chat:"聊天志愿", fantasy:"幻想志愿", diary:"日记志愿", supp:"补充志愿" };
 const SLOT_GROUP_HINT = {
   story:"剧情 / 亲密模式使用",
   chat:"聊天模式使用",
   fantasy:"幻想模式使用",
   diary:"日记模式使用",
-  supp:"摘要 / 记忆 / 补完等杂项",
-  translate:"翻译专用（可留空，留空则回落到剧情志愿）"
+  supp:"摘要 / 记忆 / 补完等杂项"
 };
 const SLOT_GROUP_STORE_KEY = {
   story:"dzmm_slots", chat:"dzmm_slots_chat", fantasy:"dzmm_slots_fantasy",
-  diary:"dzmm_slots_diary", supp:"dzmm_slots_supp", translate:"dzmm_translate_slots"
+  diary:"dzmm_slots_diary", supp:"dzmm_slots_supp"
 };
 
 // 全グループのスロット配列
-let slotGroups = { story:[], chat:[], fantasy:[], diary:[], supp:[], translate:[] };
+let slotGroups = { story:[], chat:[], fantasy:[], diary:[], supp:[] };
+
+// 中文专用版：清理旧版本遗留的翻译志愿配置和界面节点。
+// 即使用户沿用原应用的 localStorage，也不会再恢复或进入已删除的翻译分组。
+function _purgeRemovedTranslationFeature(){
+  try { localStorage.removeItem("dzmm_translate_slots"); } catch(_){}
+  try { delete slotGroups.translate; } catch(_){}
+  try { delete window.translateSlots; } catch(_){}
+  try {
+    document.querySelectorAll("#slotList_translate, #addSlotBtn_translate").forEach(el => {
+      const box = el.closest(".gen-box");
+      if (box) box.remove(); else el.remove();
+    });
+  } catch(_){}
+}
+_purgeRemovedTranslationFeature();
+
 // 旧コードとの互換:`slots` は「剧情志愿」を指す live 参照(下の getter/setter で維持)。
 Object.defineProperty(window, "slots", {
   configurable:true,
   get(){ return slotGroups.story; },
   set(v){ slotGroups.story = Array.isArray(v) ? v : []; }
 });
-// 翻訳グループの旧名互換
-Object.defineProperty(window, "translateSlots", {
-  configurable:true,
-  get(){ return slotGroups.translate; },
-  set(v){ slotGroups.translate = Array.isArray(v) ? v : []; }
-});
-
 // 現在のモード → 生成に使うグループ。
 function _activeGenGroup(){
   const m = (typeof mode !== "undefined") ? mode : "story";
@@ -17746,12 +17157,11 @@ function _persistGroup(group){
 function _persistAllGroups(){ SLOT_GROUPS.forEach(_persistGroup); }
 // 旧名互換
 function _persistSlots(){ _persistGroup("story"); }
-function _persistTranslateSlots(){ _persistGroup("translate"); }
 
 // ─── 読み込み:各グループを個別キーからロード。story は旧「dzmm_slots」を継承 ───
 function _loadGroup(group){
   const key = SLOT_GROUP_STORE_KEY[group];
-  const prefix = group === "translate" ? "trslot_" : ("slot_" + group + "_");
+  const prefix = "slot_" + group + "_";
   try {
     const raw = localStorage.getItem(key);
     if (raw){
@@ -17766,9 +17176,9 @@ function _loadGroup(group){
   return false;
 }
 function _loadSlots(){ return _loadGroup("story"); }
-function _loadTranslateSlots(){ return _loadGroup("translate"); }
 // 全グループをロードし、台帳(共有クレデンシャル)を組み立てる。
 function _loadAllSlotGroups(){
+  _purgeRemovedTranslationFeature();
   _loadCredStore();
   SLOT_GROUPS.forEach(g => _loadGroup(g));
   // 既存スロットのキーを台帳へ吸い上げ(初回/旧存档の移行)
@@ -17828,8 +17238,6 @@ function _suppSlots(){
   if (supp.length) return supp;
   return (slotGroups.story || []).filter(s => s && s.enabled && _slotReady(s));
 }
-// 翻訳グループの「就绪」志愿一覧(enabled かつ key あり)。
-const _enabledTranslateSlots = () => (slotGroups.translate || []).filter(s => s && s.enabled);
 
 // ─── Anthropic 消息净化:必须 user 开头、角色交替、无空内容 ───
 function _toAnthropicMessages(msgs){
@@ -18413,11 +17821,14 @@ function renderGenLog(){
 // 志愿卡片 UI(+ 添加、点卡片编辑、长按拖拽排序)
 // ═══════════════════════════════════════════════════════════
 let _editingSlotId = null;   // null = 新增
-let _editingSlotGroup = "story";   // story|chat|fantasy|diary|supp|translate
+let _editingSlotGroup = "story";   // story|chat|fantasy|diary|supp
 
 // グループ → 配列 / 永続化 / DOM リスト / 追加ボタン の対応
 // 旧「gen」は「story(剧情)」に読み替える(後方互換)。
-function _normGroup(group){ return (group === "gen" || !group) ? "story" : group; }
+function _normGroup(group){
+  const normalized = (group === "gen" || !group) ? "story" : group;
+  return SLOT_GROUPS.includes(normalized) ? normalized : "story";
+}
 function _slotsOf(group){ return slotGroups[_normGroup(group)] || (slotGroups[_normGroup(group)] = []); }
 function _setSlotsOf(group, arr){ slotGroups[_normGroup(group)] = Array.isArray(arr) ? arr : []; }
 function _persistOf(group){ _persistGroup(_normGroup(group)); }
@@ -18433,9 +17844,8 @@ function _renderSlotGroup(group){
   const list = $(_listIdOf(group));
   if (!list) return;
   const arr = _slotsOf(group);
-  const isTranslate = group === "translate";
   const isSupp = group === "supp";
-  const rankPrefix = isTranslate ? "翻译" : (isSupp ? "补充" : "志愿");
+  const rankPrefix = isSupp ? "补充" : "志愿";
   list.innerHTML = "";
   arr.forEach((s, idx) => {
     const card_ = document.createElement("div");
@@ -18450,9 +17860,9 @@ function _renderSlotGroup(group){
     if (typeof s.maxTokens === "number" && s.maxTokens > 0) gp.push(s.maxTokens + "字");
     const gpHtml = gp.length ? ` · <span class="slot-gp">${escapeHTML(gp.join(" "))}</span>` : "";
     const modelShown = (s.kind === "dzmm") ? (s.model || currentModel || "(DZMM 模型)") : (s.model || "(默认模型)");
-    // 翻訳/补充グループでは「可写成人」の表示は不要
+    // 补充グループでは「可写成人」の表示は不要
     const rankLabel = `${rankPrefix}${idx + 1}`;
-    const subExtra = (isTranslate || isSupp) ? "" : ` · ${s.nsfw ? "可写成人" : "不可写成人"}`;
+    const subExtra = isSupp ? "" : ` · ${s.nsfw ? "可写成人" : "不可写成人"}`;
     card_.innerHTML = `
       <div class="slot-drag" title="长按拖动排序"><i class="ph ph-dots-six-vertical"></i></div>
       <div class="slot-rank">${rankLabel}</div>
@@ -18875,7 +18285,6 @@ function _wireProvidersUI(){
   // 多 AI 志愿系统:迁移老配置 → 志愿,加载生成日志,渲染并接线 UI
   _migrateToSlots();
   _ensureAtLeastOneSlot();
-  _loadTranslateSlots();   // 翻訳志愿(別グループ)をロード
   _syncDzmmTokenFromSlot();   // 用 DZMM 槽位的 key 校准全局 token
   _loadGenLog();
   _wireProvidersUI();
